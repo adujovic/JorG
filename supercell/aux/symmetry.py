@@ -20,16 +20,17 @@ def show_cell(lattice, positions, numbers):
     for p, s in zip(positions, numbers):
         print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
 
-def write_report(comment,data,fileName):
+from .periodic import periodicTableElement
+def write_report(comment,data,crystal,fileName):
     with open(fileName,"w+") as raportFile:
         raportFile.write(str(comment))
         for i,record in enumerate(data):
             raportFile.write("\n\n*****************(%d)*********************\n\n"%(i+1))
             
-            raportFile.write(" Input spacegroup is:\
+            raportFile.write("Spacegroup is:\
                             \n   %s (%d)\n\n" % (record['international'],
                                                  record['number']))
             raportFile.write("  Mapping to equivalent atoms is:\n")
-            for i, x in enumerate(record['equivalent_atoms']):
-                raportFile.write("\t%d -> %d\n" % (i + 1, x + 1))
+            for i, (x,atom) in enumerate(zip(record['equivalent_atoms'],crystal)):
+                raportFile.write("%s:\t%d -> %d\n" % (atom[0],i + 1, x + 1))
         

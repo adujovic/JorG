@@ -2,7 +2,11 @@ import re
 import numpy as np
 from aux.periodic import periodicTableNumber
 
+
 def load(inputName):
+    """
+        Reading POSCAR file. Extensive testing required.
+                                                        """
     data = {}
 
     # Returned data:
@@ -122,60 +126,17 @@ def load(inputName):
     data['cellAtoms']     = cellAtomsCopy
     data['atomNames']     = atomNames
     return data 
- 
 
-from itertools import permutations as per
-def get_number_of_pictures(directions,cutOff):
-    multiplyers = []
-    
-    bestScore = 0.0
-    bestPermutation = (0,1,2) 
-    for p in per(range(3)):
-        score = 1.0
-        for i,d in enumerate(directions):
-            score *= d[p[i]]
-        if np.abs(score) > bestScore:
-            bestScore = np.abs(score)
-            bestPermutation = p
-    
-    for d,p in zip(directions,
-                   bestPermutation):
-        multiplyers.append(int(cutOff/d[p]))
-    
-    return multiplyers
+#
+#
+#
+#
+#
 
-from aux.periodic import periodicTableNumber
-def generate_crystal(multiplyers,cell,directions,atomNames):
-    crystal = []
-    cellSymmetryFull = ([],[],[])
-
-    invDirections = np.dot(np.diag(1.0/(1.0+np.array(multiplyers))),np.linalg.inv(directions))
-
-    for m,d in zip(multiplyers,directions):
-        cellSymmetryFull[0].append((m+1)*d)
-
-    for x in range(multiplyers[0]+1):
-        for y in range(multiplyers[1]+1):
-            for z in range(multiplyers[2]+1):
-                for atom in cell:
-                    position = np.copy(atom[1])
-                    for a,n in zip([x,y,z],directions):
-                        position += a*n
-                    if atom[0] < len(atomNames):
-                        flag = "%s"%atomNames[int(atom[0])]
-                    else:    
-                        flag = "%s"%periodicTable[int(atom[0])]
-                    crystal.append([flag,position])    
-
-    for atomName in atomNames:
-        for atom in crystal:
-            if atom[0]==atomName:
-                cellSymmetryFull[1].append(tuple(np.dot(atom[1],invDirections)))
-                cellSymmetryFull[2].append(periodicTableNumber[atom[0]])
-
-    return crystal,cellSymmetryFull
-
-def write_xyz(fileName,crystal,numberOfAtoms = -1):
+def save_xyz(fileName,crystal,numberOfAtoms = -1):
+    """
+        Saving data to xyz-style file
+                                        """
     if numberOfAtoms < 0:
         numberOfAtoms = len(crystal)
 
@@ -189,8 +150,16 @@ def write_xyz(fileName,crystal,numberOfAtoms = -1):
             xyzFile.write("\n")
         xyzFile.write("\n")
 
+#
+#
+#
+#
+#
 
-def write_POSCAR(fileName,crystal,multiplyers,data):
+def save_POSCAR(fileName,crystal,multiplyers,data):
+    """
+        Saving data to POSCAR file
+                                    """
     with open(fileName,"w+") as vaspFile:
         vaspFile.write(data['comment'])
         vaspFile.write("\n1.0\n")
