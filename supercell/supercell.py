@@ -78,37 +78,23 @@ atomTypeMask = "MnO" # should be given by user, consists of elemental symbols
 
 # several masks in aux.periodic; examples:
 from aux.periodic import maskFull,maskD,maskF,mask2p,mask3d
-atomTypeMask = maskFull  # all    elements 
 atomTypeMask = maskD     # all  d elements 
 atomTypeMask = maskF     # all  f elements 
 atomTypeMask = mask2p    # all 2p elements 
 atomTypeMask = mask3d    # all 3d elements 
+atomTypeMask = maskFull  # all    elements 
 referenceAtom = cell[reference]
-distances = [ ]
-for atom in crystal:
-   d = np.around(np.linalg.norm(atom[1]-referenceAtom[1]),decimals=logAccuracy )
-   if (d,atom[0]) not in distances and d > 0.0 and d <= cutOff:
-       distances.append((d,atom[0]))
 
-distances = np.array(distances, dtype=[('distance', np.float), ('element', 'U3')])
-distances.sort(order='distance')
+from JorG.equivalent import find_unique_flips
+flipper = find_unique_flips(referenceAtom,crystal,symmetryFull,cutOff,atomTypeMask,logAccuracy)
 
-                                    #for d,n in distances:
-                                    #    print(n,d)
-                                    #for atom in crystal:
-                                    #  print("%s %f %f %f"%(atom[0],atom[1][0],atom[1][1],atom[1][2]))
-
-checker = [False for x in range(len(crystal))] 
-case = 1
-for (d,n) in distances:
-    if n in atomTypeMask:
-        for i,atom in enumerate(crystal):
-            if not checker[i]:
-                if d == np.around(np.linalg.norm(atom[1]-referenceAtom[1]),decimals=logAccuracy) and atom[0] == n:
-                    for j in np.argwhere(symmetryFull['equivalent_atoms'] == symmetryFull['equivalent_atoms'][i]).flatten():
-                        if d == np.around(np.linalg.norm(crystal[j][1]-referenceAtom[1]),decimals=logAccuracy):
-                            print("Case no: %d, for %s with d= %f"%(case,crystal[j][0],d))
-                            checker[j] = True
-                    if checker[i]:
-                        case += 1
-print(checker)
+output = ""
+for i,rec in enumerate(flipper):
+    if rec[0]:
+        output += "%d\t"%(i+1) 
+        output += str(rec[1][0])
+        for x in rec[1][1]:
+            output += ("  %.10f"%x)
+        output += "\n"
+print(output)
+            
