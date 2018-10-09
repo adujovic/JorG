@@ -133,20 +133,29 @@ def load(inputName):
 #
 #
 
-def save_xyz(fileName,crystal,numberOfAtoms = -1):
+import numpy as np
+def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
     """
         Saving data to xyz-style file
                                         """
     if numberOfAtoms < 0:
         numberOfAtoms = len(crystal)
 
+
     with open(fileName,"w+") as xyzFile:
         xyzFile.write(str(numberOfAtoms))
         xyzFile.write("\n\n")
-        for atom in crystal:
+        for i,atom in enumerate(crystal):
             xyzFile.write("%s"%atom[0])
             for xyz in atom[1]:
                 xyzFile.write(" %.10f"%xyz)
+            if selectedAtoms is not None:
+                print(selectedAtoms)
+                if i == selectedAtoms[0]:
+                    xyzFile.write(" 10.0 %f %f %f"%(3.0,3.0,3.0))
+                elif i in selectedAtoms[1:]:
+                    v = np.random.rand(3)
+                    xyzFile.write(" 0.1 %f %f %f"%(-2.0,-2.0,2.0))
             xyzFile.write("\n")
         xyzFile.write("\n")
 

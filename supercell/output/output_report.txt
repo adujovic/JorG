@@ -2,19 +2,55 @@ generated cell
 
 *****************(1)*********************
 
-Spacegroup is:                            
+Spacegroup is:                        
    P4/mmm (123)
 
   Mapping to equivalent atoms with the Wyckoff positions:
-Ba:	1	->	1	w: g
-Ba:	2	->	1	w: g
-Cu:	3	->	3	w: c
-Cu:	4	->	4	w: h
-Cu:	5	->	4	w: h
-O:	6	->	6	w: h
-O:	7	->	6	w: h
-O:	8	->	8	w: i
-O:	9	->	8	w: i
-O:	10	->	8	w: i
-O:	11	->	8	w: i
-Y:	12	->	12	w: b
+Ba:	1	->	1	w: h
+Ba:	2	->	1	w: h
+Ba:	3	->	1	w: h
+Ba:	4	->	1	w: h
+Ba:	5	->	1	w: h
+Ba:	6	->	1	w: h
+Ba:	7	->	1	w: h
+Ba:	8	->	1	w: h
+Cu:	9	->	9	w: a
+Cu:	10	->	10	w: g
+Cu:	11	->	10	w: g
+Cu:	12	->	9	w: a
+Cu:	13	->	10	w: g
+Cu:	14	->	10	w: g
+Cu:	15	->	9	w: a
+Cu:	16	->	10	w: g
+Cu:	17	->	10	w: g
+Cu:	18	->	9	w: a
+Cu:	19	->	10	w: g
+Cu:	20	->	10	w: g
+O:	21	->	21	w: g
+O:	22	->	21	w: g
+O:	23	->	23	w: i
+O:	24	->	23	w: i
+O:	25	->	23	w: i
+O:	26	->	23	w: i
+O:	27	->	21	w: g
+O:	28	->	21	w: g
+O:	29	->	23	w: i
+O:	30	->	23	w: i
+O:	31	->	23	w: i
+O:	32	->	23	w: i
+O:	33	->	21	w: g
+O:	34	->	21	w: g
+O:	35	->	23	w: i
+O:	36	->	23	w: i
+O:	37	->	23	w: i
+O:	38	->	23	w: i
+O:	39	->	21	w: g
+O:	40	->	21	w: g
+O:	41	->	23	w: i
+O:	42	->	23	w: i
+O:	43	->	23	w: i
+O:	44	->	23	w: i
+Y:	45	->	45	w: d
+Y:	46	->	45	w: d
+Y:	47	->	45	w: d
+Y:	48	->	45	w: d

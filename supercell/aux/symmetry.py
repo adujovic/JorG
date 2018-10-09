@@ -21,16 +21,26 @@ def show_cell(lattice, positions, numbers):
         print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
 
 from .periodic import periodicTableElement
-def write_report(comment,data,crystal,fileName):
-    with open(fileName,"w+") as raportFile:
-        raportFile.write(str(comment))
-        for i,record in enumerate(data):
-            raportFile.write("\n\n*****************(%d)*********************\n\n"%(i+1))
-            
-            raportFile.write("Spacegroup is:\
-                            \n   %s (%d)\n\n" % (record['international'],
-                                                 record['number']))
-            raportFile.write("  Mapping to equivalent atoms with the Wyckoff positions:\n")
-            for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
-                raportFile.write("%s:\t%d\t->\t%d\tw: %s\n" % (atom[0],i + 1, x + 1,wyck))
+from sys import stdout
+def write_report(comment,data,crystal,fileName=None, atomDict=None):
+    if fileName is None:
+        raport = stdout
+    else:
+        raport = open(fileName,"w+")
+    raport.write(str(comment))
+    for i,record in enumerate(data):
+        raport.write("\n\n*****************(%d)*********************\n\n"%(i+1))
         
+        raport.write("Spacegroup is:\
+                        \n   %s (%d)\n\n" % (record['international'],
+                                             record['number']))
+        raport.write("  Mapping to equivalent atoms with the Wyckoff positions:\n")
+        if atomDict is None:
+            for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
+                raport.write("%s:\t%d\t->\t%d\tw: %s\n" % (atom[0],i + 1, x + 1,wyck))
+        else: 
+            for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
+                raport.write("%s:\t%d\t->\t%d\tw: %s\n" % (atomDict[atom[0]],i + 1, x + 1,wyck))
+    if raport is not stdout:
+        raport.close()
+    

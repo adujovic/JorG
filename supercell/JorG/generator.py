@@ -30,18 +30,20 @@ def get_number_of_pictures(directions,cutOff):
 
 import numpy as np
 from aux.periodic import periodicTableNumber
-def generate_crystal(multiplyers,cell,directions,atomNames):
+def generate_crystal(multiplyers,cell,directions,atomNames,reference = 0):
     """
         Generator of minimal required SuperCell
                                                 """
     crystal = []
     cellSymmetryFull = ([],[],[])
+    newReference = None
 
     invDirections = np.dot(np.diag(1.0/(1.0+np.array(multiplyers))),np.linalg.inv(directions))
 
     for m,d in zip(multiplyers,directions):
         cellSymmetryFull[0].append((m+1)*d)
 
+    atomNumber = 1
     for name in atomNames:
         for x in range(multiplyers[0]+1):
             for y in range(multiplyers[1]+1):
@@ -51,12 +53,17 @@ def generate_crystal(multiplyers,cell,directions,atomNames):
                             position = np.copy(atom[1])
                             for a,n in zip([x,y,z],directions):
                                 position += a*n
+                                
+                            if np.linalg.norm(position - cell[reference][1]) < 1e-1:
+                                newReference = atomNumber
+
                             flag = "%s"%atomNames[int(atom[0])]
                             crystal.append([flag,position])    
+                            atomNumber += 1    
     for atomName in atomNames:
         for atom in crystal:
             if atom[0]==atomName:
-                cellSymmetryFull[1].append(tuple(np.dot(atom[1],invDirections)))
+                cellSymmetryFull[1].append(np.dot(atom[1],invDirections))
                 cellSymmetryFull[2].append(periodicTableNumber[atom[0]])
 
-    return crystal,cellSymmetryFull
+    return crystal,cellSymmetryFull,newReference

@@ -1,41 +1,20 @@
-(1) crude cell
-(2) refined cell
+cell
 
 *****************(1)*********************
 
-Spacegroup is:                            
+Spacegroup is:                        
    P4/mmm (123)
 
   Mapping to equivalent atoms with the Wyckoff positions:
-0:	1	->	1	w: g
-0:	2	->	1	w: g
-1:	3	->	3	w: c
-1:	4	->	4	w: h
-1:	5	->	4	w: h
-2:	6	->	6	w: h
-2:	7	->	6	w: h
-2:	8	->	8	w: i
-2:	9	->	8	w: i
-2:	10	->	8	w: i
-2:	11	->	8	w: i
-3:	12	->	12	w: b
-
-
-*****************(2)*********************
-
-Spacegroup is:                            
-   P4/mmm (123)
-
-  Mapping to equivalent atoms with the Wyckoff positions:
-0:	1	->	1	w: g
-0:	2	->	1	w: g
-1:	3	->	3	w: c
-1:	4	->	4	w: h
-1:	5	->	4	w: h
-2:	6	->	6	w: h
-2:	7	->	6	w: h
-2:	8	->	8	w: i
-2:	9	->	8	w: i
-2:	10	->	8	w: i
-2:	11	->	8	w: i
-3:	12	->	12	w: b
+Ba:	1	->	1	w: g
+Ba:	2	->	1	w: g
+Cu:	3	->	3	w: c
+Cu:	4	->	4	w: h
+Cu:	5	->	4	w: h
+O:	6	->	6	w: h
+O:	7	->	6	w: h
+O:	8	->	8	w: i
+O:	9	->	8	w: i
+O:	10	->	8	w: i
+O:	11	->	8	w: i
+Y:	12	->	12	w: b
