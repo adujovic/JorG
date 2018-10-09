@@ -30,7 +30,7 @@ def write_report(comment,data,crystal,fileName):
             raportFile.write("Spacegroup is:\
                             \n   %s (%d)\n\n" % (record['international'],
                                                  record['number']))
-            raportFile.write("  Mapping to equivalent atoms is:\n")
-            for i, (x,atom) in enumerate(zip(record['equivalent_atoms'],crystal)):
-                raportFile.write("%s:\t%d -> %d\n" % (atom[0],i + 1, x + 1))
+            raportFile.write("  Mapping to equivalent atoms with the Wyckoff positions:\n")
+            for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
+                raportFile.write("%s:\t%d\t->\t%d\tw: %s\n" % (atom[0],i + 1, x + 1,wyck))
         

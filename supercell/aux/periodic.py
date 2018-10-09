@@ -21,3 +21,32 @@ mask5f = "AcThPaUNpPuAmCmBkCfEsFmMdNoLr"
 maskF  = mask4f+mask5f
 
 
+maskG1   = "HLiNaKRbCsFr"
+maskG2   = "BeMgCaSrBaRa"
+maskG3   = "ScYLuLrLaAc"
+maskG4   = "TiZrHfRfCeTh"
+maskG5   = "VNbTaDbPrPa"
+maskG6   = "CrMoWSgNdU"
+maskG7   = "MnTcReBhPmNp"
+maskG8   = "FeRuOsHsSmPu"
+maskG9   = "CoRhIrMtEuAm"
+maskG10 = "NiPdPtDsGdCm"
+maskG11 = "CuAgAuRgTbBk"
+maskG12 = "ZnCdHgCnDyCf"
+maskG13 = "BAlGaInTlNhHoEs"
+maskG14 = "CSiGeSnPbFlErFm"
+maskG15 = "NPAsSbBiMcTmMd"
+maskG16 = "OSSeTePoLvYbNo"
+maskG17 = "FClBrIAtTs"
+maskG18 = "HeNeArKrXeRnOg"
+
+blockNames  = ["P","D","F"]
+periodNames = ["2p", "3p", "4p", "5p", "6p", "3d", "4d", "5d", "4f", "5f"]
+periods = [mask2p, mask3p, mask4p, mask5p, mask6p, maskP,
+           mask3d, mask4d, mask5d, maskD,
+           mask4f, mask5f, maskF]
+groups  = [maskG1,  maskG2,  maskG3,  maskG4,  maskG5,  maskG6,
+           maskG7,  maskG8,  maskG9,  maskG10, maskG11, maskG12,
+           maskG13, maskG14, maskG15, maskG16, maskG17, maskG18]
+
+
