@@ -150,12 +150,13 @@ def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
             for xyz in atom[1]:
                 xyzFile.write(" %.10f"%xyz)
             if selectedAtoms is not None:
-                print(selectedAtoms)
+                vector = 2*np.random.ranf(3)-1.0
+                vector = 0.2*vector/np.linalg.norm(vector)
                 if i == selectedAtoms[0]:
-                    xyzFile.write(" 10.0 %f %f %f"%(3.0,3.0,3.0))
+                    vector = 2.0*vector
+                    xyzFile.write(" PatrialCharge(1.0) %f %f %f"%tuple(vector))
                 elif i in selectedAtoms[1:]:
-                    v = np.random.rand(3)
-                    xyzFile.write(" 0.1 %f %f %f"%(-2.0,-2.0,2.0))
+                    xyzFile.write(" PatrialCharge(1.0) %f %f %f"%tuple(vector))
             xyzFile.write("\n")
         xyzFile.write("\n")
 

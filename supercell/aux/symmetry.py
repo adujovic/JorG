@@ -22,14 +22,19 @@ def show_cell(lattice, positions, numbers):
 
 from .periodic import periodicTableElement
 from sys import stdout
-def write_report(comment,data,crystal,fileName=None, atomDict=None):
+import numpy as np
+def write_report(comments,data,crystal,fileName=None, atomDict=None):
     if fileName is None:
         raport = stdout
     else:
         raport = open(fileName,"w+")
-    raport.write(str(comment))
-    for i,record in enumerate(data):
-        raport.write("\n\n*****************(%d)*********************\n\n"%(i+1))
+
+    for i,(comment,record) in enumerate(zip(comments,data)):
+        uniqueWyckoffs = set(record['wyckoffs'])
+        wyckoffCount =  dict.fromkeys(uniqueWyckoffs,0)
+        raport.write("*****************************************\n")
+        raport.write(comment)
+        raport.write("\n*****************************************\n\n")
         
         raport.write("Spacegroup is:\
                         \n   %s (%d)\n\n" % (record['international'],
@@ -38,9 +43,18 @@ def write_report(comment,data,crystal,fileName=None, atomDict=None):
         if atomDict is None:
             for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
                 raport.write("%s:\t%d\t->\t%d\tw: %s\n" % (atom[0],i + 1, x + 1,wyck))
+                wyckoffCount[wyck] += 1 
         else: 
             for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
                 raport.write("%s:\t%d\t->\t%d\tw: %s\n" % (atomDict[atom[0]],i + 1, x + 1,wyck))
+                wyckoffCount[wyck] += 1 
+
+        raport.write("\n*****************************************\n")
+        output = ""
+        for wyck in uniqueWyckoffs:
+            output += "  #%s = %d"%(wyck,wyckoffCount[wyck])
+        raport.write(output)
+        raport.write("\n*****************************************\n\v")
     if raport is not stdout:
         raport.close()
     

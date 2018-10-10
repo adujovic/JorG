@@ -1,6 +1,5 @@
-cell
-
-*****************(1)*********************
+Analysis of symmetry in the input cell
+**************************************
 
 Spacegroup is:                        
    P4/mmm (123)

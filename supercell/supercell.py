@@ -57,10 +57,10 @@ if __name__ == '__main__':
                                                no_idealize=0,
                                                symprec=1e-1))
         symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
-        write_report("(1) crude cell\n(2) refined cell",
+        write_report(["Analysis of symmetry in:\n\n(1) the crude input cell","(2) the newly refined input cell"],
                  [symmetryCrude,symmetryRefined], cell, atomDict=atomNames)
     else:
-        write_report("cell", [symmetryCrude], cell,
+        write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
                      "output/input_report.txt", atomDict=atomNames);
     
     """ Generating output """
@@ -74,11 +74,11 @@ if __name__ == '__main__':
     symmetryFull = spglib.get_symmetry_dataset(cellSymmetryFull)
     
     if(SYMMETRYRUN):
-        write_report("(3) crystal",
+        write_report(["(3) the generated cell"],
                  [symmetryFull], crystal)
         exit(1)
     
-    write_report("generated cell",[symmetryFull],crystal,"output/output_report.txt");
+    write_report(["Analysis of symmetry in the generated cell"],[symmetryFull],crystal,"output/output_report.txt");
     save_POSCAR("output/POSCAR",crystal,copiesInEachDirection,readData)
     
     """
