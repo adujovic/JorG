@@ -4,13 +4,13 @@ import numpy as np
 import aux.periodic as periodic
 
 class options:
-    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "output", "mask", "symmetry"]
+    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "output", "mask", "symmetry", "refined"]
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Find minimal number of unique spin-flips')
         typeOfRange = self.parser.add_mutually_exclusive_group()
-        typeOfRange.add_argument('--cutOff', '-R', default=-1.0, type=np.float,
+        typeOfRange.add_argument('--cutOff', '-R', default=None, type=np.float,
                                  help='a cut-off distance (in Å) for calculations')
-        typeOfRange.add_argument('--neighbor', '-N', default=-1, type=int,
+        typeOfRange.add_argument('--neighbor', '-N', default=None, type=int,
                                  help='a rank of the last Neighbor taken into account')
         self.parser.add_argument('--Wyckoffs', '-W', default='abcdefghijklmnopqrstuvwxyz',
                                  help='narrows down the atomic selection to the atoms in positions defined by string (eg. \'abc\')')
@@ -18,6 +18,8 @@ class options:
                                  help='symmetry run only (default False)')
         self.parser.add_argument('--spin-orbit', '--SOC', action='store_true',
                                  help='is sping-orbit coupling enabled (default False)')
+        self.parser.add_argument('--refined',  action='store_true',
+                                 help='should use refined supercell (default False)')
         self.parser.add_argument('--reference', '-r', default=1, type=int,
                                  help='number of reference atom in inputFile')
         self.parser.add_argument('--input', '-i', default='POSCAR',
@@ -53,21 +55,6 @@ class options:
             exit(-300)
         elif key == 'reference':
             return self.opt.__dict__['reference'] - 1; 
-        elif key == 'neighbor':
-            neighbor = self.opt.__dict__['neighbor'] 
-            if self.opt.__dict__['neighbor'] < 0:
-                if self.opt.__dict__['cutOff'] < 0.0:
-                    return 1
-                else:
-                    print("No neighbor defined: use cutOff")
-                    return None                    
-            return neighbor 
-        elif key == 'cutOff':
-            cutOff = self.opt.__dict__['cutOff'] 
-            if cutOff < 0.0:
-                print("No cutOff defined: use neighbor")
-                return None                    
-            return cutOff    
         elif key in self.opt.__dict__:
             return self.opt.__dict__[key]
         elif key == 'mask':
