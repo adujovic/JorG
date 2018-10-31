@@ -20,7 +20,6 @@ mask4f = "LaCePrNdPmSmEuGdTbDyHoErTmYbLu"
 mask5f = "AcThPaUNpPuAmCmBkCfEsFmMdNoLr"
 maskF  = mask4f+mask5f
 
-
 maskG1   = "HLiNaKRbCsFr"
 maskG2   = "BeMgCaSrBaRa"
 maskG3   = "ScYLuLrLaAc"
@@ -48,5 +47,7 @@ periods = [mask2p, mask3p, mask4p, mask5p, mask6p, maskP,
 groups  = [maskG1,  maskG2,  maskG3,  maskG4,  maskG5,  maskG6,
            maskG7,  maskG8,  maskG9,  maskG10, maskG11, maskG12,
            maskG13, maskG14, maskG15, maskG16, maskG17, maskG18]
+
+elementMagneticMoment = {"H" : 1.0, "He" : 0.0, "Li" : 0.35, "Be" : 0.0, "B" : 0.0, "C" : 4.0, "N" : 0.0, "O" : 2.0, "F" : 1.0 ,"Ne" : 0.005, "Na" : 0.001, "Mg" : 0.05, "Al" : 0.1, "Si" : 0.0, "P" : 0.0, "S" : 0.0, "Cl" : 1.0, "Ar" : 0.0, "K" : 0.0007, "Ca" : 0.15, "Sc" : 0.68, "Ti" : 1.8, "V" : 1.65, "Cr" : 4.8, "Mn" : 4.5, "Fe" : 2.5, "Co" : 1.9, "Ni" : 0.73, "Cu" : 0.0, "Zn" : 0.0, "Ga" : 0.0, "Ge" : 0.0, "As" : 0.0, "Se" : 0.0, "Br" : 0.2, "Kr" : 0.0, "Rb" : 0.0, "Sr" : 0.18, "Y" : 0.6, "Zr" : 0.6, "Nb" : 0.0, "Mo" : 0.0, "Tc" : 0.0, "Ru" : 1.83, "Rh" : 1.54, "Pd" : 0.44, "Ag" : 0.0, "Cd" : 0.0, "In" : 0.0, "Sn" : 0.0, "Sb" : 0.0, "Te" : 0.0, "I" : 0.0, "Xe" : 0.0, "Cs" : 0.0, "Ba" : 0.0, "La" : 0.58, "Ce" : 0.88, "Pr" : 2.88, "Nd" : 4.1, "Pm" : 5.34, "Sm" : 0.4, "Eu" : 7.86, "Gd" : 7.68, "Tb" : 6.28, "Dy" : 0.0, "Ho" : 0.1, "Er" : 0.12, "Tm" : 0.9, "Yb" : 0.16, "Lu" : 0.035, "Hf" : 0.0, "Ta" : 0.0, "W" : 0.0, "Re" : 0.0, "Os" : 1.43, "Ir" : 1.0, "Pt" : 0.18, "Au" : 0.0, "Hg" : 0.0, "Tl" : 0.0, "Pb" : 0.0, "Bi" : 0.0, "Po" : 0.0, "At" : 0.0, "Rn" : 0.0, "Fr" : 0.0, "Ra" : 0.0, "Ac" : 0.0, "Th" : 0.0, "Pa" : 0.0, "U" : 0.0, "Np" : 0.0, "Pu" : 0.0, "Am" : 0.0, "Cm" : 0.0, "Bk" : 0.0, "Cf" : 0.0, "Es" : 0.0,"Fm" :100, "Md" : 0.0, "No" : 0.0, "Lr" : 0.0, "Rf" : 0.0, "Db" : 0.0, "Sg" : 0.0, "Bh" : 0.0, "Hs" : 0.0, "Mt" : 0.0, "Ds" : 0.0, "Rg" : 0.0, "Cn" : 0.0, "Nh" : 0.0, "Fl" : 0.0, "Mc" : 0.0, "Lv" : 0.0, "Ts" : 0.0, "Og" : 0.0}
 
 
