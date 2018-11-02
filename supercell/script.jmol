@@ -1,0 +1,9 @@
+vibration ON
+vector ON 
+vector SCALE 5.0
+vector 0.1
+spin ON
+set bondRadiusMilliAngstroms 0 
+background [253,246,227]
+#select all and {*}.partialCharge=0.1; #color white;
+

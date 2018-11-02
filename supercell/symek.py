@@ -76,7 +76,7 @@ if __name__ == '__main__':
     if(SYMMETRYRUN):
         refinedCell     = (spglib.standardize_cell(cellSymmetry,
                                                to_primitive=1,
-                                               no_idealize=1,
+                                               no_idealize=0,
                                                symprec=1e-1))
         symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
         write_report(["""Analysis of symmetry in:\n
@@ -106,6 +106,7 @@ if __name__ == '__main__':
      
     oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
     oldMoments = []
+    print(oldMomentsText.group(0))
     if oldMomentsText is None:
         for atom in cell:
             oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])

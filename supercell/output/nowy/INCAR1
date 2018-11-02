@@ -1,8 +1,0 @@
-ISTART =             0     #  startjob: no WAVECAR file  
-ICHARG =             2     #  charge: from atoms ICHARG = 2
-INIWAV =             1     #  random initialization for wf.  
-NELM   =            400    #  maximum of 40 electronic steps
-NELMIN =             20    #  minimum of two steps
-NELMDL =             -5    #  no update of charge for 3 steps 
-EDIFF  =             10E-6 # accuracy for electronic minimization
-MAGMOM = 1.000000 2.000000 1.000000 2.000000 1.000000 2.000000 1.000000 2.000000 -2.000000 -1.000000 -1.000000 -2.000000 1.000000 -1.000000 -2.000000 -1.000000 -1.000000 -2.000000 -1.000000 -1.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 2.000000 0.600000 0.600000 0.600000 0.600000 
