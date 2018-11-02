@@ -20,7 +20,7 @@ class options:
                                  help='is sping-orbit coupling enabled (default False)')
         self.parser.add_argument('--refined',  action='store_true',
                                  help='should use refined supercell (default False)')
-        self.parser.add_argument('--reference', '-r', default=1, type=int,
+        self.parser.add_argument('--reference', '-r', default=-1, type=int,
                                  help='number of reference atom in inputFile')
         self.parser.add_argument('--input', '-i', default='POSCAR',
                                  help='input POSCAR file')

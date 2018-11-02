@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from sys import argv
+from sys import maxsize
+from os import system
+import re
+from datetime import datetime
 import numpy as np
 import spglib
 from aux.periodic import *
@@ -14,6 +18,9 @@ def main(**args):
     pass
 
 if __name__ == '__main__':
+    outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
+    system("mkdir -p output")
+    system("mkdir -p %s"%outDirName)
     
     currentOptions = options(*argv)
     workingFile    = currentOptions('input')
@@ -38,8 +45,19 @@ if __name__ == '__main__':
     cellVolume    = readData['cellVolume']
     cellCenter    = readData['cellCenter']
     cellAtoms     = readData['cellAtoms']
-    
-    referenceAtom = cell[reference]
+
+    referenceAtom = None
+    if reference >= 0:
+      referenceAtom = cell[reference]
+    else:
+      for i,atom in enumerate(cell):  
+        if "$"+atomNames[atom[0]]+"$" in atomTypeMask:  
+          referenceAtom = atom
+          reference = i
+          break
+    if referenceAtom is None:
+      print("Error: can not find any atoms (%s) in input file!"%re.sub('\$','',atomTypeMask))
+      exit(-7)
     
     print("The reference was chosen to be atom No. %d: %s %f %f %f"%(
           reference+1, 
@@ -54,7 +72,7 @@ if __name__ == '__main__':
     
     if(SYMMETRYRUN):
         refinedCell     = (spglib.standardize_cell(cellSymmetry,
-                                               to_primitive=1,
+                                               to_primitive=0,
                                                no_idealize=0,
                                                symprec=1e-1))
         symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
@@ -66,11 +84,11 @@ if __name__ == '__main__':
         exit(0)
     else:
         write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
-                     "output/input_report.txt", atomDict=atomNames);
+                     outDirName+"/input_report.txt", atomDict=atomNames);
 
     if USEREFINED: 
         refinedCell = (spglib.standardize_cell(cellSymmetry,
-                                               to_primitive=1,
+                                               to_primitive=0,
                                                no_idealize=0,
                                                symprec=1e-1))
         directions = np.array(refinedCell[0])
@@ -79,10 +97,11 @@ if __name__ == '__main__':
             for x,d in zip(refinedAtom,refinedCell[0]):
                 newPosition += x*np.array(d)
             atom[1] = newPosition
-
    
 
     """ Generating output """
+    if nearestNeighbor is None:
+        nearestNeighbor = maxsize
 
     if cutOff is None:
         if nearestNeighbor is None:
@@ -101,7 +120,7 @@ if __name__ == '__main__':
                                          atomTypeMask)
     else:
         copiesInEachDirection = get_number_of_pictures(directions,cutOff)
-        extraDirections = [mul*d 
+        extraDirections = [(mul+1)*d 
                            for mul,d in
                            zip(copiesInEachDirection,
                                directions)]
@@ -111,7 +130,7 @@ if __name__ == '__main__':
                                  directions,
                                  atomNames,
                                  reference=reference)
-        wyckoffDict, symmetryFull = wyckoffs_dict(cell, 
+        wyckoffDict, symmetryFull, symmetryOriginal = wyckoffs_dict(cell, 
                                                       crystal,
                                                       directions,
                                                       extraDirections,
@@ -122,8 +141,8 @@ if __name__ == '__main__':
     write_report(["Analysis of symmetry in the generated cell"],
                  [symmetryFull],
                  crystal,
-                 "output/output_report.txt");
-    save_POSCAR("output/POSCAR",
+                 outDirName+"/output_report.txt");
+    save_POSCAR(outDirName+"/POSCAR",
                 crystal,
                 copiesInEachDirection,
                 readData)
@@ -144,15 +163,18 @@ if __name__ == '__main__':
     output = ""
     caseID = 1
     selected = [newReference]
-    for i,rec in enumerate(flipper):
-        if rec[0]:
+    print(crystal[newReference])
+    for (i,atom,distance,wyck) in flipper:
+        if caseID <= nearestNeighbor:
             selected.append(i)
-            output += "Case  %d:\t atom No. %d @ %s "%(caseID,i+1,rec[2]) 
+            output += "Case  %d:\t atom No. %d @ %s && %3.2f A | "%(caseID,i+1,wyck,distance) 
             caseID += 1
-            output += str(rec[1][0])
-            for x in rec[1][1]:
-                output += ("  %.10f"%x)
+            output += str(atom[0])
+            for x in atom[1]:
+                output += ("  %.5f"%x)
             output += "\n"
     print(output)
                 
-    save_xyz   ("output/crystal.xyz",crystal,selectedAtoms = selected)
+
+
+    save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
