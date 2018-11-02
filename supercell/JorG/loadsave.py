@@ -191,3 +191,29 @@ def save_POSCAR(fileName,crystal,multiplyers,data):
                     vaspFile.write(" %s\n"%atom[0])
         vaspFile.write("\n")
 
+#
+#
+#
+#
+#
+import re
+def save_INCAR(fileName,oldINCAR,crystal,flips):
+    """
+        Saving data to POSCAR file
+                                    """
+    with open(fileName,"w+") as vaspFile:
+        vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
+        vaspFile.write("MAGMOM = ")
+        for i,atom in enumerate(crystal):
+            vaspFile.write("%f "%atom[2])
+        vaspFile.write("\n")
+    for i,flip in enumerate(flips):
+        with open(fileName+str(i),"w+") as vaspFile:
+            vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
+            vaspFile.write("MAGMOM = ")
+            for i,atom in enumerate(crystal):
+                if i == flip[0]:
+                    vaspFile.write("%f "%-atom[2])
+                else:
+                    vaspFile.write("%f "%atom[2])
+            vaspFile.write("\n")

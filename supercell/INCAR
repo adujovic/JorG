@@ -1,0 +1,19 @@
+System=CsNiF3 AF without U
+IBRION = -1
+
+PREC = high
+NELM = 100
+NSW = 0
+
+EDIFF = 1.0E-7
+#EDIFFG = -1.0E-5
+
+ISMEAR = -5
+LREAL = .TRUE.
+LWAVE = .FALSE.
+LCHARG = .FALSE.
+MAGMOM = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 -4 -4 4 4 -4 -4 4 0 0 0 0 0 0 0 0 
+ISPIN = 2
+ENCUT = 520
+NPAR = 1
+#LORBIT = 11

@@ -24,7 +24,7 @@ class options:
                                  help='number of reference atom in inputFile')
         self.parser.add_argument('--input', '-i', default='POSCAR',
                                  help='input POSCAR file')
-        self.parser.add_argument('--output', '-o', default='output/POSCAR',
+        self.parser.add_argument('--output', '-o', default=None,
                                  help='output POSCAR file')
         self.parser.add_argument('--elements','-E', 
                                  help='string of all elements taken into account (eg. \'CuO\')')

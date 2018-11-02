@@ -18,9 +18,6 @@ def main(**args):
     pass
 
 if __name__ == '__main__':
-    outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
-    system("mkdir -p output")
-    system("mkdir -p %s"%outDirName)
     
     currentOptions = options(*argv)
     workingFile    = currentOptions('input')
@@ -31,7 +28,13 @@ if __name__ == '__main__':
     SYMMETRYRUN    = currentOptions('symmetry')
     USEREFINED     = currentOptions('refined')
     wyckoffs       = currentOptions('Wyckoffs')
-    
+    outDirName     = currentOptions('output')
+   
+    if outDirName == None:
+      outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
+      system("mkdir -p output")
+    system("mkdir -p %s"%outDirName)
+
     """ Reading POSCAR file.
           TODO: bulletproofing """
 #    
@@ -72,8 +75,8 @@ if __name__ == '__main__':
     
     if(SYMMETRYRUN):
         refinedCell     = (spglib.standardize_cell(cellSymmetry,
-                                               to_primitive=0,
-                                               no_idealize=0,
+                                               to_primitive=1,
+                                               no_idealize=1,
                                                symprec=1e-1))
         symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
         write_report(["""Analysis of symmetry in:\n
@@ -98,6 +101,17 @@ if __name__ == '__main__':
                 newPosition += x*np.array(d)
             atom[1] = newPosition
    
+    with open("INCAR","r") as INCARfile:
+        incarData = INCARfile.read()
+     
+    oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
+    oldMoments = []
+    if oldMomentsText is None:
+        for atom in cell:
+            oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])
+    else:
+        for moment in oldMomentsText.group(1).split():
+            oldMoments.append(np.float(moment))
 
     """ Generating output """
     if nearestNeighbor is None:
@@ -117,7 +131,8 @@ if __name__ == '__main__':
                                          nearestNeighbor,
                                          atomNames,
                                          wyckoffs,
-                                         atomTypeMask)
+                                         atomTypeMask,
+                                         moments=oldMoments)
     else:
         copiesInEachDirection = get_number_of_pictures(directions,cutOff)
         extraDirections = [(mul+1)*d 
@@ -129,7 +144,8 @@ if __name__ == '__main__':
                                  cell,
                                  directions,
                                  atomNames,
-                                 reference=reference)
+                                 reference=reference,
+                                 moments=oldMoments)
         wyckoffDict, symmetryFull, symmetryOriginal = wyckoffs_dict(cell, 
                                                       crystal,
                                                       directions,
@@ -160,21 +176,19 @@ if __name__ == '__main__':
                                 logAccuracy=logAccuracy)
     
     
-    output = ""
     caseID = 1
     selected = [newReference]
-    print(crystal[newReference])
+    from itertools import chain
+    print("Reference atom in new system is %s at %f %f %f"%(crystal[newReference][0],*crystal[newReference][1]))
     for (i,atom,distance,wyck) in flipper:
         if caseID <= nearestNeighbor:
             selected.append(i)
-            output += "Case  %d:\t atom No. %d @ %s && %3.2f A | "%(caseID,i+1,wyck,distance) 
+            print("Case  %d:\t atom No. %d @ %s && %3.2f A | %s  %.5f %.5f %.5f"%(caseID,i+1,wyck,distance,atom[0],*atom[1]))
             caseID += 1
-            output += str(atom[0])
-            for x in atom[1]:
-                output += ("  %.5f"%x)
-            output += "\n"
-    print(output)
                 
-
+    if nearestNeighbor < len(flipper) :
+        save_INCAR(outDirName+"/INCAR",incarData,crystal,flipper[:nearestNeighbor])    
+    else:
+        save_INCAR(outDirName+"/INCAR",incarData,crystal,flipper)    
 
     save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)

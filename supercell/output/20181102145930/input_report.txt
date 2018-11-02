@@ -1,0 +1,53 @@
+*****************************************
+Analysis of symmetry in the input cell
+*****************************************
+
+Spacegroup is:                        
+   P2_1/m (11)
+
+  Mapping to equivalent atoms with the Wyckoff positions:
+F:	1	->	1	w: e
+F:	2	->	1	w: e
+F:	3	->	1	w: e
+F:	4	->	1	w: e
+F:	5	->	5	w: e
+F:	6	->	5	w: e
+F:	7	->	5	w: e
+F:	8	->	5	w: e
+F:	9	->	9	w: e
+F:	10	->	9	w: e
+F:	11	->	9	w: e
+F:	12	->	9	w: e
+F:	13	->	1	w: e
+F:	14	->	1	w: e
+F:	15	->	1	w: e
+F:	16	->	1	w: e
+F:	17	->	5	w: e
+F:	18	->	5	w: e
+F:	19	->	5	w: e
+F:	20	->	5	w: e
+F:	21	->	9	w: e
+F:	22	->	9	w: e
+F:	23	->	9	w: e
+F:	24	->	9	w: e
+Ni:	25	->	25	w: a
+Ni:	26	->	25	w: a
+Ni:	27	->	25	w: a
+Ni:	28	->	25	w: a
+Ni:	29	->	25	w: a
+Ni:	30	->	25	w: a
+Ni:	31	->	25	w: a
+Ni:	32	->	25	w: a
+Cs:	33	->	33	w: e
+Cs:	34	->	33	w: e
+Cs:	35	->	33	w: e
+Cs:	36	->	33	w: e
+Cs:	37	->	33	w: e
+Cs:	38	->	33	w: e
+Cs:	39	->	33	w: e
+Cs:	40	->	33	w: e
+
+*****************************************
+  #a = 8  #e = 32
+*****************************************
+
