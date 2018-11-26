@@ -1,0 +1,25 @@
+*****************************************
+Analysis of symmetry in the input cell
+*****************************************
+
+Spacegroup is:                        
+   P4/mmm (123)
+
+  Mapping to equivalent atoms with the Wyckoff positions:
+Ba:	1	->	1	w: h
+Ba:	2	->	1	w: h
+Cu:	3	->	3	w: a
+Cu:	4	->	4	w: g
+Cu:	5	->	4	w: g
+O:	6	->	6	w: g
+O:	7	->	6	w: g
+O:	8	->	8	w: i
+O:	9	->	8	w: i
+O:	10	->	8	w: i
+O:	11	->	8	w: i
+Y:	12	->	12	w: d
+
+*****************************************
+  #g = 4  #h = 2  #a = 1  #d = 1  #i = 4
+*****************************************
+

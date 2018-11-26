@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import argparse as ap
 import numpy as np
+import re
 import aux.periodic as periodic
 
 class options:
@@ -69,7 +70,12 @@ class options:
                 for el in self.opt.__dict__['block']:
                     output += eval("periodic.mask"+el)
             if self.opt.__dict__['elements'] is not None: 
-                output += self.opt.__dict__['elements']
+                for element in re.findall('[A-Z][a-z]?',self.opt.__dict__['elements']):
+                    if "$"+element+"$" in periodic.maskFull:
+                        output += '$'+element
+                    else:
+                        print("Unknown element provided ("+element+")")
+                output += '$'    
             if output == '':
                 return periodic.maskFull
             return output

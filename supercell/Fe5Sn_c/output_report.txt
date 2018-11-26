@@ -1,0 +1,37 @@
+*****************************************
+Analysis of symmetry in the generated cell
+*****************************************
+
+Spacegroup is:                        
+   C2 (5)
+
+  Mapping to equivalent atoms with the Wyckoff positions:
+Fe:	1	->	1	w: c
+Fe:	2	->	1	w: c
+Fe:	3	->	3	w: c
+Fe:	4	->	3	w: c
+Fe:	5	->	5	w: b
+Fe:	6	->	1	w: c
+Fe:	7	->	1	w: c
+Fe:	8	->	3	w: c
+Fe:	9	->	3	w: c
+Fe:	10	->	5	w: b
+Fe:	11	->	1	w: c
+Fe:	12	->	1	w: c
+Fe:	13	->	3	w: c
+Fe:	14	->	3	w: c
+Fe:	15	->	5	w: b
+Fe:	16	->	1	w: c
+Fe:	17	->	1	w: c
+Fe:	18	->	3	w: c
+Fe:	19	->	3	w: c
+Fe:	20	->	5	w: b
+Sn:	21	->	21	w: a
+Sn:	22	->	21	w: a
+Sn:	23	->	21	w: a
+Sn:	24	->	21	w: a
+
+*****************************************
+  #a = 4  #b = 4  #c = 16
+*****************************************
+
