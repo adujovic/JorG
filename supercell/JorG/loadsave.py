@@ -1,5 +1,6 @@
 import re
 import numpy as np
+from os import system
 from aux.periodic import periodicTableNumber
 
 
@@ -201,14 +202,19 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
     """
         Saving data to POSCAR file
                                     """
-    with open(fileName,"w+") as vaspFile:
+    system("mkdir -p %s/noFlip"%fileName)
+    system("cp %s/POSCAR %s/noFlip/POSCAR"%(fileName,fileName))
+
+    with open(fileName+"/noFlip/INCAR","w+") as vaspFile:
         vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
         vaspFile.write("MAGMOM = ")
         for i,atom in enumerate(crystal):
             vaspFile.write("%f "%atom[2])
         vaspFile.write("\n")
     for i,flip in enumerate(flips):
-        with open(fileName+str(i),"w+") as vaspFile:
+        system("mkdir -p %s/flip%d"%(fileName,i))
+        system("cp %s/POSCAR %s/flip%d/POSCAR"%(fileName,fileName,i))
+        with open(fileName+"/flip"+str(i)+"/INCAR","w+") as vaspFile:
             vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
             vaspFile.write("MAGMOM = ")
             for i,atom in enumerate(crystal):

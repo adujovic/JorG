@@ -31,10 +31,22 @@ if __name__ == '__main__':
     outDirName     = currentOptions('output')
    
     if outDirName == None:
+      # if output directory is not given:  
       outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
-      system("mkdir -p output")
-    system("mkdir -p %s"%outDirName)
+    else:
+      # remove multiple '/' and possible '/' at the end  
+      outDirName = re.sub('/+','/',outDirName)
+      outDirName = re.sub('/$','',outDirName)
 
+    # cr4eating output path
+    temporaryName = ""
+    for partOfOutput in re.split('/',outDirName):
+      temporaryName += partOfOutput
+      system("mkdir -p %s"%temporaryName)
+      temporaryName += "/"
+
+    # clean output path ? SHOULD WE?
+#    system("rm -r "+temporaryName+"*")
     """ Reading POSCAR file.
           TODO: bulletproofing """
 #    
@@ -106,7 +118,9 @@ if __name__ == '__main__':
      
     oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
     oldMoments = []
+    print("magnetic moments read:")
     print(oldMomentsText.group(0))
+    print("--------------------------------------------------------------------------------------------------------------------------------")
     if oldMomentsText is None:
         for atom in cell:
             oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])
@@ -176,10 +190,8 @@ if __name__ == '__main__':
                                 wyckoffDict=wyckoffDict,
                                 logAccuracy=logAccuracy)
     
-    
     caseID = 1
     selected = [newReference]
-    from itertools import chain
     print("Reference atom in new system is %s at %f %f %f"%(crystal[newReference][0],*crystal[newReference][1]))
     for (i,atom,distance,wyck) in flipper:
         if caseID <= nearestNeighbor:
@@ -188,8 +200,8 @@ if __name__ == '__main__':
             caseID += 1
                 
     if nearestNeighbor < len(flipper) :
-        save_INCAR(outDirName+"/INCAR",incarData,crystal,flipper[:nearestNeighbor])    
+        save_INCAR(outDirName,incarData,crystal,flipper[:nearestNeighbor])    
     else:
-        save_INCAR(outDirName+"/INCAR",incarData,crystal,flipper)    
+        save_INCAR(outDirName,incarData,crystal,flipper)    
 
     save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
