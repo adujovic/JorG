@@ -9,34 +9,57 @@ from mpl_toolkits.mplot3d import proj3d
 
 # set input data
 
-basis = np.array([ [2, 0,0],
-                   [1,np.sqrt(3.),0],
-                   [0,0,4*np.sqrt(2.0/3.0)]])
-
+#basis = np.array([ [2, 0,0],
+#                   [1,np.sqrt(3.),0],
+#                   [0,0,4*np.sqrt(2.0/3.0)]])
 #superCell = np.array([ [-0.5,-0.5,-0.5],
 #                       [ 0.5, 0.5, 0.5]])
-superCell = np.array([ [ 0.0, 0.0, 0.0],
-                       [ 4.0/3.0, 2.0/3.0, 2.0*np.sqrt(2.0/3.0)]])
+#superCell = np.array([ [ 0.0, 0.0, 0.0],
+#                       [ 4.0/3.0, 2.0/3.0, 2.0*np.sqrt(2.0/3.0)]])
+
+basis = np.array([
+ [ 3.87753641405488 ,-0.00000000000000 ,-0.00000000000000],
+ [-0.00000000000000 , 3.87753641405488 , 0.00000000000000],
+ [ 0.00000000000000 , 0.00000000000000 ,12.09549987244948]
+   ])
+
+superCell = np.array([
+ [ 0.50000000000000*3.87753641405488,  0.50000000000000*3.87753641405488 ,0.19398936278918*12.09549987244948],    
+ [ 0.50000000000000*3.87753641405488,  0.50000000000000*3.87753641405488 ,0.80601063721082*12.09549987244948],    
+ [ 0.00000000000000*3.87753641405488,  0.00000000000000*3.87753641405488 ,0.00000000000000*12.09549987244948],    
+ [-0.00000000000000*3.87753641405488,  0.00000000000000*3.87753641405488 ,0.36270017366243*12.09549987244948],    
+ [ 0.00000000000000*3.87753641405488, -0.00000000000000*3.87753641405488 ,0.63729982633757*12.09549987244948],    
+ [ 0.00000000000000*3.87753641405488, -0.00000000000000*3.87753641405488 ,0.15023942974438*12.09549987244948],    
+ [-0.00000000000000*3.87753641405488,  0.00000000000000*3.87753641405488 ,0.84976057025562*12.09549987244948],    
+ [ 0.00000000000000*3.87753641405488,  0.50000000000000*3.87753641405488 ,0.37983766131592*12.09549987244948],    
+ [ 0.50000000000000*3.87753641405488,  0.00000000000000*3.87753641405488 ,0.37983766131592*12.09549987244948],    
+ [-0.00000000000000*3.87753641405488,  0.50000000000000*3.87753641405488 ,0.62016233868408*12.09549987244948],    
+ [ 0.50000000000000*3.87753641405488, -0.00000000000000*3.87753641405488 ,0.62016233868408*12.09549987244948]    
+   ])
+atomNames = [ 'Ba', 'Ba', 'Cu', 'Cu', 'Cu', 'O', 'O', 'O', 'O', 'O', 'O', 'Y' ]
 center = np.zeros(3)
 for a in superCell:
     center += a
 center /= len(superCell)
 
-cutOff = 5
+cutOff = 13
 multiplier = 1 + int(cutOff/np.min([np.max([np.abs(np.dot(e,d)) for e in basis]) for d in np.identity(3)]))
 
 points = []
-for a in superCell:  
+names  = []
+for n,a in zip(atomNames,superCell):  
     points.append(a)
+    names.append(n)
 for i in range(-multiplier,multiplier+1):
     for j in range(-multiplier,multiplier+1):
         for k in range(-multiplier,multiplier+1):
             if i == 0 and j == 0 and k == 0:
                 continue
-            for a in superCell:  
+            for ii,a in enumerate(superCell):  
                 v = a + i*basis[0]+j*basis[1]+k*basis[2]
                 if(np.linalg.norm(v-center) <= cutOff):
                     points.append(v)  
+                    names.append(atomNames[ii])
 
 points = np.array(points)
                    
@@ -48,7 +71,11 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 # plot generator points
-ax.scatter(points[:, 0], points[:, 1], points[:, 2], c='b')
+#for element in set(atomNames):
+#    random_color = colors.rgb2hex(np.random.rand(3))
+#    for name,atom in zip(names,points):
+#        if element == name:
+#            ax.scatter(atom[0], atom[1], atom[2], c=random_color)
 
 # plot Voronoi vertices
 #ax.scatter(sv.vertices[:, 0], sv.vertices[:, 1], sv.vertices[:, 2], c='g')
@@ -58,7 +85,7 @@ ax.scatter(points[:, 0], points[:, 1], points[:, 2], c='b')
 regions = []
 for i,atom in enumerate(superCell):
     regions.append(sv.regions[sv.point_region[i]])
-for region in regions:
+for atom,region in zip(superCell,regions):
     alpha = 0.4
     vertices = []
     average = np.zeros(3)
@@ -79,14 +106,21 @@ for region in regions:
         average /= len(vertices)
         vertices.append(average + 27720*(average-center))
     vertices = np.array(vertices)    
-            
+
+    radius = cutOff*2;
     if len(vertices) > 3:
         convexHull = ConvexHull(vertices)
         random_color = colors.rgb2hex(np.random.rand(3))
         for simplex in convexHull.simplices:
+            normal = np.cross(vertices[simplex[1]]-vertices[simplex[0]],vertices[simplex[2]]-vertices[simplex[0]])
+            normal /= np.linalg.norm(normal)
+            distance = np.dot(normal,atom-vertices[simplex[0]])
+            if distance < radius:
+                radius = distance
             polygon = Poly3DCollection([vertices[simplex]], alpha=alpha)
             polygon.set_color(random_color)
             ax.add_collection3d(polygon)
+        ax.scatter(atom[0], atom[1], atom[2], c=random_color, alpha = 1.0, s=radius)
     elif len(vertices) > 2:
         random_color = colors.rgb2hex(np.random.rand(3))
         polygon = Poly3DCollection([vertices], alpha=1.0)
