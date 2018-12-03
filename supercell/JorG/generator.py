@@ -1,24 +1,19 @@
-from itertools import permutations as per
-def get_number_of_pictures(directions,cutOff):
+import numpy as np
+def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
     """
         Finding the amount of copies
         of the original SuperCell
                                         """
+
     multipliers = [] # returned 
-    
-    bestScore = 0.0             # starting score
-    bestPermutation = (0,1,2)   # starting permutation
-    for p in per(range(3)):
-        score = 1.0
-        for i,d in enumerate(directions):
-            score *= d[p[i]]
-        if np.abs(score) > bestScore: # best score wins
-            bestScore = np.abs(score)
-            bestPermutation = p
-    
-    for d,p in zip(directions,
-                   bestPermutation):
-        multipliers.append(int(cutOff/d[p])) # calculating multipliers
+    dDirs = np.tile(directions,(2,1)) 
+
+    for i in range(3):
+        normal = np.cross(dDirs[i+1],dDirs[i+2])
+        normal /= np.linalg.norm(normal)
+        height = np.dot(dDirs[i],normal)
+        relative = np.dot(dDirs[i]-referenceAtom[1],normal)
+        multipliers.append(1 + int((cutOff-relative)/height)) # calculating multipliers
     
     return multipliers
 
@@ -246,3 +241,13 @@ def generate_from_NN(cell,referenceAtom,directions,nearestNeighbor,atomNames,
 
     return None
 
+from itertools import product
+def apply_mirrorsXYZ(dimensions,cell):
+    outputCell = []
+    print(cell)
+    for p in product([0,-1],repeat=3):
+        projection = np.array([p])
+        translation = np.dot(projection,dimensions)[0]
+        for atom in cell: 
+            outputCell.append([atom[0],atom[1]+translation])
+    return outputCell

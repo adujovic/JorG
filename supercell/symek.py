@@ -14,6 +14,7 @@ from aux.argv import options
 from JorG.loadsave import * 
 from JorG.generator import * 
 
+
 def main(**args):
     pass
 
@@ -149,7 +150,7 @@ if __name__ == '__main__':
                                          atomTypeMask,
                                          moments=oldMoments)
     else:
-        copiesInEachDirection = get_number_of_pictures(directions,cutOff)
+        copiesInEachDirection = get_number_of_pictures(directions,cutOff,referenceAtom)
         extraDirections = [(mul+1)*d 
                            for mul,d in
                            zip(copiesInEachDirection,
@@ -205,3 +206,5 @@ if __name__ == '__main__':
         save_INCAR(outDirName,incarData,crystal,flipper)    
 
     save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
+    save_xyz   (outDirName+"/crystalFull.xyz",apply_mirrorsXYZ(extraDirections,crystal),selectedAtoms = selected)
+    system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
