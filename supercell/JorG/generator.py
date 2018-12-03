@@ -4,9 +4,27 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
         Finding the amount of copies
         of the original SuperCell
                                         """
-
     multipliers = [] # returned 
     dDirs = np.tile(directions,(2,1)) 
+    #                                                                  
+    #          /---------------------------\    
+    #         / \                           \   
+    #        /   \                           \  
+    #       /     \                           \ 
+    #      /       ^---------------------------\
+    #     /       /                           /  
+    #    /       /     reference point       /    
+    #   /       / C   .                     /     
+    #  ^       /                           /       
+    # B \     /                           /        
+    #    \   /                           /         
+    #     \ /                           /          
+    #      0--------------------------->           
+    #                   A                                     
+    # A,B,C -> Vectors
+    # normalA = (BxC)/|BxC|
+    # normalB = (CxA)/|CxA|
+    # normalC = (AxB)/|AxB|
 
     for i in range(3):
         normal = np.cross(dDirs[i+1],dDirs[i+2])
@@ -150,9 +168,35 @@ def check_in_cell(cell,referenceAtom,directions,nearestNeighbor,atomNames,
         return False,distances,None
     return True,distances,wyckoffPositionDict
 
-from itertools import permutations as per
+#
+#
+#
+#
+#
+#
+#
 from aux.periodic import elementMagneticMoment
 def generate_from_NN(cell,referenceAtom,directions,nearestNeighbor,atomNames,
+                   Wyckoffs='abcdefghijklmnopqrstuvwxyz',
+                    atomTypeMask=maskFull, moments=None):
+
+    originalSymmetryCell = (directions,
+                            [np.dot(row[1],np.linalg.inv(directions)) for row in cell],
+                            [periodicTableNumber[atomNames[row[0]]] for row in cell])
+    originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
+
+    newReference = None
+
+    m
+#
+#
+#
+#
+#
+#
+from itertools import permutations as per
+from aux.periodic import elementMagneticMoment
+def generate_from_NN_OLD_AND_NONWORKING(cell,referenceAtom,directions,nearestNeighbor,atomNames,
                    Wyckoffs='abcdefghijklmnopqrstuvwxyz',
                     atomTypeMask=maskFull, moments=None):
     originalSymmetryCell = (directions,
@@ -229,7 +273,7 @@ def generate_from_NN(cell,referenceAtom,directions,nearestNeighbor,atomNames,
                             [periodicTableNumber[atomNames[row[0]]]
                                 for row in crystal])
             crystalSymmetry = spglib.get_symmetry_dataset(symmetryCell)
-            cutOff = 0.01+distances[nearestNeighbor]
+            cutOff = 0.0001+distances[nearestNeighbor]
             for atom in crystal:
                 atom[0] = atomNames[atom[0]]
             return (cutOff,
