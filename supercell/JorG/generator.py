@@ -176,7 +176,7 @@ def check_in_cell(cell,referenceAtom,directions,nearestNeighbor,atomNames,
 #
 #
 from aux.periodic import elementMagneticMoment
-def generate_from_NN(cell,referenceAtom,directions,nearestNeighbor,atomNames,
+def generate_from_NN_NEW(cell,referenceAtom,directions,nearestNeighbor,atomNames,
                    Wyckoffs='abcdefghijklmnopqrstuvwxyz',
                     atomTypeMask=maskFull, moments=None):
 
@@ -186,8 +186,6 @@ def generate_from_NN(cell,referenceAtom,directions,nearestNeighbor,atomNames,
     originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
 
     newReference = None
-
-    m
 #
 #
 #
@@ -196,9 +194,12 @@ def generate_from_NN(cell,referenceAtom,directions,nearestNeighbor,atomNames,
 #
 from itertools import permutations as per
 from aux.periodic import elementMagneticMoment
-def generate_from_NN_OLD_AND_NONWORKING(cell,referenceAtom,directions,nearestNeighbor,atomNames,
-                   Wyckoffs='abcdefghijklmnopqrstuvwxyz',
-                    atomTypeMask=maskFull, moments=None):
+#def generate_from_NN_OLD_AND_NONWORKING(cell,referenceAtom,directions,nearestNeighbor,atomNames,
+def generate_from_NN(cell,
+        referenceAtom,directions,nearestNeighbor,atomNames,
+        Wyckoffs='abcdefghijklmnopqrstuvwxyz',
+        atomTypeMask=maskFull, moments=None):
+
     originalSymmetryCell = (directions,
                             [np.dot(row[1],np.linalg.inv(directions)) for row in cell],
                             [periodicTableNumber[atomNames[row[0]]] for row in cell])
