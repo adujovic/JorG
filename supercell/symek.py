@@ -149,6 +149,10 @@ if __name__ == '__main__':
                                          wyckoffs,
                                          atomTypeMask,
                                          moments=oldMoments)
+        extraDirections = [(mul+1)*d 
+                           for mul,d in
+                           zip(copiesInEachDirection,
+                               directions)]
     else:
         copiesInEachDirection = get_number_of_pictures(directions,cutOff,referenceAtom)
         extraDirections = [(mul+1)*d 

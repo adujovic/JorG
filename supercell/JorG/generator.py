@@ -176,9 +176,11 @@ def check_in_cell(cell,referenceAtom,directions,nearestNeighbor,atomNames,
 #
 #
 from aux.periodic import elementMagneticMoment
-def generate_from_NN_NEW(cell,referenceAtom,directions,nearestNeighbor,atomNames,
-                   Wyckoffs='abcdefghijklmnopqrstuvwxyz',
-                    atomTypeMask=maskFull, moments=None):
+#def generate_from_NN_NEW(cell,
+def generate_from_NN(cell,
+        referenceAtom,directions,nearestNeighbor,atomNames,
+        Wyckoffs='abcdefghijklmnopqrstuvwxyz',
+        atomTypeMask=maskFull, moments=None):
 
     originalSymmetryCell = (directions,
                             [np.dot(row[1],np.linalg.inv(directions)) for row in cell],
@@ -186,7 +188,71 @@ def generate_from_NN_NEW(cell,referenceAtom,directions,nearestNeighbor,atomNames
     originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
 
     newReference = None
-#
+
+    minDirection = np.min([np.linalg.norm(d) for d in directions])
+
+    for cutOff in minDirection*np.sqrt(np.arange(1.0,17.0,1.0)):
+        multipliers = get_number_of_pictures(directions,
+                                             cutOff,
+                                             referenceAtom)
+        extraDirections = [(mul+1)*d 
+                           for mul,d in
+                           zip(multipliers,
+                               directions)]
+        crystal = []                   
+        for name in atomNames:
+            for x in range(multipliers[0]+1):
+                for y in range(multipliers[1]+1):
+                    for z in range(multipliers[2]+1):
+                        if moments is None:
+                            for atom in cell:
+                                if atomNames[atom[0]] == name:
+                                    position = np.copy(atom[1])
+                                    for a,n in zip([x,y,z],directions):
+                                        position += a*n
+                                    if np.linalg.norm(position - referenceAtom[1]) < 1e-3:
+                                        newReference = len(crystal)
+                                    crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atomNames[atom[0]]]]])    
+                        else:
+                            for atom,moment in zip(cell,moments):
+                                if atomNames[atom[0]] == name:
+                                    position = np.copy(atom[1])
+                                    for a,n in zip([x,y,z],directions):
+                                        position += a*n
+                                    if np.linalg.norm(position - referenceAtom[1]) < 1e-3:
+                                        newReference = len(crystal)
+                                    crystal.append([atom[0],position,moment])    
+            ISFOUND,distances,wyckoffPositionDict = check_in_cell(
+                                                     crystal,
+                                                     referenceAtom,
+                                                     extraDirections,
+                                                     nearestNeighbor,
+                                                     atomNames,
+                                                     cell,
+                                                     directions,
+                                                     Wyckoffs,
+                                                     originalSymmetry,
+                                                     atomTypeMask)
+
+        if(ISFOUND):
+            symmetryCell = (extraDirections,
+                            [np.dot(row[1],np.linalg.inv(extraDirections))
+                                for row in crystal],
+                            [periodicTableNumber[atomNames[row[0]]]
+                                for row in crystal])
+            crystalSymmetry = spglib.get_symmetry_dataset(symmetryCell)
+            cutOff = 0.0001+distances[nearestNeighbor]
+            for atom in crystal:
+                atom[0] = atomNames[atom[0]]
+            return (cutOff,
+                    crystal,
+                    crystalSymmetry,
+                    newReference,
+                    multipliers,
+                    wyckoffPositionDict)
+
+    return None
+# 
 #
 #
 #
@@ -194,8 +260,8 @@ def generate_from_NN_NEW(cell,referenceAtom,directions,nearestNeighbor,atomNames
 #
 from itertools import permutations as per
 from aux.periodic import elementMagneticMoment
-#def generate_from_NN_OLD_AND_NONWORKING(cell,referenceAtom,directions,nearestNeighbor,atomNames,
-def generate_from_NN(cell,
+def generate_from_NN_OLD_AND_NONWORKING(cell,
+#def generate_from_NN(cell,
         referenceAtom,directions,nearestNeighbor,atomNames,
         Wyckoffs='abcdefghijklmnopqrstuvwxyz',
         atomTypeMask=maskFull, moments=None):
@@ -289,7 +355,6 @@ def generate_from_NN(cell,
 from itertools import product
 def apply_mirrorsXYZ(dimensions,cell):
     outputCell = []
-    print(cell)
     for p in product([0,-1],repeat=3):
         projection = np.array([p])
         translation = np.dot(projection,dimensions)[0]
