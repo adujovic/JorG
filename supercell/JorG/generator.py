@@ -7,11 +7,11 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
     multipliers = [] # returned 
     dDirs = np.tile(directions,(2,1)) 
     #                                                                  
-    #          /---------------------------\    
+    #          .---------------------------.    
     #         / \                           \   
     #        /   \                           \  
     #       /     \                           \ 
-    #      /       ^---------------------------\
+    #      /       ^---------------------------.
     #     /       /                           /  
     #    /       /     reference point       /    
     #   /       / C   .                     /     
