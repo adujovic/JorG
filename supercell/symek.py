@@ -3,13 +3,14 @@
 
 from sys import argv
 from sys import maxsize
-from os import system
+from os import system,environ
 import re
 from datetime import datetime
 import numpy as np
 import spglib
 from aux.periodic import *
 from aux.symmetry import *
+from aux.format import *
 from aux.argv import options
 from JorG.loadsave import * 
 from JorG.generator import * 
@@ -75,32 +76,7 @@ if __name__ == '__main__':
       print("Error: can not find any atoms (%s) in input file!"%re.sub('\$','',atomTypeMask))
       exit(-7)
     
-    print("The reference was chosen to be atom No. %d: %s %f %f %f"%(
-          reference+1, 
-          atomNames[referenceAtom[0]],
-          referenceAtom[1][0],
-          referenceAtom[1][1],
-          referenceAtom[1][2]))
-      
-    """ Checking the symmetry 
-                    of the input """
-    symmetryCrude   = spglib.get_symmetry_dataset(cellSymmetry)
-    
-    if(SYMMETRYRUN):
-        refinedCell     = (spglib.standardize_cell(cellSymmetry,
-                                               to_primitive=1,
-                                               no_idealize=0,
-                                               symprec=1e-1))
-        symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
-        write_report(["""Analysis of symmetry in:\n
-            (1) the crude input cell""",
-           "(2) the newly refined input cell"],
-                [symmetryCrude,symmetryRefined],
-                cell, atomDict=atomNames)
-        exit(0)
-    else:
-        write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
-                     outDirName+"/input_report.txt", atomDict=atomNames);
+    print("The reference was chosen to be atom No. %d:\n"%(reference+1)+color.BF+color.YELLOW+"%s"%(atomNames[referenceAtom[0]])+color.END+' [ '+color.DARKCYAN+"% 2.5f % 2.5f % 2.5f"%(*referenceAtom[1],)+color.END+' ]')
 
     if USEREFINED: 
         refinedCell = (spglib.standardize_cell(cellSymmetry,
@@ -108,28 +84,68 @@ if __name__ == '__main__':
                                                no_idealize=0,
                                                symprec=1e-1))
         directions = np.array(refinedCell[0])
-        for atom,refinedAtom in zip(cell,refinedCell[1]):
+        for refinedAtom in refinedCell[1]:
             newPosition = np.zeros(3)
             for x,d in zip(refinedAtom,refinedCell[0]):
                 newPosition += x*np.array(d)
-            atom[1] = newPosition
+            for atom in cell:
+                if np.linalg.norm(atom[1] - newPosition) <= 1e-1:
+                    atom[1] = newPosition
+                    continue
    
     with open("INCAR","r") as INCARfile:
         incarData = INCARfile.read()
      
     oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
     oldMoments = []
-    print("magnetic moments read:")
-    print(oldMomentsText.group(0))
-    print("--------------------------------------------------------------------------------------------------------------------------------")
+    print("+----------------------------------+")
+    print("|    Magnetic moments read:        |")
     if oldMomentsText is None:
+        print('|              '+color.RED+color.UN+"NONE"+color.END+'                |')
         for atom in cell:
             oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])
     else:
+        print('| ',end='')
+        sumOfChars = 2
         for moment in oldMomentsText.group(1).split():
             oldMoments.append(np.float(moment))
+            if sumOfChars > 26:
+                print(' '*(38-sumOfChars),end='')
+                print('|')
+                print('| ',end='')
+                sumOfChars = 2
+            print("   % 2.1f  "%oldMoments[-1],end='')
+            sumOfChars += 10
+        print(' '*(36-sumOfChars),end='')
+        print('|')
+    print("+----------------------------------+")
 
-    """ Generating output """
+    print("+----------------------------------+")
+    print("|       Crystal axes:              |")
+    names = [color.BF+'a'+color.END, color.BF+'b'+color.END, color.BF+'c'+color.END]
+    for n,d in zip(names,directions):
+        print("| %s [ % 3.5f % 3.5f % 3.5f ] |"%(n,d[0],d[1],d[2]))
+    print("|       Crystal directions:        |")
+    names = [color.RED+'a'+color.END, color.GREEN+'b'+color.END, color.BLUE+'c'+color.END]
+    for n,d in zip(names,directions):
+        print("| %s = % 3.5fÅ                    |"%(n,np.linalg.norm(d)))
+    print("|       Crystal angles:            |")
+    names = [color.RED+'α'+color.END, color.GREEN+'β'+color.END, color.BLUE+'γ'+color.END]
+    vectors = [directions[0],directions[1],directions[2],directions[0],directions[1]]
+    for i,n in enumerate(names):
+        dotProduct = np.dot(vectors[i+1],vectors[i+2])
+        dotProduct /= np.linalg.norm(vectors[i+1])
+        dotProduct /= np.linalg.norm(vectors[i+2])
+        print("| %s = % 3.5fπ                    |"%(n,np.arccos(np.clip(dotProduct,-1,1))/np.pi))
+    print("+----------------------------------+")
+
+
+    """ 
+    
+        Generating output
+
+
+    """
     if nearestNeighbor is None:
         nearestNeighbor = maxsize
 
@@ -197,11 +213,13 @@ if __name__ == '__main__':
     
     caseID = 1
     selected = [newReference]
-    print("Reference atom in new system is %s at %f %f %f"%(crystal[newReference][0],*crystal[newReference][1]))
+    print("Reference atom in the new system is No. %d:"%newReference)
+    print_atom(crystal[newReference],vector=color.DARKCYAN)
     for (i,atom,distance,wyck) in flipper:
         if caseID <= nearestNeighbor:
             selected.append(i)
-            print("Case  %d:\t atom No. %d @ %s && %3.2f A | %s  %.5f %.5f %.5f"%(caseID,i+1,wyck,distance,atom[0],*atom[1]))
+            print("Case "+color.IT+color.CYAN+"%3d"%(caseID)+color.END+" atom No. "+color.IT+"%3d"%(i+1)+color.END+" @ %s & % 3.2f Å | "%(wyck,distance),end='')
+            print_atom(atom)
             caseID += 1
                 
     if nearestNeighbor < len(flipper) :
@@ -210,5 +228,5 @@ if __name__ == '__main__':
         save_INCAR(outDirName,incarData,crystal,flipper)    
 
     save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
-    save_xyz   (outDirName+"/crystalFull.xyz",apply_mirrorsXYZ(extraDirections,crystal),selectedAtoms = selected)
+    save_xyz   (outDirName+"/crystalFull.xyz",apply_mirrorsXYZ(extraDirections,crystal,cutOff=cutOff,reference=newReference),selectedAtoms = selected)
     system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
