@@ -18,11 +18,6 @@ def find_unique_flips(referenceAtom,crystal,symmetry,cutOff,
     distances = np.array(distances, dtype=[('distance', np.float), ('element', 'U3')])
     distances.sort(order='distance')
     
-                                        #for d,n in distances:
-                                        #    print(n,d)
-                                        #for atom in crystal:
-                                        #  print("%s %f %f %f"%(atom[0],atom[1][0],atom[1][1],atom[1][2]))
-    
     checker = [ False        for x in range(len(crystal))] 
     flipper = [] 
     case = 1
@@ -43,3 +38,47 @@ def find_unique_flips(referenceAtom,crystal,symmetry,cutOff,
     flipper.sort(order='distance')
     return flipper
 
+#
+#
+#
+#
+#
+
+def find_all_flips(referenceAtom,crystal,symmetry,cutOff,
+                   atomTypeMask=maskFull,
+                   Wyckoffs="abcdefghijklmnopqrstuvwxyz",
+                   wyckoffDict={'a':'a','b':'b','c':'c','d':'d','e':'e','f':'f','g':'g','h':'h','i':'i','j':'j','k':'k','l':'l','m':'m','n':'n','o':'o','p':'p','q':'q','r':'r','s':'s','t':'t','u':'u','v':'v','w':'w','x':'x','y':'y','z':'z'}, 
+                   logAccuracy=2, VERBOSE=False):
+   
+    flipper = []
+    for i,atom in enumerate(crystal): 
+        if "$"+atom[0]+"$" in atomTypeMask                         \
+            and wyckoffDict[symmetry['wyckoffs'][i]] in Wyckoffs   \
+            and np.linalg.norm(atom[1]-referenceAtom[1]) > 1e-3:
+            flipper.append(i)
+
+#            and np.linalg.norm(atom[1]-referenceAtom[1]) <= cutOff 
+
+    return flipper
+
+
+def find_all_distances(reference, 
+                       crystal8,
+                       cutOff, flipper,
+                       logAccuracy = 2):
+    acceptableFlips = np.append(flipper, reference)
+
+    size = int(len(crystal8)/8)
+    distances = []
+    for i in range(8):
+        for flipA in acceptableFlips:
+            for j in range(8):
+                for flipB in acceptableFlips:
+                    d = np.round(np.linalg.norm(crystal8[flipA+size*i][1] - crystal8[flipB+size*j][1]),logAccuracy)
+                    if d not in distances \
+                       and d <= cutOff:
+                        distances.append(d)
+    distances = np.array(distances)
+    distances.sort()
+    return distances
+            

@@ -186,7 +186,6 @@ def check_in_cell(cell,referenceAtom,directions,nearestNeighbor,atomNames,
 #
 #
 from aux.periodic import elementMagneticMoment
-#def generate_from_NN_NEW(cell,
 def generate_from_NN(cell,
         referenceAtom,directions,nearestNeighbor,atomNames,
         Wyckoffs='abcdefghijklmnopqrstuvwxyz',
@@ -244,7 +243,10 @@ def generate_from_NN(cell,
                                     position = np.copy(atom[1])
                                     for a,n in zip([x,y,z],directions):
                                         position += a*n
-                                    crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atomNames[atom[0]]]]])    
+                                    if isinstance(atom[0],int):
+                                        crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atomNames[atom[0]]]]])    
+                                    else:
+                                        crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atom[0]]]])    
                         else:
                             for atom,moment in zip(cell,moments):
                                 if atomNames[atom[0]] == name:
@@ -305,8 +307,8 @@ def apply_mirrorsXYZ(dimensions,cell, cutOff=-1.0, reference=0):
         projection = np.array([p])
         translation = np.dot(projection,dimensions)[0]
         for atom in cell: 
-            if cutOff > 0:
-                if np.linalg.norm(atom[1]+translation - cell[reference][1]) > cutOff:
-                    continue
-            outputCell.append([atom[0],atom[1]+translation])
+#            if cutOff > 0:
+#                if np.linalg.norm(atom[1]+translation - cell[reference][1]) > cutOff:
+#                    continue
+            outputCell.append([atom[0],atom[1]+translation,atom[2]])
     return outputCell

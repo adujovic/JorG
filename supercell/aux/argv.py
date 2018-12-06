@@ -5,7 +5,7 @@ import re
 import aux.periodic as periodic
 
 class options:
-    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "output", "mask", "symmetry", "refined"]
+    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "incar", "output", "mask", "symmetry", "refined"]
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Find minimal number of unique spin-flips')
         typeOfRange = self.parser.add_mutually_exclusive_group()
@@ -25,8 +25,10 @@ class options:
                                  help='number of reference atom in inputFile')
         self.parser.add_argument('--input', '-i', default='POSCAR',
                                  help='input POSCAR file')
+        self.parser.add_argument('--incar', '--INCAR', '-I', default='INCAR',
+                                 help='input INCAR file')
         self.parser.add_argument('--output', '-o', default=None,
-                                 help='output POSCAR file')
+                                 help='output directory')
         self.parser.add_argument('--elements','-E', 
                                  help='string of all elements taken into account (eg. \'CuO\')')
         self.parser.add_argument('--group',choices=range(1,19), type=int, nargs='+',

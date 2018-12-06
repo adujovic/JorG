@@ -22,7 +22,8 @@ def main(**args):
 if __name__ == '__main__':
     
     currentOptions = options(*argv)
-    workingFile    = currentOptions('input')
+    POSCARfile     = currentOptions('input')
+    INCARfile      = currentOptions('incar')
     cutOff         = currentOptions('cutOff')
     nearestNeighbor= currentOptions('neighbor')  
     atomTypeMask   = currentOptions('mask')  
@@ -49,10 +50,11 @@ if __name__ == '__main__':
 
     # clean output path ? SHOULD WE?
 #    system("rm -r "+temporaryName+"*")
-    """ Reading POSCAR file.
+    """ Reading POSCAR and INCAR files.
           TODO: bulletproofing """
 #    
-    readData = load(workingFile)
+    readData             = load_POSCAR(POSCARfile)
+    oldMoments,incarData = load_INCAR (readData['cell'],INCARfile)
 #    
     cell          = readData['cell']
     cellSymmetry  = readData['cellSymmetry']
@@ -92,53 +94,16 @@ if __name__ == '__main__':
                 if np.linalg.norm(atom[1] - newPosition) <= 1e-1:
                     atom[1] = newPosition
                     continue
-   
-    with open("INCAR","r") as INCARfile:
-        incarData = INCARfile.read()
-     
-    oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
-    oldMoments = []
-    print("+----------------------------------+")
-    print("|    Magnetic moments read:        |")
-    if oldMomentsText is None:
-        print('|              '+color.RED+color.UN+"NONE"+color.END+'                |')
-        for atom in cell:
-            oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])
-    else:
-        print('| ',end='')
-        sumOfChars = 2
-        for moment in oldMomentsText.group(1).split():
-            oldMoments.append(np.float(moment))
-            if sumOfChars > 26:
-                print(' '*(38-sumOfChars),end='')
-                print('|')
-                print('| ',end='')
-                sumOfChars = 2
-            print("   % 2.1f  "%oldMoments[-1],end='')
-            sumOfChars += 10
-        print(' '*(36-sumOfChars),end='')
-        print('|')
-    print("+----------------------------------+")
+    """
 
-    print("+----------------------------------+")
-    print("|       Crystal axes:              |")
-    names = [color.BF+'a'+color.END, color.BF+'b'+color.END, color.BF+'c'+color.END]
-    for n,d in zip(names,directions):
-        print("| %s [ % 3.5f % 3.5f % 3.5f ] |"%(n,d[0],d[1],d[2]))
-    print("|       Crystal directions:        |")
-    names = [color.RED+'a'+color.END, color.GREEN+'b'+color.END, color.BLUE+'c'+color.END]
-    for n,d in zip(names,directions):
-        print("| %s = % 3.5fÅ                    |"%(n,np.linalg.norm(d)))
-    print("|       Crystal angles:            |")
-    names = [color.RED+'α'+color.END, color.GREEN+'β'+color.END, color.BLUE+'γ'+color.END]
-    vectors = [directions[0],directions[1],directions[2],directions[0],directions[1]]
-    for i,n in enumerate(names):
-        dotProduct = np.dot(vectors[i+1],vectors[i+2])
-        dotProduct /= np.linalg.norm(vectors[i+1])
-        dotProduct /= np.linalg.norm(vectors[i+2])
-        print("| %s = % 3.5fπ                    |"%(n,np.arccos(np.clip(dotProduct,-1,1))/np.pi))
-    print("+----------------------------------+")
+        Printing input data
 
+
+    """
+
+    print_moments(oldMoments)
+    print_label("INPUT")
+    print_crystal(directions,cell,atomNames=atomNames)
 
     """ 
     
@@ -198,6 +163,10 @@ if __name__ == '__main__':
                 crystal,
                 copiesInEachDirection,
                 readData)
+
+    print_label("OUTPUT")
+    print_crystal(extraDirections,crystal)
+
     
     """
         Searching for unique atoms for calculations
@@ -217,9 +186,8 @@ if __name__ == '__main__':
     print_atom(crystal[newReference],vector=color.DARKCYAN)
     for (i,atom,distance,wyck) in flipper:
         if caseID <= nearestNeighbor:
+            print_case(caseID,atom,i+1,wyck,distance)
             selected.append(i)
-            print("Case "+color.IT+color.CYAN+"%3d"%(caseID)+color.END+" atom No. "+color.IT+"%3d"%(i+1)+color.END+" @ %s & % 3.2f Å | "%(wyck,distance),end='')
-            print_atom(atom)
             caseID += 1
                 
     if nearestNeighbor < len(flipper) :
@@ -227,6 +195,53 @@ if __name__ == '__main__':
     else:
         save_INCAR(outDirName,incarData,crystal,flipper)    
 
+    crystal8 = apply_mirrorsXYZ(extraDirections,crystal,
+                                cutOff=cutOff,
+                                reference=newReference)
     save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
-    save_xyz   (outDirName+"/crystalFull.xyz",apply_mirrorsXYZ(extraDirections,crystal,cutOff=cutOff,reference=newReference),selectedAtoms = selected)
+    save_xyz   (outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
     system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
+
+    from JorG.equivalent import find_all_flips
+    allFlippable = find_all_flips(crystal[newReference],crystal,
+                                symmetryFull,cutOff,
+                                atomTypeMask,Wyckoffs=wyckoffs,
+                                wyckoffDict=wyckoffDict,
+                                logAccuracy=logAccuracy)
+ 
+    size = len(flipper['distance'])
+    print(cutOff,flipper['distance'])
+    from itertools import product
+    for option in product([1,-1],repeat=len(allFlippable)):
+        print(option)
+        penalty = {distance: 0 for distance in flipper['distance']} 
+        for i,flip1 in enumerate(option):
+            if flip1 < 0:
+                for (a,b) in product(range(0,8),repeat=2):
+                    d = np.round(
+                          np.linalg.norm(
+                            crystal8[newReference+len(crystal)*a][1]
+                           -crystal8[allFlippable[i]+len(crystal)*b][1]
+                          ),
+                        logAccuracy)
+                    if d <= cutOff:
+                        if d not in penalty.keys():
+                            penalty[d] = 1
+                        else:    
+                            penalty[d] += 1
+            for j,flip2 in enumerate(option):
+                if(j < i):
+                    if flip1*flip2 < 0:
+                        for (a,b) in product(range(0,8),repeat=2):
+                            d = np.round(
+                                  np.linalg.norm(
+                                    crystal8[allFlippable[i]+len(crystal)*a][1]
+                                   -crystal8[allFlippable[j]+len(crystal)*b][1]
+                                  ),
+                                logAccuracy)
+                            if d <= cutOff:
+                                if d not in penalty.keys():
+                                    penalty[d] = 1
+                                else:    
+                                    penalty[d] += 1
+        print(penalty)

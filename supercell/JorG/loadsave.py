@@ -4,7 +4,7 @@ from os import system
 from aux.periodic import periodicTableNumber
 
 
-def load(inputName):
+def load_POSCAR(inputName):
     """
         Reading POSCAR file. Extensive testing required.
                                                         """
@@ -128,6 +128,27 @@ def load(inputName):
     data['atomNames']     = atomNames
     return data 
 
+#
+#
+#
+#
+#
+
+import numpy as np
+def load_INCAR(cell,INCARname="INCAR"):
+    oldMoments = []
+    with open(INCARname,"r") as INCARfile:
+        incarData = INCARfile.read()
+     
+        oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
+        if oldMomentsText is None:
+            for atom in cell:
+                oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])
+        else:
+            for moment in oldMomentsText.group(1).split():
+                oldMoments.append(np.float(moment))
+    
+    return oldMoments,incarData
 #
 #
 #
