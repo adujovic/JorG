@@ -78,7 +78,34 @@ if __name__ == '__main__':
       print("Error: can not find any atoms (%s) in input file!"%re.sub('\$','',atomTypeMask))
       exit(-7)
     
-    print("The reference was chosen to be atom No. %d:\n"%(reference+1)+color.BF+color.YELLOW+"%s"%(atomNames[referenceAtom[0]])+color.END+' [ '+color.DARKCYAN+"% 2.5f % 2.5f % 2.5f"%(*referenceAtom[1],)+color.END+' ]')
+    print("The reference was chosen to be atom No. %d:"%(reference+1))
+    print_atom(referenceAtom)
+
+
+    """ Checking the symmetry 
+                    of the input """
+    symmetryCrude   = spglib.get_symmetry_dataset(cellSymmetry)
+    if(SYMMETRYRUN):
+        standarizedCell  = (spglib.standardize_cell(cellSymmetry,
+                                               to_primitive=1,
+                                               no_idealize=0,
+                                               symprec=1e-1))
+        symmetryStandard = spglib.get_symmetry_dataset(standarizedCell)
+        refinedCell      = (spglib.refine_cell(cellSymmetry,
+                                               symprec=1e-1))
+        symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
+        write_report(["""Analysis of symmetry in:\n
+            (1) the crude input cell""",
+           "(2) the standarized cell",
+           "(3) the refined primitive cell"],
+                [symmetryCrude,symmetryStandard,symmetryRefined],
+                cell, atomDict=atomNames)
+        niggli = spglib.niggli_reduce(cellSymmetry)
+        print(niggli)
+        exit(0)
+    else:
+        write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
+                     outDirName+"/input_report.txt", atomDict=atomNames);
 
     if USEREFINED: 
         refinedCell = (spglib.standardize_cell(cellSymmetry,
@@ -101,9 +128,9 @@ if __name__ == '__main__':
 
     """
 
-    print_moments(oldMoments)
     print_label("INPUT")
     print_crystal(directions,cell,atomNames=atomNames)
+    print_moments(oldMoments,cell=cell,atomNames=atomNames)
 
     """ 
     
@@ -112,7 +139,7 @@ if __name__ == '__main__':
 
     """
     if nearestNeighbor is None:
-        nearestNeighbor = maxsize
+        nearestNeighbor = 2
 
     if cutOff is None:
         if nearestNeighbor is None:
@@ -209,6 +236,7 @@ if __name__ == '__main__':
                                 wyckoffDict=wyckoffDict,
                                 logAccuracy=logAccuracy)
  
+    exit()
     size = len(flipper['distance'])
     print(cutOff,flipper['distance'])
     from itertools import product

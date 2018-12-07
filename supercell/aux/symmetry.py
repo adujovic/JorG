@@ -21,6 +21,7 @@ def show_cell(lattice, positions, numbers):
         print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
 
 from .periodic import periodicTableElement
+from .format import *
 from sys import stdout
 import numpy as np
 def write_report(comments,data,crystal,fileName=None, atomDict=None):
@@ -28,6 +29,8 @@ def write_report(comments,data,crystal,fileName=None, atomDict=None):
         raport = stdout
     else:
         raport = open(fileName,"w+")
+   
+    print_crystal(data[0]['std_lattice'],crystal,stream=stdout,atomNames=atomDict)
 
     for i,(comment,record) in enumerate(zip(comments,data)):
         uniqueWyckoffs = set(record['wyckoffs'])

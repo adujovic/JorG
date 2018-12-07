@@ -141,11 +141,15 @@ def load_INCAR(cell,INCARname="INCAR"):
         incarData = INCARfile.read()
      
         oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
+
         if oldMomentsText is None:
             for atom in cell:
                 oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])
         else:
-            for moment in oldMomentsText.group(1).split():
+            magmomLine = oldMomentsText.group(1)
+            for record in re.findall("\s*([0-9]+)\s*\*\s*([\-0-9\.]+)",magmomLine):
+                magmomLine = re.sub("{:s}\s*\*\s*{:s}".format(record[0],record[1]),(record[1]+" ")*int(record[0]),magmomLine)
+            for moment in magmomLine.split():
                 oldMoments.append(np.float(moment))
     
     return oldMoments,incarData
