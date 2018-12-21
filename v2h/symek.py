@@ -14,6 +14,7 @@ from aux.format import *
 from aux.argv import options
 from JorG.loadsave import * 
 from JorG.generator import * 
+from multiprocessing import Pool, TimeoutError
 
 
 def main(**args):
@@ -236,40 +237,24 @@ if __name__ == '__main__':
                                 wyckoffDict=wyckoffDict,
                                 logAccuracy=logAccuracy)
  
-    exit()
     size = len(flipper['distance'])
     print(cutOff,flipper['distance'])
     from itertools import product
-    for option in product([1,-1],repeat=len(allFlippable)):
-        print(option)
-        penalty = {distance: 0 for distance in flipper['distance']} 
-        for i,flip1 in enumerate(option):
-            if flip1 < 0:
-                for (a,b) in product(range(0,8),repeat=2):
-                    d = np.round(
-                          np.linalg.norm(
-                            crystal8[newReference+len(crystal)*a][1]
-                           -crystal8[allFlippable[i]+len(crystal)*b][1]
-                          ),
-                        logAccuracy)
-                    if d <= cutOff:
-                        if d not in penalty.keys():
-                            penalty[d] = 1
-                        else:    
-                            penalty[d] += 1
-            for j,flip2 in enumerate(option):
-                if(j < i):
-                    if flip1*flip2 < 0:
-                        for (a,b) in product(range(0,8),repeat=2):
-                            d = np.round(
-                                  np.linalg.norm(
-                                    crystal8[allFlippable[i]+len(crystal)*a][1]
-                                   -crystal8[allFlippable[j]+len(crystal)*b][1]
-                                  ),
-                                logAccuracy)
-                            if d <= cutOff:
-                                if d not in penalty.keys():
-                                    penalty[d] = 1
-                                else:    
-                                    penalty[d] += 1
-        print(penalty)
+    from JorG.configurations import *
+    allOptions = []
+    configurations = product([1,-1],repeat=len(allFlippable))
+    numberOfConfigurations = int(2**len(allFlippable))
+    print("Checking total number of configurations:",numberOfConfigurations)
+    print(allFlippable)
+    
+    with Pool(processes=4) as pool:
+        output = [pool.apply_async(
+                   get_configuration_penalty, (configuration, flipper,
+                                               crystal, crystal8,
+                                               allFlippable, newReference))
+              for configuration in configurations ]
+    for entry in output:
+        try:
+            print(entry.get(timeout=1))
+        except TimeoutError:
+            print("We lacked patience and got a multiprocessing.TimeoutError")
