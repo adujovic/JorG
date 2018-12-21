@@ -3,20 +3,20 @@
 gsl::SimulatedAnnealing::SimulatedAnnealing(){
 	gsl_rng_env_setup();
 	
-	T = gsl_rng_default;
-	r = gsl_rng_alloc(T);
+	workspace = gsl_rng_default;
+	randomNumberGenerator = gsl_rng_alloc(workspace);
 
 	energy  = gsl::pass<double,void*>;
 	measure = gsl::pass<double,void*,void*>;
 	step    = gsl::pass<void,const gsl_rng*,void*,double>;
-	print   = gsl::pass<void,void*>;
+	print   = NULL;
 
 	asaParameters.n_tries       = 100;
-	asaParameters.iters_fixed_T = 5;
+	asaParameters.iters_fixed_T = 501;
 	asaParameters.step_size     = 1e-2;
 	asaParameters.k             = 1.0;
 	asaParameters.t_initial     = 1e-2;
-	asaParameters.mu_t          = 1.0 + 3e-4;
+	asaParameters.mu_t          = 1.0 + 3e-2;
 	asaParameters.t_min         = 1e-6;
 
 	std::cout<<"energy"<<"  = "<<energy(NULL)<<std::endl;
@@ -24,7 +24,16 @@ gsl::SimulatedAnnealing::SimulatedAnnealing(){
 }
 
 gsl::SimulatedAnnealing::~SimulatedAnnealing(){
-	gsl_rng_free(r);
+	gsl_rng_free(randomNumberGenerator);
+}
+
+void gsl::SimulatedAnnealing::run(void* init, size_t byteSize, size_t _n_tries){
+	asaParameters.n_tries = _n_tries;
+	gsl_siman_solve(randomNumberGenerator, init,
+			energy, step,
+			measure, print,
+			NULL, NULL, NULL,
+			byteSize, asaParameters);
 }
 
 void gsl::SimulatedAnnealing::set_energy (double (*_new)(void*)){

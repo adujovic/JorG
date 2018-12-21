@@ -17,21 +17,22 @@ public:
 protected:
 	size_t systemDimension;
 
-	const gsl_rng_type * T;
-	gsl_rng * r;
+	const gsl_rng_type * workspace;
+	gsl_rng * randomNumberGenerator;
 
 	double (*energy) (void*);
 	double (*measure)(void*,void*);
-	void   (*step)   (const gsl_rng* r,void*,double);
+	void   (*step)   (const gsl_rng*,void*,double);
 	void   (*print)  (void*);
 
 	gsl_siman_params_t asaParameters;
 
 public:
+	void run(void* init, size_t byteSize, size_t _n_tries = 100);
 	
 	void set_energy (double (*)(void*));
 	void set_measure(double (*)(void*,void*));
-	void set_step   (void   (*)(const gsl_rng* r,void*,double));
+	void set_step   (void   (*)(const gsl_rng*,void*,double));
 	void set_print  (void   (*)(void*));
 
 
