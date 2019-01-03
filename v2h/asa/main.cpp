@@ -1,48 +1,88 @@
 #include <iostream>
 #include <iomanip>
 
+#include <vector>
+#include <array>
+#include <numeric>
+#include <random>
+
 #include <cmath>
 #include <cstring>
 
 #include "asa.h"
 
-double E1(void *xp) {
-  double x = * ((double *) xp);
+template<size_t N>
+double parabolic_plus_cos(void *input) {
+  double* x = static_cast<double *>(input);
+  double result = 0.0;
+  double alpha = 0.5;
 
-  return exp(-pow((x-1.0),2.0))*sin(8*x);
+  for(unsigned i = 0U; i<N; ++i)
+    result += 1*pow(x[i],2) - alpha*cos(10.0*x[i]) + alpha;
+  return result;
 }
 
-double M1(void *xp, void *yp) {
-  double x = *((double *) xp);
-  double y = *((double *) yp);
+template<size_t N>
+double measure(void *inX, void *inY) {
+  double* x = static_cast<double *>(inX);
+  double* y = static_cast<double *>(inY);
 
-  return fabs(x - y);
+  double err = 0.0;
+  for(unsigned i = 0U; i<N; ++i)
+    err += pow(x[i]-y[i],2);
+
+  return sqrt(err)/N;
 }
 
-void S1(const gsl_rng * r, void *xp, double step_size) {
-  double old_x = *((double *) xp);
-  double new_x;
+template<size_t N>
+void step(const gsl_rng* r, void* inX, double step_size) {
+  double* x = static_cast<double*>(inX);
 
-  double u = gsl_rng_uniform(r);
-  new_x = u * 2 * step_size - step_size + old_x;
-
-  std::memcpy(xp, &new_x, sizeof(new_x));
+  for(unsigned i = 0U; i<N; ++i){
+  double randomOne = gsl_rng_uniform(r);
+  double randomTwo = gsl_rng_uniform(r);
+     x[i] += sqrt(-2.0*log(randomOne))*cos(M_2_PI*randomTwo)*step_size;
+  }
 }
 
 void P1(void *xp) {
 	std::cout<<"\t"<<*((double *) xp);
 }
 
-int main (int argc, char **argv){
+//int main (int argc, char **argv){
+int main (){
+	constexpr size_t M = 3;
 	std::cout << std::setprecision(9);
 	gsl::SimulatedAnnealing asa;
-	asa.set_energy(E1);
-	asa.set_measure(M1);
-	asa.set_step(S1);
-	asa.set_print(P1);
+	asa.set_energy(parabolic_plus_cos<M>);
+	asa.set_measure(measure<M>);
+	asa.set_step(step<M>);
+	//asa.set_print(P1);
 
-	double init[1] = {1.0};
-	asa.run(&init,sizeof(double));
+	std::random_device randomDevice{};
+	std::mt19937 generator{randomDevice()};
+    	std::normal_distribution<> gauss{0.2,1};
+
+	std::vector<double>  stdvec(M);
+	double              carr[M];
+	std::array<double,M> stdarr;
+	for(size_t i=0U; i<M; ++i){
+		carr[i]   = gauss(generator);
+		stdarr[i] = gauss(generator);
+		stdvec[i] = gauss(generator);
+	}
+	asa.run(&carr,M*sizeof(double),1000);
+	asa.run(stdarr,1000);
+	asa.run(stdvec,1000);
+	std::cout<<"Cstyle array solution: ";
+	for(size_t i=0U; i<M; ++i) std::cout<<" "<<carr[i];
+	std::cout<<std::endl;
+	std::cout<<"  std::array solution: ";
+	for(size_t i=0U; i<M; ++i) std::cout<<" "<<stdarr[i];
+	std::cout<<std::endl;
+	std::cout<<" std::vector solution: ";
+	for(size_t i=0U; i<M; ++i) std::cout<<" "<<stdvec[i];
+	std::cout<<std::endl;
 
 	return 0;
 }

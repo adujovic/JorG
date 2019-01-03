@@ -1,6 +1,14 @@
 # Compilators
-#CC = clang
-CC = g++
+
+ifdef _USE_CLANG
+  CPP = clang++
+  COMPILER_SPECIFIC = -stdlib=libstdc++ -I/usr/include/c++/8 -I/usr/include/x86_64-linux-gnu/c++/8
+  LINKING_SPECIFIC  = -stdlib=libstdc++ -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/clang
+else
+  CPP = g++
+  COMPILER_SPECIFIC = 
+endif
+
 CFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic -fopenmp
 
 # Verbose
@@ -10,28 +18,29 @@ CFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic -fopenmp
 V =
 
 # Linking
-LFLAGS = -lm -lgsl -lgslcblas 
+LFLAGS = -std=c++17 -lm -lgsl -lgslcblas 
+
  
 # File names
 EXEC = start
 
 # Sources
-C_SOURCES = $(wildcard *.cpp)
-C_OBJECTS = $(C_SOURCES:.cpp=.o)
+CPP_SOURCES = $(wildcard *.cpp)
+CPP_OBJECTS = $(CPP_SOURCES:.cpp=.o)
  
 #+++++++++++++++++++#
 # COMPILATION RULES #
 #+++++++++++++++++++#
 
 # Main target
-$(EXEC):  $(C_OBJECTS)
-	$(CC) $(C_OBJECTS) -o $(EXEC) $(LFLAGS)
+$(EXEC):  $(CPP_OBJECTS)
+	$(CPP) $(LINKING_SPECIFIC) $(CPP_OBJECTS) -o $(EXEC) $(LFLAGS)
  
 # Other targets 
 %.o: %.cpp
-	$(CC) -c $(CFLAGS) -c $< -o $@
+	$(CPP) $(COMPILER_SPECIFIC) $(CFLAGS) -c $< -o $@
 
 # Cleaning
 clean:
-	rm -f $(EXEC) $(C_OBJECTS)  
+	rm -f $(EXEC) $(CPP_OBJECTS)  
 

@@ -12,15 +12,15 @@ gsl::SimulatedAnnealing::SimulatedAnnealing(){
 	print   = NULL;
 
 	asaParameters.n_tries       = 100;
-	asaParameters.iters_fixed_T = 501;
+	asaParameters.iters_fixed_T = 100;
 	asaParameters.step_size     = 1e-2;
 	asaParameters.k             = 1.0;
-	asaParameters.t_initial     = 1e-2;
-	asaParameters.mu_t          = 1.0 + 3e-2;
-	asaParameters.t_min         = 1e-6;
+	asaParameters.t_initial     = 1e1;
+	asaParameters.mu_t          = 1.0 + 1e-3;
+	asaParameters.t_min         = 1e-7;
 
-	std::cout<<"energy"<<"  = "<<energy(NULL)<<std::endl;
-	std::cout<<"measure"<<" = "<<measure(NULL,NULL)<<std::endl;
+//	std::cout<<"energy"<<"  = "<<energy(NULL)<<std::endl;
+//	std::cout<<"measure"<<" = "<<measure(NULL,NULL)<<std::endl;
 }
 
 gsl::SimulatedAnnealing::~SimulatedAnnealing(){
@@ -34,6 +34,17 @@ void gsl::SimulatedAnnealing::run(void* init, size_t byteSize, size_t _n_tries){
 			measure, print,
 			NULL, NULL, NULL,
 			byteSize, asaParameters);
+}
+
+void gsl::SimulatedAnnealing::run(std::vector<double>& init,
+	                          size_t _n_tries){
+	asaParameters.n_tries = _n_tries;
+	void* data = static_cast<void*>(init.data());
+	gsl_siman_solve(randomNumberGenerator, data,
+			energy, step,
+			measure, print,
+			NULL, NULL, NULL,
+			sizeof(double)*init.size(), asaParameters);
 }
 
 void gsl::SimulatedAnnealing::set_energy (double (*_new)(void*)){
