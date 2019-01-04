@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include "asa.h"
+#include "ising.h"
 
 template<size_t N>
 double parabolic_plus_cos(void *input) {
@@ -51,6 +52,14 @@ void P1(void *xp) {
 
 //int main (int argc, char **argv){
 int main (){
+	auxiliary::IsingModel<100> model;
+	model.add_interaction(1,1,0.1);
+	model.add_interaction(std::make_tuple(1U,1U,1.0));
+	std::vector<std::tuple<unsigned,unsigned,double>> d;
+	d.push_back(std::make_tuple(1U,1U,1.0));
+	d.push_back(std::make_tuple(0U,0U,1.0));
+	model.add_interaction(d);
+	exit(0);
 	constexpr size_t M = 3;
 	std::cout << std::setprecision(9);
 	gsl::SimulatedAnnealing asa;

@@ -14,7 +14,7 @@ namespace gsl{
 class SimulatedAnnealing{
 public:
 	SimulatedAnnealing();
-	~SimulatedAnnealing();
+	virtual ~SimulatedAnnealing();
 
 protected:
 	const gsl_rng_type * workspace;
