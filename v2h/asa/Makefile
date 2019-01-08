@@ -44,3 +44,17 @@ $(EXEC):  $(CPP_OBJECTS)
 clean:
 	rm -f $(EXEC) $(CPP_OBJECTS)  
 
+# Spacing
+spacing:
+	@echo "#"
+	@echo "#"
+	@echo "#"
+	@echo "#"
+	@echo "#"
+
+# Force compilation
+all:	spacing clean $(EXEC)
+
+# Force compilation and run valgind
+check:	all
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC)

@@ -12,12 +12,12 @@ gsl::SimulatedAnnealing::SimulatedAnnealing(){
 	print   = NULL;
 
 	asaParameters.n_tries       = 100;
-	asaParameters.iters_fixed_T = 100;
+	asaParameters.iters_fixed_T = 10;
 	asaParameters.step_size     = 1e-2;
 	asaParameters.k             = 1.0;
-	asaParameters.t_initial     = 1e1;
+	asaParameters.t_initial     = 1.e0;
 	asaParameters.mu_t          = 1.0 + 1e-3;
-	asaParameters.t_min         = 1e-7;
+	asaParameters.t_min         = 1.e-7;
 
 //	std::cout<<"energy"<<"  = "<<energy(NULL)<<std::endl;
 //	std::cout<<"measure"<<" = "<<measure(NULL,NULL)<<std::endl;
@@ -62,14 +62,3 @@ void gsl::SimulatedAnnealing::set_step   (void   (*_new)(const gsl_rng* r,void*,
 void gsl::SimulatedAnnealing::set_print  (void   (*_new)(void*)){
 	print = _new;
 }
-
-template<typename R,typename ...T>
-R gsl::pass(T... args __attribute__((unused))){
-	if constexpr(std::is_void<R>::value) return;	
-	if constexpr(std::is_arithmetic<R>::value){
-		if constexpr(sizeof...(args)==2) return R(1);
-		else return R(0);
-	}
-	return R();
-}
-

@@ -10,112 +10,285 @@
 
 #include <algorithm>
 #include <random>
-#include <limits>
 #include <string>
+
+#include <memory>
+#include <limits>
 #include <type_traits>
 
 #include "asa.h"
 #include "arithmeticvector.h"
 
-namespace auxiliary{
+namespace ising{
+
+template<size_t N> double isingEnergy (void* state);
+template<size_t N> double isingMeasure(void* stateI,
+                                       void* stateJ);
+template<size_t N> void   isingStep   (const gsl_rng* random,
+                                       void* state,
+                                       double step);
+template<size_t N> void   isingPrint  (void* state);
+
+
+template<size_t N, class Model>
+struct LatticeType{
+    LatticeType() = delete;
+    LatticeType(const LatticeType& rhs);
+    LatticeType& operator=(const LatticeType& rhs);
+    LatticeType(std::shared_ptr<std::mt19937>& _randomEngine,
+            std::shared_ptr<std::uniform_int_distribution
+                                  <unsigned long long int>>& _uniform,
+            const std::bitset<N>& _nodes,
+            const Model* _model);
+    LatticeType(std::shared_ptr<std::mt19937>& _randomEngine,
+            std::shared_ptr<std::uniform_int_distribution
+                                  <unsigned long long int>>& _uniform,
+            const Model* _model);
+
+    std::shared_ptr<std::mt19937> randomEngine;
+    std::shared_ptr<std::uniform_int_distribution
+                          <unsigned long long int>> uniform;
+    const Model* model;
+    std::bitset<N> nodes;
+    size_t flipper;
+};
 
 template<size_t N>
 class IsingModel{
 public:
-	IsingModel(bool QUICK_START=true):randomDevice(),randomEngine(randomDevice()),flip(0U,1U),
-	                                  uniform(
- 					    std::numeric_limits<unsigned long long int>::min(),
-                                            std::numeric_limits<unsigned long long int>::max()),
-					  lattice(randomEngine,uniform){
-          if(QUICK_START) hamiltonian.reserve(N*N/2); // maximum number of interactions ( each site with each )
-          else            hamiltonian.reserve(N);     // minimum number of interactions ( once  per each site )
-	  randomize(12);
+    IsingModel(bool QUICK_START=true):
+        randomDevice(),
+        randomEngine(std::make_shared<std::mt19937>(randomDevice())),
+        uniform(std::make_shared<
+                std::uniform_int_distribution<
+                unsigned long long int>>(
+                    std::numeric_limits<
+                    unsigned long long int>::min(),
+                    std::numeric_limits<
+                    unsigned long long int>::max())),
+        lattice(randomEngine,uniform,this){
+            if(QUICK_START) hamiltonian.reserve(N*N/2); // maximum number of interactions ( each site with each )
+            else        hamiltonian.reserve(N);     // minimum number of interactions ( once  per each site )
 
-	}
-	virtual ~IsingModel(){}
+            solver.set_energy (  isingEnergy<N> );
+            solver.set_measure( isingMeasure<N> );
+            solver.set_step   (    isingStep<N> );
+//            solver.set_print  (   isingPrint<N> );
+        }
 
-	typedef std::tuple<unsigned,unsigned,double>      TwoSiteInteraction;
-	typedef std::vector<TwoSiteInteraction>       HamiltonianType;
-	typedef celerium::ArithmeticVector                VectorType;
-private:
-	std::random_device randomDevice;
-        std::mt19937 randomEngine;
-        std::uniform_int_distribution<unsigned> flip;
-        std::uniform_int_distribution<unsigned long long int>
-		uniform;
+    virtual ~IsingModel(){}
 
-	struct LatticeType{
-	  std::bitset<N>           nodes;
-	  std::array<VectorType,N> positions;
+    typedef std::tuple<unsigned,unsigned,double>  TwoSiteInteraction;
+    typedef std::vector<TwoSiteInteraction>       HamiltonianType;
+    typedef celerium::ArithmeticVector            VectorType;
+protected:
+    std::random_device                              randomDevice;
+    std::shared_ptr<std::mt19937>                   randomEngine;
+    std::shared_ptr<std::uniform_int_distribution
+                         <unsigned long long int>>  uniform;
+    LatticeType<N,IsingModel>                       lattice;
 
-	  LatticeType(std::mt19937& engine,
-		      std::uniform_int_distribution<unsigned long long int>& distribution)
-	              :nodes(distribution(engine)){
-	    constexpr auto seedSize    = 8*sizeof(unsigned long long int);
-	    auto currentSize = seedSize;
-	    while (currentSize < N){
-	      nodes <<= seedSize;
-	      nodes  |= std::bitset<N>(distribution(engine));
-	      currentSize += seedSize;
-	    }
-	    std::cout<<nodes<<std::endl;
-	  }
-	} lattice;
-
-	gsl::SimulatedAnnealing solver;
-	HamiltonianType         hamiltonian;
+    gsl::SimulatedAnnealing                         solver;
+    HamiltonianType                                 hamiltonian;
 
 public:
-	unsigned randomize(size_t maxNumberOfFlips=1){
-	  unsigned ones  = std::min(maxNumberOfFlips,N);
-	  unsigned zeros = N - ones;
-	  std::string mask(ones,'1');
-	  mask += std::string(zeros,'0');
-	  std::shuffle(mask.begin(),mask.end(),randomEngine);
-	  std::cout<<mask<<std::endl;
+    static unsigned randomize(std::bitset<N>& state, 
+                              std::shared_ptr<std::mt19937>& randomEngine,
+                              std::shared_ptr<
+                              std::uniform_int_distribution
+                                   <unsigned long long int>>& uniform){ 
 
-	  lattice.nodes ^= std::bitset<N>(mask);
-          std::cout<<lattice.nodes<<std::endl;
-	  return 0;
-  	}	  
+        unsigned ones  = (*uniform)(*randomEngine)%static_cast<size_t>(sqrt(N));
+        unsigned zeros = N - ones;
+        std::string mask(ones,'1');
+        mask += std::string(zeros,'0');
+        std::shuffle(mask.begin(),mask.end(),*randomEngine);
+        /*
+         *       std::cout<<ones<<" "<<zeros<<" "<<mask<<std::endl;
+         *      exit(0);
+         */
+        state ^= std::bitset<N>(mask);
+    //    state |= std::bitset<N>(1211);
+
+        return 0;
+    }
+
+    static unsigned randomize(std::bitset<N>& state, 
+                              std::mt19937& randomEngine,
+                              size_t maxNumberOfFlips=
+                                     static_cast<size_t>(1.0+2.0*log(N))){
+
+        unsigned ones  = std::min(maxNumberOfFlips,N);
+        unsigned zeros = N - ones;
+        std::string mask(ones,'1');
+        mask += std::string(zeros,'0');
+        std::shuffle(mask.begin(),mask.end(),randomEngine);
+        state ^= std::bitset<N>(mask);
+
+        return 0;
+    }
+
+protected:
+    // For SFINAE compiler-time evaulation
+    template<class T>
+    T tester(T t)const{
+        if(std::is_integral<T>::value) return static_cast<unsigned>(t);
+        return t;
+    }
 
 public:
-	void add_interaction(...){
-	  std::cerr<<"Wrong input for auxiliary::IsingModel::add_interaction:"<<std::endl;
-	  std::cerr<<"           Either non-iterable or iterable of non <int,int,float> tuples."<<std::endl;
-	  std::cerr<<"           Nothing was added!"<<std::endl;
-	}
+    void add_interaction(...){
+        std::cerr<<"Wrong input for auxiliary::IsingModel::add_interaction:"<<std::endl;
+        std::cerr<<"       Either non-iterable or iterable of non <int,int,float> tuples."<<std::endl;
+        std::cerr<<"       Nothing was added!"<<std::endl;
+    }
 
-	// For SFINAE compiler-time evaulation
-	template<class T>
-	T tester(T t){
-	  if(std::is_integral<T>::value) return static_cast<unsigned>(t);
-	  return t;
-	};
+    template<class intlike, class floatlike>
+    auto add_interaction(intlike i, intlike j, floatlike J) -> decltype((unsigned)(tester<intlike>)(i),void()){
+        hamiltonian.push_back(std::make_tuple(i,j,J));
+    }
 
-	template<class intlike, class floatlike>
-	auto add_interaction(intlike i, intlike j, floatlike J) -> decltype((unsigned)(tester<intlike>)(i),void()){
-	  hamiltonian.push_back(std::make_tuple(i,j,J));
-	}
+    template<class T>
+    auto add_interaction(T interaction) -> decltype((TwoSiteInteraction&&)(tester<T>)(interaction),void()){
+        hamiltonian.push_back(interaction);
+    }
 
-	template<class T>
-	auto add_interaction(T interaction) -> decltype((TwoSiteInteraction&)(tester<T>)(interaction),void()){
-	  hamiltonian.push_back(interaction);
-	}
+    template<class T>
+    auto add_interaction(T interaction) -> decltype((TwoSiteInteraction&)(tester<T>)(interaction),void()){
+        hamiltonian.push_back(interaction);
+    }
 
-	template<class T>
-	auto add_interaction(T interaction) -> decltype((TwoSiteInteraction&&)(tester<T>)(interaction),void()){
-	  hamiltonian.push_back(interaction);
-	}
+    template<class Iterable>
+    auto add_interaction(const Iterable& interactions) -> decltype((decltype(interactions.begin()))(std::begin)(interactions),void()){
+        for(auto& interaction : interactions)
+            hamiltonian.push_back(interaction);
+    }
 
-	template<class Iterable>
-	auto add_interaction(const Iterable& interactions) -> decltype((Iterable::iterator)(interactions.begin())(),void()){
-	    for(auto& interaction : interactions)
-	      hamiltonian.push_back(interaction);
-	}
+    std::bitset<N>* get_nodes_ptr(){
+        return &(lattice.nodes);
+    }
 
-};	
+    const std::bitset<N>& get_nodes() const{
+        return lattice.nodes;
+    }
 
-}//end of namespace auxiliary
+    const HamiltonianType& get_hamiltonian() const{
+        return hamiltonian;
+    }
+
+    std::bitset<N>& get_nodes(){
+        return lattice.nodes;
+    }
+
+    friend std::ostream& operator<<(std::ostream& stream, const IsingModel& model){
+        return stream<<model.get_nodes();
+    }
+
+    static double energy(const LatticeType<N,IsingModel>* state){
+        double E = 0.0;
+        for(const auto& interaction : state->model->get_hamiltonian())
+            E += -400.*std::get<2>(interaction)
+                *(state->nodes[std::get<0>(interaction)]-0.5)
+                *(state->nodes[std::get<1>(interaction)]-0.5);
+        return E;
+    }
+
+    static double measure(const std::bitset<N>& stateI, const std::bitset<N>& stateJ){
+        std::bitset<N> output = ~stateI & stateJ;
+        return output.count();
+    }    
+
+    void run(){
+        std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
+        solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
+        std::cout<<"Solution:      "<<lattice.nodes<<std::endl;
+    }
+
+    static void generate_state(std::bitset<N>& state,
+                               std::mt19937& engine,
+                               std::uniform_int_distribution
+                                    <unsigned long long int>& distribution){
+
+        constexpr auto seedSize = 8*sizeof(unsigned long long int);
+
+        state = std::bitset<N>(distribution(engine));
+        auto currentSize = seedSize;
+
+        while (currentSize < N){
+            state <<= seedSize;
+            state  |= std::bitset<N>(distribution(engine));
+            currentSize += seedSize;
+        }
+    }
+}; // end of class IsingModel
+
+template<size_t N>
+double isingEnergy (void* state){
+    return IsingModel<N>::energy(static_cast<LatticeType<N,IsingModel<N>>*>(state));
+}
+
+template<size_t N>
+double isingMeasure(void* stateI, void* stateJ){
+    return IsingModel<N>::measure(
+            static_cast<LatticeType<N,IsingModel<N>>*>(stateI)->nodes,
+            static_cast<LatticeType<N,IsingModel<N>>*>(stateJ)->nodes
+           );
+}
+
+template<size_t N>
+void   isingStep   (const gsl_rng* random __attribute__((unused)), void* state, double step __attribute__((unused))){
+    IsingModel<N>::randomize(
+            static_cast<LatticeType<N,IsingModel<N>>*>(state)->nodes,
+            static_cast<LatticeType<N,IsingModel<N>>*>(state)->randomEngine,
+            static_cast<LatticeType<N,IsingModel<N>>*>(state)->uniform
+           );
+}
+
+template<size_t N>
+void   isingPrint  (void* state){
+    std::cout<<'\t'<<static_cast<LatticeType<N,IsingModel<N>>*>(state)->nodes;
+}
+
+template<size_t N, class Model>
+LatticeType<N,Model>::LatticeType(const LatticeType<N,Model>& rhs){
+    randomEngine = rhs.randomEngine;
+    uniform      = rhs.uniform;
+    nodes        = rhs.nodes;
+    model        = rhs.model;
+}
+
+template<size_t N, class Model>
+LatticeType<N,Model>& LatticeType<N,Model>::operator=(const LatticeType<N,Model>& rhs){
+    randomEngine = rhs.randomEngine;
+    uniform      = rhs.uniform;
+    nodes        = rhs.nodes;
+    model        = rhs.model;
+}
+
+template<size_t N, class Model>
+LatticeType<N,Model>::LatticeType(
+        std::shared_ptr<std::mt19937>& _randomEngine,
+        std::shared_ptr<
+          std::uniform_int_distribution
+               <unsigned long long int>>& _uniform,
+        const std::bitset<N>& _nodes,
+        const Model* _model):randomEngine(_randomEngine),
+                             uniform(_uniform),
+                             model(_model),
+                             nodes(_nodes){}
+
+template<size_t N, class Model>
+LatticeType<N,Model>::LatticeType(
+        std::shared_ptr<std::mt19937>& _randomEngine,
+        std::shared_ptr<
+          std::uniform_int_distribution
+               <unsigned long long int>>& _uniform,
+        const Model* _model):randomEngine(_randomEngine),
+                             uniform(_uniform),
+                             model(_model){
+        IsingModel<N>::generate_state(nodes,*_randomEngine,*_uniform);    
+    }
+
+} //end of namespace ising
 
 #endif
