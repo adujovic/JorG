@@ -1,10 +1,12 @@
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 #include <vector>
 #include <array>
 #include <numeric>
 #include <random>
+#include <regex>
 
 #include <cmath>
 #include <cstring>
@@ -21,7 +23,63 @@ template<size_t N> void step                 ( const gsl_rng* r,
                                                      double step_size );
 template<size_t N> void print_state          (       void *xp         );
 
-int main (){
+int main(int argc, char** argv){
+    if(argc < 4){
+        std::cerr<<"No files given!"<<std::endl;
+        exit(-1);
+    }
+
+    constexpr size_t SITESNUMBER = 64;
+
+    std::size_t pos;
+    std::size_t buff;
+    std::string line;
+    
+    std::array<typename ising::IsingModel<SITESNUMBER>::VectorType,3> basis;
+    std::ifstream directions(argv[1]);
+    if(directions.is_open()) {
+        size_t id = 0;
+        while (getline(directions,line)){
+            buff = 0;
+            std::array<double,3> position;
+            for(int i=0; i<3; ++i){
+              position[i] = std::stod(line.substr(buff),&pos);
+              buff += pos;
+            }
+            basis[id++] = position;
+        }
+        directions.close();
+    }
+
+    std::vector<std::pair<typename ising::IsingModel<SITESNUMBER>::VectorType,double>> supercell; 
+    std::ifstream crystal(argv[2]);
+    if(crystal.is_open()) {
+        while (getline(crystal,line)){
+            std::stoi(line,&pos);
+            buff = pos;
+            std::array<double,3> position;
+            for(int i=0; i<3; ++i){
+              position[i] = std::stod(line.substr(buff),&pos);
+              buff += pos;
+            }
+            auto moment = std::stod(line.substr(buff));
+            supercell.push_back(std::make_pair(position,moment));
+        }
+        crystal.close();
+    }
+
+    typename ising::IsingModel<SITESNUMBER>::VectorType reference;
+    std::ifstream ref(argv[1]);
+    if(ref.is_open()) {
+        getline(ref,line);
+        buff = 0;
+        for(int i=0; i<3; ++i){
+          reference[i] = std::stod(line.substr(buff),&pos);
+          buff += pos;
+        }
+        ref.close();
+    }
+
     std::cout<<"########################################"<<std::endl;
     std::cout<<"##                                    ##"<<std::endl;
     std::cout<<"##                                    ##"<<std::endl;
@@ -34,8 +92,11 @@ int main (){
     std::mt19937 generator{randomDevice()};
     std::normal_distribution<> gauss{0.0,1.0};
 
-    constexpr size_t SITESNUMBER = 64;
     ising::IsingModel<SITESNUMBER> model;
+
+    model.set_basis(basis);
+    model.set_supercell(supercell);
+    model.set_reference(reference);
 
     std::vector<std::tuple<unsigned,unsigned,double>> d;
     for(size_t i = 0U; i<SITESNUMBER-1; ++i){

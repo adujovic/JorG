@@ -256,7 +256,8 @@ if __name__ == '__main__':
         for d in extraDirections:
             dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
 
-
+    with open("asa/solver/reference.dat","w+") as refFile:
+        refFile.write("%.8f %.8f %.8f\n"%tuple(crystal[newReference][1]))
 
     exit()
     

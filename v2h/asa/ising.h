@@ -92,13 +92,30 @@ protected:
 
     gsl::SimulatedAnnealing                         solver;
     HamiltonianType                                 hamiltonian;
-    std::array<std::array<VectorType,N>,8>          positions;
+
+    std::array<VectorType,3>                        basis;
+    std::vector<std::pair<VectorType,double>>       supercell;
+
+    VectorType                                      referencePoint;
+    double                                          decayCoeff;
 
 public:
     typename gsl::SimulatedAnnealing::Parameters&
         set_parameters(const typename gsl::SimulatedAnnealing::Parameters& _params){
             return solver.set_parameters(_params);
         }
+
+    void set_basis(const std::array<VectorType,3>& _basis){
+        basis = _basis;
+    }
+
+    void set_supercell(const std::vector<std::pair<VectorType,double>>& _supercell){
+        supercell = _supercell;
+    }
+
+    void set_reference(const VectorType& _reference){
+        referencePoint = _reference;
+    }
 
     static unsigned randomize(std::bitset<N>& state, 
                               std::shared_ptr<std::mt19937>& randomEngine,
@@ -189,8 +206,8 @@ public:
 
     static double energy(const LatticeType<N,IsingModel>* state){
         double E = 0.0;
-        for(const auto& interaction : state->model->get_hamiltonian())
-            E += -400.*std::get<2>(interaction)
+        for(const auto& interaction : state->model->get_hamiltonian()){
+            E += std::get<2>(interaction)
                 *(state->nodes[std::get<0>(interaction)]-0.5)
                 *(state->nodes[std::get<1>(interaction)]-0.5);
         return E;
@@ -201,7 +218,22 @@ public:
         return output.count();
     }    
 
+    void fit_to_model(){
+        double minDistance = (basis[0]^basis[1])*basis[2];
+        double maxDistance = 0.0;
+
+        for(const auto& atomI : supercell){
+            for(const auto& atomJ : supercell){
+                auto d = VectorType::norm(atomI.first,atomJ.first);
+                if (d > 1e-7 && d < minDistance) minDistance = d;
+                if (d > maxDistance)             maxDistance = d;
+            }
+        }
+        decayCoeff = 24*log10(2)*log(10)/(maxDistance-minDistance);
+    }
+
     void run(){
+        this->fit_to_model();
         std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
         solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
         std::cout<<"Solution:      "<<lattice.nodes<<std::endl;
