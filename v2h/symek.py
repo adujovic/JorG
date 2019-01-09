@@ -246,6 +246,19 @@ if __name__ == '__main__':
     numberOfConfigurations = int(2**len(allFlippable))
     print("Checking total number of configurations:",numberOfConfigurations)
     print(allFlippable)
+
+    with open("asa/solver/input.dat","w+") as isingFile:
+        for i in allFlippable:
+            isingFile.write("%d %.8f %.8f %.8f %.2f\n"%(
+            i,*crystal[i][1],crystal[i][2]))
+
+    with open("asa/solver/directions.dat","w+") as dirFile:
+        for d in extraDirections:
+            dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
+
+
+
+    exit()
     
     with Pool(processes=4) as pool:
         output = [pool.apply_async(

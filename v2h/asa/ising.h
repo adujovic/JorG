@@ -73,7 +73,9 @@ public:
             solver.set_energy (  isingEnergy<N> );
             solver.set_measure( isingMeasure<N> );
             solver.set_step   (    isingStep<N> );
-//            solver.set_print  (   isingPrint<N> );
+#ifdef _VERBOSE
+            solver.set_print  (   isingPrint<N> );
+#endif
         }
 
     virtual ~IsingModel(){}
@@ -90,8 +92,14 @@ protected:
 
     gsl::SimulatedAnnealing                         solver;
     HamiltonianType                                 hamiltonian;
+    std::array<std::array<VectorType,N>,8>          positions;
 
 public:
+    typename gsl::SimulatedAnnealing::Parameters&
+        set_parameters(const typename gsl::SimulatedAnnealing::Parameters& _params){
+            return solver.set_parameters(_params);
+        }
+
     static unsigned randomize(std::bitset<N>& state, 
                               std::shared_ptr<std::mt19937>& randomEngine,
                               std::shared_ptr<
@@ -103,12 +111,7 @@ public:
         std::string mask(ones,'1');
         mask += std::string(zeros,'0');
         std::shuffle(mask.begin(),mask.end(),*randomEngine);
-        /*
-         *       std::cout<<ones<<" "<<zeros<<" "<<mask<<std::endl;
-         *      exit(0);
-         */
         state ^= std::bitset<N>(mask);
-    //    state |= std::bitset<N>(1211);
 
         return 0;
     }

@@ -9,8 +9,9 @@
 #include <cmath>
 #include <cstring>
 
-#include "asa.h"
-#include "ising.h"
+#include "../asa.h"
+#include "../ising.h"
+#include "../arithmeticvector.h"
 
 template<size_t N> double parabolic_plus_cos (       void* input      ); 
 template<size_t N> double measure            (       void* inX, 
@@ -50,9 +51,9 @@ int main (){
     asa.set_energy  ( parabolic_plus_cos<M> );
     asa.set_measure ( measure<M>            );
     asa.set_step    ( step<M>               );
-//    asa.set_print   ( print_state<M>        );
-
-    gauss = std::normal_distribution<>{0.2,1};
+#ifdef _VERBOSE
+    asa.set_print   ( print_state<M>        );
+#endif
 
     std::vector<double>  stdvec(M);
     double               carr[M];
@@ -66,6 +67,27 @@ int main (){
     std::cout<<"##                                    ##"<<std::endl;
     std::cout<<"########################################"<<std::endl;
 
+    typename gsl::SimulatedAnnealing::Parameters params;
+
+    params.n_tries       = 100;      /* how many points
+                                      * to try for each step 
+                                      */
+    params.iters_fixed_T = 1000;     // how many iterations at each temperature?
+    params.step_size     = 1e-3;     /* max step size in the random walk;
+                                      * !!! unused for ising::IsingModel !!!
+                                      */
+    params.k             = 1.0;      /* Boltzman constant;
+                                      * scaling factor for "energy";
+                                      * should be of the order of "energy"
+                                      */
+    params.t_initial     = 1e4;      // initial "temperature"
+    params.mu_t          = 1.0+1e-1; // "temperature" step
+    params.t_min         = 1e-5;     // final "temperature"
+
+    asa.set_parameters(params);
+
+    gauss = std::normal_distribution<>{0.1,0.2};
+
     std::cout<<"Starting from:         \t";
     for(size_t i=0U; i<M; ++i){
         auto tmp  = gauss(generator);
@@ -76,9 +98,9 @@ int main (){
     }
     std::cout<<std::endl;
 
-    asa.run(&carr,  M*sizeof(double), 1000);
-    asa.run(stdarr,                   1000);
-    asa.run(stdvec,                   1000);
+    asa.run   (&carr,  M*sizeof(double), 100000);
+    asa.run<M>(stdarr,                   100000);
+    asa.run   (stdvec,                   100000);
 
     std::cout<<"Cstyle array solution:";
     for(size_t i=0U; i<M; ++i) std::cout<<"\t"<<carr[i];
@@ -124,8 +146,7 @@ void step(const gsl_rng* r, void* inX, double step_size) {
 
     for(unsigned i = 0U; i<N; ++i){
         double randomOne = gsl_rng_uniform(r);
-        double randomTwo = gsl_rng_uniform(r);
-        x[i] += sqrt(-2.0*log(randomOne))*cos(M_2_PI*randomTwo)*step_size;
+        x[i] += step_size*2.0*(randomOne-0.5);
     }
 }
 

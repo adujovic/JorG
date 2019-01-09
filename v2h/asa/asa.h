@@ -16,6 +16,17 @@ public:
     SimulatedAnnealing();
     virtual ~SimulatedAnnealing();
 
+    typedef gsl_siman_params_t Parameters; 
+    /* Struct defined in gsl/gsl_siman.h (gsl2.5) access on Jan 9, 2019 as:
+     * 51 typedef struct {     
+     * 52   int n_tries;          // how many points to try for each step
+     * 53   int iters_fixed_T;    // how many iterations at each temperature?
+     * 54   double step_size;     // max step size in the random walk
+     * 55   // the following parameters are for the Boltzmann distribution
+     * 56   double k, t_initial, mu_t, t_min;
+     * 57 } gsl_siman_params_t;
+     */
+
 protected:
     const gsl_rng_type * workspace;
     gsl_rng * randomNumberGenerator;
@@ -28,9 +39,15 @@ protected:
                             double);
     void   (*print)  (void*);
 
-    gsl_siman_params_t asaParameters;
+    Parameters asaParameters;
 
 public:
+    Parameters& set_parameters(const Parameters&
+                                     _asaParameters){
+        asaParameters = _asaParameters;
+        return asaParameters;
+    }
+
     void run(void* init, 
              size_t byteSize, 
              size_t _n_tries = 1000);
