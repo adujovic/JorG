@@ -252,6 +252,12 @@ if __name__ == '__main__':
             isingFile.write("%d %.8f %.8f %.8f %.2f\n"%(
             i,*crystal[i][1],crystal[i][2]))
 
+    with open("asa/solver/supercell.dat","w+") as supercellFile:
+        for i,atom in enumerate(crystal):
+            supercellFile.write("%d %.8f %.8f %.8f %.2f\n"%(
+            i,*atom[1],atom[2]))
+
+
     with open("asa/solver/directions.dat","w+") as dirFile:
         for d in extraDirections:
             dirFile.write("%.8f %.8f %.8f\n"%tuple(d))

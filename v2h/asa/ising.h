@@ -99,11 +99,13 @@ protected:
     VectorType                                      referencePoint;
     double                                          decayCoeff;
 
+    const std::bitset<N>*                           mask;
+
 public:
     typename gsl::SimulatedAnnealing::Parameters&
-        set_parameters(const typename gsl::SimulatedAnnealing::Parameters& _params){
+    set_parameters(const typename gsl::SimulatedAnnealing::Parameters& _params){
             return solver.set_parameters(_params);
-        }
+    }
 
     void set_basis(const std::array<VectorType,3>& _basis){
         basis = _basis;
@@ -121,14 +123,17 @@ public:
                               std::shared_ptr<std::mt19937>& randomEngine,
                               std::shared_ptr<
                               std::uniform_int_distribution
-                                   <unsigned long long int>>& uniform){ 
+                                   <unsigned long long int>>& uniform,
+                              const std::bitset<N>* mask=nullptr){ 
 
         unsigned ones  = (*uniform)(*randomEngine)%static_cast<size_t>(sqrt(N));
         unsigned zeros = N - ones;
-        std::string mask(ones,'1');
-        mask += std::string(zeros,'0');
-        std::shuffle(mask.begin(),mask.end(),*randomEngine);
-        state ^= std::bitset<N>(mask);
+        std::string face(ones,'1');
+        face += std::string(zeros,'0');
+        std::shuffle(face.begin(),face.end(),*randomEngine);
+        state ^= std::bitset<N>(face);
+
+        if(mask != nullptr) state |= *mask; // if mask exist, flip all marked spins
 
         return 0;
     }
@@ -136,16 +141,23 @@ public:
     static unsigned randomize(std::bitset<N>& state, 
                               std::mt19937& randomEngine,
                               size_t maxNumberOfFlips=
-                                     static_cast<size_t>(1.0+2.0*log(N))){
+                                     static_cast<size_t>(1.0+2.0*log(N)),
+                              const std::bitset<N>* mask=nullptr){ 
 
         unsigned ones  = std::min(maxNumberOfFlips,N);
         unsigned zeros = N - ones;
-        std::string mask(ones,'1');
-        mask += std::string(zeros,'0');
-        std::shuffle(mask.begin(),mask.end(),randomEngine);
-        state ^= std::bitset<N>(mask);
+        std::string face(ones,'1');
+        face += std::string(zeros,'0');
+        std::shuffle(face.begin(),face.end(),randomEngine);
+        state ^= std::bitset<N>(face);
+
+        if(mask != nullptr) state |= *mask; // if mask exist, flip all marked spins
 
         return 0;
+    }
+
+    const std::bitset<N>* get_mask() const{
+        return mask;
     }
 
 protected:
@@ -210,6 +222,7 @@ public:
             E += std::get<2>(interaction)
                 *(state->nodes[std::get<0>(interaction)]-0.5)
                 *(state->nodes[std::get<1>(interaction)]-0.5);
+        }
         return E;
     }
 
@@ -224,7 +237,7 @@ public:
 
         for(const auto& atomI : supercell){
             for(const auto& atomJ : supercell){
-                auto d = VectorType::norm(atomI.first,atomJ.first);
+                auto d = (atomI.first * atomJ.first);
                 if (d > 1e-7 && d < minDistance) minDistance = d;
                 if (d > maxDistance)             maxDistance = d;
             }
@@ -233,6 +246,15 @@ public:
     }
 
     void run(){
+        this->mask = nullptr;
+        this->fit_to_model();
+        std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
+        solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
+        std::cout<<"Solution:      "<<lattice.nodes<<std::endl;
+    }
+
+    void run(const std::bitset<N>* mask){
+        this->mask = mask;
         this->fit_to_model();
         std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
         solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
@@ -275,7 +297,8 @@ void   isingStep   (const gsl_rng* random __attribute__((unused)), void* state, 
     IsingModel<N>::randomize(
             static_cast<LatticeType<N,IsingModel<N>>*>(state)->nodes,
             static_cast<LatticeType<N,IsingModel<N>>*>(state)->randomEngine,
-            static_cast<LatticeType<N,IsingModel<N>>*>(state)->uniform
+            static_cast<LatticeType<N,IsingModel<N>>*>(state)->uniform,
+            static_cast<LatticeType<N,IsingModel<N>>*>(state)->model->get_mask()
            );
 }
 

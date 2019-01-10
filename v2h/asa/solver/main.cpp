@@ -24,8 +24,13 @@ template<size_t N> void step                 ( const gsl_rng* r,
 template<size_t N> void print_state          (       void *xp         );
 
 int main(int argc, char** argv){
-    if(argc < 4){
+    if(argc < 5){
         std::cerr<<"No files given!"<<std::endl;
+        std::cerr<<"One should provide:"<<std::endl;
+        std::cerr<<"    (  i) basis"<<std::endl;
+        std::cerr<<"    ( ii) supercell"<<std::endl;
+        std::cerr<<"    (iii) flippable"<<std::endl;
+        std::cerr<<"    ( iv) reference"<<std::endl;
         exit(-1);
     }
 
@@ -52,9 +57,9 @@ int main(int argc, char** argv){
     }
 
     std::vector<std::pair<typename ising::IsingModel<SITESNUMBER>::VectorType,double>> supercell; 
-    std::ifstream crystal(argv[2]);
-    if(crystal.is_open()) {
-        while (getline(crystal,line)){
+    std::ifstream inSupercell(argv[2]);
+    if(inSupercell.is_open()) {
+        while (getline(inSupercell,line)){
             std::stoi(line,&pos);
             buff = pos;
             std::array<double,3> position;
@@ -65,7 +70,24 @@ int main(int argc, char** argv){
             auto moment = std::stod(line.substr(buff));
             supercell.push_back(std::make_pair(position,moment));
         }
-        crystal.close();
+        inSupercell.close();
+    }
+
+    std::vector<std::pair<typename ising::IsingModel<SITESNUMBER>::VectorType,double>> flippable; 
+    std::ifstream inFlippable(argv[2]);
+    if(inFlippable.is_open()) {
+        while (getline(inFlippable,line)){
+            std::stoi(line,&pos);
+            buff = pos;
+            std::array<double,3> position;
+            for(int i=0; i<3; ++i){
+              position[i] = std::stod(line.substr(buff),&pos);
+              buff += pos;
+            }
+            auto moment = std::stod(line.substr(buff));
+            flippable.push_back(std::make_pair(position,moment));
+        }
+        inFlippable.close();
     }
 
     typename ising::IsingModel<SITESNUMBER>::VectorType reference;
@@ -104,7 +126,9 @@ int main(int argc, char** argv){
     }
     model.add_interaction(d);
 
-    model.run();
+    const std::bitset<SITESNUMBER> mask(std::string(SITESNUMBER/8,'1'));
+
+    model.run(&mask);
 
     constexpr size_t M = 3;
     std::cout << std::setprecision(9);
