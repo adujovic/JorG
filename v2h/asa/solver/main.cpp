@@ -40,6 +40,12 @@ int main(int argc, char** argv){
     std::size_t buff;
     std::string line;
     
+    /* Reading data from files:
+     * crystal direction (basis) in argv[1]
+     * supercell                 in argv[2]
+     * unique flippable spins    in argv[3]
+     * new reference point       in argv[4]
+     */ 
     std::array<typename ising::IsingModel<SITESNUMBER>::VectorType,3> basis;
     std::ifstream directions(argv[1]);
     if(directions.is_open()) {
