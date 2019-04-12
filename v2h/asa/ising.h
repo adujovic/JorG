@@ -53,8 +53,13 @@ struct LatticeType{
     size_t flipper;
 };
 
+class AbstractIsingModel{
+public:
+    virtual ~AbstractIsingModel() = 0;
+};
+
 template<size_t N>
-class IsingModel{
+class IsingModel : public AbstractIsingModel{
 public:
     IsingModel(bool QUICK_START=true):
         randomDevice(),
@@ -78,7 +83,7 @@ public:
 #endif
         }
 
-    virtual ~IsingModel(){}
+    virtual ~IsingModel() override {}
 
     typedef std::tuple<unsigned,unsigned,double>  TwoSiteInteraction;
     typedef std::vector<TwoSiteInteraction>       HamiltonianType;
@@ -87,19 +92,18 @@ protected:
     std::random_device                              randomDevice;
     std::shared_ptr<std::mt19937>                   randomEngine;
     std::shared_ptr<std::uniform_int_distribution
-                         <unsigned long long int>>  uniform;
-    LatticeType<N,IsingModel>                       lattice;
+                         <unsigned long long int>>    uniform;
+    LatticeType<N,IsingModel>                         lattice;
 
-    gsl::SimulatedAnnealing                         solver;
-    HamiltonianType                                 hamiltonian;
+    gsl::SimulatedAnnealing                           solver;
+    HamiltonianType                                   hamiltonian;
 
-    std::array<VectorType,3>                        basis;
-    std::vector<std::pair<VectorType,double>>       supercell;
+    std::array<VectorType,3>                          basis;
+    std::vector<std::tuple<size_t,VectorType,double>> supercell;
 
-    VectorType                                      referencePoint;
-    double                                          decayCoeff;
+    size_t                                            referencePoint;
 
-    const std::bitset<N>*                           mask;
+    const std::bitset<N>*                             mask;
 
 public:
     typename gsl::SimulatedAnnealing::Parameters&
@@ -111,11 +115,11 @@ public:
         basis = _basis;
     }
 
-    void set_supercell(const std::vector<std::pair<VectorType,double>>& _supercell){
+    void set_supercell(const std::vector<std::tuple<size_t,VectorType,double>>& _supercell){
         supercell = _supercell;
     }
 
-    void set_reference(const VectorType& _reference){
+    void set_reference(size_t _reference){
         referencePoint = _reference;
     }
 
@@ -133,7 +137,7 @@ public:
         std::shuffle(face.begin(),face.end(),*randomEngine);
         state ^= std::bitset<N>(face);
 
-        if(mask != nullptr) state |= *mask; // if mask exist, flip all marked spins
+        if(mask != nullptr) state &= *mask; // if mask exist, don't flip marked spins
 
         return 0;
     }
@@ -151,7 +155,7 @@ public:
         std::shuffle(face.begin(),face.end(),randomEngine);
         state ^= std::bitset<N>(face);
 
-        if(mask != nullptr) state |= *mask; // if mask exist, flip all marked spins
+        if(mask != nullptr) state &= *mask; // if mask exist, don't flip marked spins
 
         return 0;
     }
@@ -200,6 +204,21 @@ public:
         return &(lattice.nodes);
     }
 
+    void clear_hamiltonian(){
+        hamiltonian.clear();
+    }
+
+    void reset(){
+        this->clear_hamiltonian();
+        this->randomize_state();
+//        std::cout<<lattice.nodes<<std::endl;
+//        std::cout<<*mask<<std::endl;
+    }
+
+    void randomize_state(){
+        IsingModel<N>::generate_state(lattice.nodes,*(lattice.randomEngine),*(lattice.uniform));
+    }
+
     const std::bitset<N>& get_nodes() const{
         return lattice.nodes;
     }
@@ -231,34 +250,29 @@ public:
         return output.count();
     }    
 
-    void fit_to_model(){
-        double minDistance = (basis[0]^basis[1])*basis[2];
-        double maxDistance = 0.0;
-
-        for(const auto& atomI : supercell){
-            for(const auto& atomJ : supercell){
-                auto d = (atomI.first * atomJ.first);
-                if (d > 1e-7 && d < minDistance) minDistance = d;
-                if (d > maxDistance)             maxDistance = d;
-            }
-        }
-        decayCoeff = 24*log10(2)*log(10)/(maxDistance-minDistance);
-    }
-
     void run(){
         this->mask = nullptr;
-        this->fit_to_model();
+#ifdef _VERBOSE
         std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
+#endif
         solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
-        std::cout<<"Solution:      "<<lattice.nodes<<std::endl;
+#ifdef _VERBOSE
+        std::cout<<"Solution:      ";
+#endif
+        std::cout<<lattice.nodes<<std::endl;
     }
 
-    void run(const std::bitset<N>* mask){
+    void run(std::bitset<N>* mask){
         this->mask = mask;
-        this->fit_to_model();
+        lattice.nodes &= *mask;
+#ifdef _VERBOSE
         std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
+#endif
         solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
-        std::cout<<"Solution:      "<<lattice.nodes<<std::endl;
+#ifdef _VERBOSE
+        std::cout<<"Solution:      ";
+#endif
+        std::cout<<lattice.nodes<<std::endl;
     }
 
     static void generate_state(std::bitset<N>& state,

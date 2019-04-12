@@ -11,11 +11,14 @@ endif
 
 CFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic -fopenmp
 
+# Number of sites
+#
+# SITES
+
 # Verbose
 # If verbose mode is needed please use:
 # make V=-D[verbose flag] instead of make
 # Usually I use _VERBOSE as a flag /andrzej
-V =
 
 # Linking
 LFLAGS = -std=c++17 -lm -lgsl -lgslcblas 
@@ -38,7 +41,7 @@ $(EXEC):  $(CPP_OBJECTS)
  
 # Other targets 
 %.o: %.cpp
-	$(CPP) $(COMPILER_SPECIFIC) $(CFLAGS) -c $< -o $@
+	$(CPP) $(COMPILER_SPECIFIC) $(CFLAGS) $(SITES) -c $< -o $@
 
 # Cleaning
 clean:
