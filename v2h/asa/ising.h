@@ -250,7 +250,7 @@ public:
         return output.count();
     }    
 
-    void run(){
+    std::bitset<N> run(){
         this->mask = nullptr;
 #ifdef _VERBOSE
         std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
@@ -258,22 +258,29 @@ public:
         solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
 #ifdef _VERBOSE
         std::cout<<"Solution:      ";
-#endif
         std::cout<<lattice.nodes<<std::endl;
+#endif
+        return lattice.nodes;
     }
 
-    void run(std::bitset<N>* mask){
+#ifdef _VERBOSE
+    std::bitset<N> run(std::bitset<N>* mask){
         this->mask = mask;
         lattice.nodes &= *mask;
-#ifdef _VERBOSE
         std::cout<<"Starting from: "<<lattice.nodes<<std::endl;
-#endif
         solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
-#ifdef _VERBOSE
         std::cout<<"Solution:      ";
-#endif
         std::cout<<lattice.nodes<<std::endl;
+        return lattice.nodes;
     }
+#else
+    std::bitset<N> run(std::bitset<N>* mask){
+        this->mask = mask;
+        lattice.nodes &= *mask;
+        solver.run<LatticeType<N,IsingModel<N>>>(lattice,sizeof(lattice));
+        return lattice.nodes;
+    }
+#endif
 
     static void generate_state(std::bitset<N>& state,
                                std::mt19937& engine,

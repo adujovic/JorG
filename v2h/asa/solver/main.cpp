@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <array>
+#include <unordered_set>
 #include <numeric>
 #include <random>
 #include <regex>
@@ -16,13 +17,14 @@
 #include "../arithmeticvector.h"
 
 int main(int argc, char** argv){
-    if(argc < 5){
+    if(argc < 6){
         std::cerr<<"No files given!"<<std::endl;
         std::cerr<<"One should provide:"<<std::endl;
         std::cerr<<"    (  i) basis"<<std::endl;
         std::cerr<<"    ( ii) supercell"<<std::endl;
         std::cerr<<"    (iii) flippable"<<std::endl;
         std::cerr<<"    ( iv) reference (i.e. 48)"<<std::endl;
+        std::cerr<<"    (  v) number of unique flips (i.e. 2)"<<std::endl;
         exit(-1);
     }
 
@@ -41,6 +43,7 @@ int main(int argc, char** argv){
      * supercell                 in argv[2]
      * unique flippable spins    in argv[3]
      * new reference point       in argv[4]
+     * number of unique flips    in argv[5]
      */ 
     std::array<typename ising::IsingModel<SITESNUMBER>::VectorType,3> basis;
     std::ifstream directions(argv[1]);
@@ -94,6 +97,8 @@ int main(int argc, char** argv){
 
     size_t reference = std::stoi(argv[4]);
 
+    size_t unique_flips = std::stoi(argv[5]);
+
     std::cout<<"########################################"<<std::endl;
     std::cout<<"##                                    ##"<<std::endl;
     std::cout<<"##                                    ##"<<std::endl;
@@ -133,12 +138,21 @@ int main(int argc, char** argv){
 
     mask.reset(reference);
 
-    for(auto n = 0.5; n<128; n*=2){
+#ifdef _VEBOSE    
+            std::cout<<"               ";
+            for(int i=1; i<(SITESNUMBER-reference); ++i) std::cout<<" ";
+            std::cout<<"| reference"<<std::endl;
+            std::cout<<"Mask:          "<<mask<<std::endl;
+#endif
+
+    std::unordered_set<std::bitset<SITESNUMBER>> solutions;
+    size_t iteration = 0U;
+    for(auto n = 2.0; n<512.0; n*=2){
         model.reset();
         d.clear();
         for (const auto& atom1 : flippable) {
             for (const auto& atom2 : supercell) {
-                if(std::get<2>(atom2) > 0.0 && std::get<0>(atom1) != std::get<0>(atom2)) 
+                if(std::fabs(std::get<2>(atom2)) > 1e-9 && std::get<0>(atom1) != std::get<0>(atom2)) 
                     d.push_back(std::make_tuple(std::get<0>(atom1),
                                                 std::get<0>(atom2),
                                                 -exp(-n*decayCoeff*ising::IsingModel<SITESNUMBER>::VectorType::norm(
@@ -147,20 +161,60 @@ int main(int argc, char** argv){
         }
         model.add_interaction(d);
         
-        for(unsigned m = 0; m<5; ++m){
+        for(unsigned m = 0; m<flippable.size(); ++m){
             model.randomize_state();
-#ifdef _VEBOSE    
-            std::cout<<"               ";
-            for(int i=1; i<(SITESNUMBER-reference); ++i) std::cout<<" ";
-            std::cout<<"| reference"<<std::endl;
-            std::cout<<"Mask:          "<<mask<<std::endl;
-#endif
-            std::cout<<n*decayCoeff<<"  \t("<<m<<")\t";
-            model.run(&mask);
+
+            auto x = model.run(&mask);
+	    if(x.count() == 0) continue;
+
+            std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
+	    for (unsigned i=0; i<reference; ++i){
+		if(mask[i])  std::cout<<"\033[32m"<<x[i]<<"\033[39m";
+		else         std::cout<<x[i];
+	    }
+            std::cout<<"\033[1m"<<x[reference]<<"\033[0m";
+	    for (unsigned i=reference+1; i<SITESNUMBER; ++i){
+		if(mask[i])  std::cout<<"\033[91m"<<x[i]<<"\033[39m";
+		else         std::cout<<x[i];
+	    }
+	    std::cout<<std::endl;
+	    solutions.insert(x);
+            ++iteration;
+	    if(solutions.size() >= unique_flips) break;
         }
+    if(solutions.size() >= unique_flips) break;
     }
+
+    std::ofstream ostrm("best.flips", std::ios::out);
+    for(const auto& x : solutions)
+        ostrm<<x<<std::endl;
 
     return 0;
 }
+
+// BF    = '\033[1m'
+// IT    = '\033[3m'
+// UN    = '\033[4m'
+// BLINK = '\033[5m'
+// END   = '\033[0m'
+// INV   = '\033[7m'
+// HID   = '\033[8m'
+// DEFAULT       = "\033[39m"
+// BLACK         = "\033[30m"
+// DARKRED       = "\033[31m"
+// DARKGREEN     = "\033[32m"
+// DARKYELLOW    = "\033[33m"
+// DARKBLUE      = "\033[34m"
+// DARKMAGENTA   = "\033[35m"
+// DARKCYAN      = "\033[36m"
+// GRAY          = "\033[37m"
+// DARKGRAY      = "\033[90m"
+// RED           = "\033[91m"
+// GREEN         = "\033[92m"
+// YELLOW        = "\033[93m"
+// BLUE          = "\033[94m"
+// MAGENTA       = "\033[95m"
+// CYAN          = "\033[96m"
+// WHITE         = "\033[97m"
 
 

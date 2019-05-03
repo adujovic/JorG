@@ -21,7 +21,6 @@ def main(**args):
     pass
 
 if __name__ == '__main__':
-    
     currentOptions = options(*argv)
     POSCARfile     = currentOptions('input')
     INCARfile      = currentOptions('incar')
@@ -237,34 +236,32 @@ if __name__ == '__main__':
                                 wyckoffDict=wyckoffDict,
                                 logAccuracy=logAccuracy)
  
-    size = len(flipper['distance'])
-    print(cutOff,flipper['distance'])
     from itertools import product
     from JorG.configurations import *
     allOptions = []
     configurations = product([1,-1],repeat=len(allFlippable))
     numberOfConfigurations = int(2**len(allFlippable))
     print("Checking total number of configurations:",numberOfConfigurations)
-    print(allFlippable)
 
-    with open("asa/solver/input.dat","w+") as isingFile:
+    randomInteger = np.random.randint(10000000,99999999)
+
+    with open(".input%d.dat"%randomInteger,"w+") as isingFile:
         for i in allFlippable:
             isingFile.write("%d %.8f %.8f %.8f %.2f\n"%(
             i,*crystal[i][1],crystal[i][2]))
 
-    with open("asa/solver/supercell.dat","w+") as supercellFile:
+    with open(".supercell%d.dat"%randomInteger,"w+") as supercellFile:
         for i,atom in enumerate(crystal):
             supercellFile.write("%d %.8f %.8f %.8f %.2f\n"%(
             i,*atom[1],atom[2]))
 
-
-    with open("asa/solver/directions.dat","w+") as dirFile:
+    with open(".directions%d.dat"%randomInteger,"w+") as dirFile:
         for d in extraDirections:
             dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
 
-    with open("asa/solver/reference.dat","w+") as refFile:
-        refFile.write("%.8f %.8f %.8f\n"%tuple(crystal[newReference][1]))
-
+    system('pwd; cd asa/solver; pwd; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../; pwd'%len(crystal))
+    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
+    system('rm .*%d.dat'%randomInteger)
     exit()
     
     with Pool(processes=4) as pool:
