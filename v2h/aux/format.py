@@ -51,7 +51,7 @@ def print_case(caseID, atom, atomID,
 
 import numpy as np
 def print_crystal(directions, cell,
-                  linewidth=44,atomNames=None,
+                  linewidth=88,atomNames=None,
                   labelStyle=color.BF,
                   elementStyle=color.BF+color.YELLOW,
                   numberStyle=color.IT
@@ -129,7 +129,7 @@ def print_crystal(directions, cell,
 
 
 
-def print_moments(moments,cell=None,atomNames=None,linewidth=44,
+def print_moments(moments,cell=None,atomNames=None,linewidth=88,
                   colors=[color.DARKYELLOW,
                           color.DARKGREEN,
                           color.DARKBLUE,
@@ -143,6 +143,8 @@ def print_moments(moments,cell=None,atomNames=None,linewidth=44,
     stream.write("|"+"Magnetic moments read:".center(linewidth)+"|"+'\n')
     stream.write('| ')
     sumOfChars = 1
+    if len(moments) < len(cell):
+        raise IndexError("INCAR has less MAGMOM elements than POSCAR has atoms!")
     for i,moment in enumerate(moments):
         elementStr = ''
         numberStr  = ''
@@ -164,7 +166,10 @@ def print_moments(moments,cell=None,atomNames=None,linewidth=44,
     stream.write("+"+linewidth*'-'+"+"+'\n')
 
 
-def print_label(text,linewidth=44,labelStyle=color.BF+color.YELLOW,stream=stdout):
+def print_label(text,linewidth=88,labelStyle=color.BF+color.YELLOW,
+                stream=stdout,atoms=None,
+                elementStyle=color.BF+color.DARKYELLOW,
+                vectorStyle=color.END):
     if len(text) > linewidth - 2:
         label = text[:linewidth-5]+"..."
     else:
@@ -172,4 +177,30 @@ def print_label(text,linewidth=44,labelStyle=color.BF+color.YELLOW,stream=stdout
     label = labelStyle+label+color.END
     stream.write("+"+linewidth*'-'+"+"+'\n')
     stream.write("| "+label+" |"+'\n')
+
+    vectorOffset = len(elementStyle+color.END+vectorStyle+color.END)
+    if atoms is not None:
+        try:
+            if(len(atoms[0])) > 1:
+                for atom in atoms:
+                    output  = elementStyle + str(atom[0]) + color.END
+                    output += ' [ ' + vectorStyle
+                    output += '{:= 10.5f} {:= 10.5f} {:= 10.5f}'.format(*atom[1],)
+                    output += color.END + ' ] '
+                    if len(output) > linewidth - 2 + vectorOffset:
+                        output = output[:linewidth-5 + vectorOffset]+"..."+color.END
+                    else:
+                        output = output.center(linewidth-2 + vectorOffset)
+                    stream.write("| "+output+" |"+'\n')
+        except TypeError:
+            output  = elementStyle + str(atoms[0]) + color.END
+            output += ' [ ' + vectorStyle
+            output += '{:= 9.5f} {:= 10.5f} {:= 10.5f}'.format(*atoms[1],)
+            output += color.END + ' ] '
+            if len(output) > linewidth - 2 + vectorOffset:
+                output = output[:linewidth-5 + vectorOffset]+"..."+color.END
+            else:
+                output = output.center(linewidth-2 + vectorOffset)
+            stream.write("| "+output+" |"+'\n')
     stream.write("+"+linewidth*'-'+"+"+'\n')
+

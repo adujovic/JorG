@@ -172,7 +172,11 @@ int main(int argc, char** argv){
             }
         }
         model.add_interaction(d);
-        std::cout<<'['<<lowerlimit<<","<<upperlimit<<']'<<std::endl;
+
+#ifdef _VERBOSE    
+        std::cout<<"Limits are set to be: ["<<lowerlimit<<","<<upperlimit<<']'<<std::endl;
+#endif
+
         for(unsigned m = 0; m<flippable.size(); ++m){
             model.randomize_state();
 

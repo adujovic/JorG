@@ -78,9 +78,6 @@ if __name__ == '__main__':
       print("Error: can not find any atoms (%s) in input file!"%re.sub('\$','',atomTypeMask))
       exit(-7)
     
-    print("The reference was chosen to be atom No. %d:"%(reference+1))
-    print_atom(referenceAtom)
-
 
     """ Checking the symmetry 
                     of the input """
@@ -94,14 +91,11 @@ if __name__ == '__main__':
         refinedCell      = (spglib.refine_cell(cellSymmetry,
                                                symprec=1e-1))
         symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
-        write_report(["""Analysis of symmetry in:\n
-            (1) the crude input cell""",
-           "(2) the standarized cell",
-           "(3) the refined primitive cell"],
+        write_report(["(1) the crude input cell",
+                      "(2) the standarized cell",
+                      "(3) the refined primitive cell"],
                 [symmetryCrude,symmetryStandard,symmetryRefined],
                 cell, atomDict=atomNames)
-        niggli = spglib.niggli_reduce(cellSymmetry)
-        print(niggli)
         exit(0)
     else:
         write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
@@ -127,6 +121,8 @@ if __name__ == '__main__':
 
 
     """
+
+    print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=referenceAtom)
 
     print_label("INPUT")
     print_crystal(directions,cell,atomNames=atomNames)
@@ -191,7 +187,7 @@ if __name__ == '__main__':
                 copiesInEachDirection,
                 readData)
 
-    print_label("OUTPUT")
+    print_label("OUTPUT: %dx%dx%d"%(1+copiesInEachDirection[0],1+copiesInEachDirection[1],1+copiesInEachDirection[2]))
     print_crystal(extraDirections,crystal)
 
     
@@ -209,8 +205,9 @@ if __name__ == '__main__':
     
     caseID = 1
     selected = [newReference]
-    print("Reference atom in the new system is No. %d:"%newReference)
-    print_atom(crystal[newReference],vector=color.DARKCYAN)
+
+    print_label("Reference atom in the new system is No. %d:"%(newReference+1),atoms=[crystal[newReference]],vectorStyle=color.DARKCYAN)
+
     for (i,atom,distance,wyck) in flipper:
         if caseID <= nearestNeighbor:
             print_case(caseID,atom,i+1,wyck,distance)
@@ -241,7 +238,9 @@ if __name__ == '__main__':
     allOptions = []
     configurations = product([1,-1],repeat=len(allFlippable))
     numberOfConfigurations = int(2**len(allFlippable))
-    print("Checking total number of configurations:",numberOfConfigurations)
+
+    print("")
+    print_label("Checking total number of configurations: %d"%numberOfConfigurations,labelStyle=color.BF+color.DARKRED)
 
     randomInteger = np.random.randint(10000000,99999999)
 
@@ -259,13 +258,20 @@ if __name__ == '__main__':
         for d in extraDirections:
             dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
 
-    print("\n")
+    print("")
     system('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal))
     system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
     system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
     system('rm .*%d.dat'%randomInteger)
+    system('cd asa/solver; make clean; cd ../../')
 
     flippingConfigurations = np.loadtxt('best.flips',bool)
+    try:
+        np.shape(flippingConfigurations)[1]
+    except IndexError:
+        flippingConfigurations=[flippingConfigurations]
+
+
     save_INCAR(outDirName,incarData,crystal,flippingConfigurations)
     exit()
     

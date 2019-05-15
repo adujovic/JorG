@@ -24,40 +24,57 @@ from .periodic import periodicTableElement
 from .format import *
 from sys import stdout
 import numpy as np
-def write_report(comments,data,crystal,fileName=None, atomDict=None):
+def write_report(comments,data,crystal,fileName=None, atomDict=None, linewidth=88):
     if fileName is None:
         raport = stdout
     else:
         raport = open(fileName,"w+")
    
-    print_crystal(data[0]['std_lattice'],crystal,stream=stdout,atomNames=atomDict)
+    offset=len(color.BF+color.YELLOW+color.INV+color.END)
+    raport.write(linewidth*"*"+"\n")
+    raport.write(3*"*"+(color.BF+color.YELLOW+color.INV+"Symmetry analysis"+color.END).center(linewidth-6+offset)+3*"*"+"\n")
+    raport.write(linewidth*"*"+"\n")
 
     for i,(comment,record) in enumerate(zip(comments,data)):
         uniqueWyckoffs = set(record['wyckoffs'])
         wyckoffCount =  dict.fromkeys(uniqueWyckoffs,0)
-        raport.write("*****************************************\n")
-        raport.write(comment)
-        raport.write("\n*****************************************\n\n")
+        raport.write(color.INV+3*"*"+(comment).center(linewidth-6)+3*"*"+color.END+"\n")
+        raport.write(linewidth*"*"+"\n")
         
-        raport.write("Spacegroup is:\
-                        \n   %s (%d)\n\n" % (record['international'],
-                                             record['number']))
-        raport.write("  Mapping to equivalent atoms with the Wyckoff positions:\n")
+        raport.write(3*"*"+("Spacegroup: "+color.BF+color.DARKMAGENTA
+                          +"%s "%(record['international'])
+                          +color.DARKYELLOW+"(%d) "%(record['number'])
+                          +color.END).center(linewidth-6+len(color.BF+color.DARKMAGENTA+color.DARKYELLOW+color.END))
+                          +3*"*"+'\n')
+        raport.write(3*"*"+("Mapping to equivalent atoms with the Wyckoff positions:".center(linewidth-6)+3*"*"+'\n'))
+
+        offset=len(color.BF+color.DARKYELLOW+color.GRAY+color.DARKGRAY+color.GRAY+color.END+color.DARKBLUE+color.END) 
         if atomDict is None:
             for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
-                raport.write("%s:\t%d\t->\t%d\tw: %s\n" % (atom[0],i + 1, x + 1,wyck))
+                raport.write(3*"*"+(color.BF+color.DARKYELLOW+"%s: "%(atom[0])
+                                   +color.GRAY+" %d "%(i+1)+color.DARKGRAY+" -> "
+                                   +color.GRAY+" %d "%(x+1)+color.END+" W: "
+                                   +color.DARKBLUE+"%s"%(wyck)+color.END).center(linewidth-6+offset)+3*"*"+"\n")
                 wyckoffCount[wyck] += 1 
         else: 
             for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
-                raport.write("%s:\t%d\t->\t%d\tw: %s\n" % (atomDict[atom[0]],i + 1, x + 1,wyck))
+                raport.write(3*"*"+(color.BF+color.DARKYELLOW+"%s: "%(atomDict[atom[0]])
+                                   +color.GRAY+" %d "%(i+1)+color.DARKGRAY+" -> "
+                                   +color.GRAY+" %d "%(x+1)+color.END+" W: "
+                                   +color.DARKBLUE+"%s"%(wyck)+color.END).center(linewidth-6+offset)+3*"*"+"\n")
                 wyckoffCount[wyck] += 1 
 
-        raport.write("\n*****************************************\n")
+        raport.write(linewidth*"*"+"\n")
+
+        part=len(color.BF+color.DARKRED+color.END+color.BF+color.DARKGREEN+color.END)
+        offset=0
         output = ""
         for wyck in uniqueWyckoffs:
-            output += "  #%s = %d"%(wyck,wyckoffCount[wyck])
-        raport.write(output)
-        raport.write("\n*****************************************\n\v")
+            output += color.BF+color.DARKRED+" #%s "%(wyck)+color.END+" = "+color.BF+color.DARKGREEN+" %d "%(wyckoffCount[wyck])+color.END
+            offset+=part
+        raport.write(3*"*"+(output.center(linewidth-6+offset)+3*"*"+"\n"))
+
+        raport.write(linewidth*"*"+"\n")
     if raport is not stdout:
         raport.close()
     

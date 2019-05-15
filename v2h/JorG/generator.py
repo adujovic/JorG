@@ -32,7 +32,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
         height = np.dot(dDirs[i],normal)
         relative = np.dot(dDirs[i]-referenceAtom[1],normal)
         if cutOff > relative:
-            multipliers.append(1 + int((cutOff-relative)/height)) # calculating multipliers
+            multipliers.append(int((cutOff-relative)/height)) # calculating multipliers
         else:
             multipliers.append(0)
     
