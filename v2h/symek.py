@@ -217,11 +217,11 @@ if __name__ == '__main__':
             selected.append(i)
             caseID += 1
                 
-    if nearestNeighbor < len(flipper) :
-        save_INCAR(outDirName,incarData,crystal,flipper[:nearestNeighbor])    
-    else:
-        save_INCAR(outDirName,incarData,crystal,flipper)    
-
+#    if nearestNeighbor < len(flipper) :
+#        save_INCAR(outDirName,incarData,crystal,flipper[:nearestNeighbor])    
+#    else:
+#        save_INCAR(outDirName,incarData,crystal,flipper)    
+#
     crystal8 = apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff,
                                 reference=newReference)
@@ -259,19 +259,24 @@ if __name__ == '__main__':
         for d in extraDirections:
             dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
 
-    system('pwd; cd asa/solver; pwd; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../; pwd'%len(crystal))
+    print("\n")
+    system('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal))
+    system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
     system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
     system('rm .*%d.dat'%randomInteger)
+
+    flippingConfigurations = np.loadtxt('best.flips',bool)
+    save_INCAR(outDirName,incarData,crystal,flippingConfigurations)
     exit()
     
-    with Pool(processes=4) as pool:
-        output = [pool.apply_async(
-                   get_configuration_penalty, (configuration, flipper,
-                                               crystal, crystal8,
-                                               allFlippable, newReference))
-              for configuration in configurations ]
-    for entry in output:
-        try:
-            print(entry.get(timeout=1))
-        except TimeoutError:
-            print("We lacked patience and got a multiprocessing.TimeoutError")
+#    with Pool(processes=4) as pool:
+#        output = [pool.apply_async(
+#                   get_configuration_penalty, (configuration, flipper,
+#                                               crystal, crystal8,
+#                                               allFlippable, newReference))
+#              for configuration in configurations ]
+#    for entry in output:
+#        try:
+#            print(entry.get(timeout=1))
+#        except TimeoutError:
+#            print("We lacked patience and got a multiprocessing.TimeoutError")

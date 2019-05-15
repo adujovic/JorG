@@ -138,12 +138,24 @@ int main(int argc, char** argv){
 
     mask.reset(reference);
 
-#ifdef _VEBOSE    
+#ifdef _VERBOSE    
             std::cout<<"               ";
             for(int i=1; i<(SITESNUMBER-reference); ++i) std::cout<<" ";
             std::cout<<"| reference"<<std::endl;
             std::cout<<"Mask:          "<<mask<<std::endl;
 #endif
+
+#ifdef _LOWERLIMIT
+    size_t lowerlimit = _LOWERLIMIT;
+#else
+    size_t lowerlimit = 0.25*mask.count(); // doesn't allow less than 25% flipps
+#endif
+#ifdef _UPPERLIMIT
+    size_t upperlimit = _UPPERLIMIT;
+#else
+    size_t upperlimit = 0.75*mask.count(); // doesn't allow more than 75% flipps
+#endif
+
 
     std::unordered_set<std::bitset<SITESNUMBER>> solutions;
     size_t iteration = 0U;
@@ -160,12 +172,13 @@ int main(int argc, char** argv){
             }
         }
         model.add_interaction(d);
-        
+        std::cout<<'['<<lowerlimit<<","<<upperlimit<<']'<<std::endl;
         for(unsigned m = 0; m<flippable.size(); ++m){
             model.randomize_state();
 
             auto x = model.run(&mask);
-	    if(x.count() == 0) continue;
+	    if(x.count() < lowerlimit) continue;
+	    if(x.count() > upperlimit) continue;
 
             std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
 	    for (unsigned i=0; i<reference; ++i){
@@ -186,8 +199,12 @@ int main(int argc, char** argv){
     }
 
     std::ofstream ostrm("best.flips", std::ios::out);
-    for(const auto& x : solutions)
-        ostrm<<x<<std::endl;
+    for(const auto& x : solutions){
+        for(unsigned b=0U; b<SITESNUMBER; ++b){
+          ostrm<<x[b]<<" ";
+        }
+        ostrm<<std::endl;
+    }
 
     return 0;
 }

@@ -4,7 +4,7 @@ from os import system
 from aux.periodic import periodicTableNumber
 
 
-def load_POSCAR(inputName):
+def load_POSCAR(inputName,direct=False):
     """
         Reading POSCAR file. Extensive testing required.
                                                         """
@@ -103,11 +103,17 @@ def load_POSCAR(inputName):
                     coords = np.fromstring(found.group(0),sep=" ")
                     if ISDIRECT:
                         cellSymmetry[1].append(tuple(coords))
-                        for coord,vector in zip(coords,directions):
-                            atom[1] += coord*vector 
+                        if direct:
+                            atom[1] = coords
+                        else:
+                            for coord,vector in zip(coords,directions):
+                                atom[1] += coord*vector 
                     else:
                         cellSymmetry[1].append(tuple(np.dot(coords,invDirections)))
-                        atom[1] = coords
+                        if direct:
+                            atom[1] = np.dot(coords,invDirections)
+                        else:
+                            atom[1] = coords
                     cell.append(atom)    
                     cellSymmetry[2].append(atomType[0])
                 found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([a-zA-Z]+)",line)
@@ -191,7 +197,38 @@ def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
 #
 #
 #
+def save_vanilla_POSCAR(fileName,data):
+    """
+        Saving data to POSCAR file
+{'comment': 'Re/117 - (A3) - HCP [A2] A3 (117) (htqc', 'directions': [array([ 1.38476066, -2.39847581, -0.        ]), array([1.38476066, 2.39847581, 0.        ]), array([0.        , 0.        , 4.47184109])], 'cell': [[0, array([0., 0., 0.])], [0, array([ 1.38476066, -0.79949194,  2.23592055])]], 'cellSymmetry': ([(1.3847606573816698, -2.398475814907534, -0.0), (1.3847606573816698, 2.398475814907534, 0.0), (0.0, 0.0, 4.471841090100609)], [(0.0, -0.0, -0.0), (0.6666666666666714, 0.3333333333333428, 0.5)], [75, 75]), 'cellVolume': 29.704785298855388, 'cellCenter': array([1.38476066, 0.        , 2.23592055]), 'cellAtoms': array([2]), 'atomNames': ['Re']}
+                                    """
+    with open(fileName,"w+") as vaspFile:
+        vaspFile.write(data['comment'])
+        vaspFile.write("\n1.0\n")
+        for d in data['directions']:
+            for field in d:
+                vaspFile.write("  %.10f"%(field))
+            vaspFile.write("\n")
+        for atomName in data['atomNames']:
+            vaspFile.write("%s "%atomName)
+        vaspFile.write("\n")
+        for atomNumber in data['cellAtoms']:
+            vaspFile.write("%d "%atomNumber)
+        vaspFile.write("\nDirect\n")
+        for atom in data['cell']:
+            for vasp in atom[1]:
+                vaspFile.write(" %.10f "%vasp)
+            try:
+                vaspFile.write(" %s\n"%data['atomNames'][atom[0]])
+            except TypeError:    
+                vaspFile.write(" %s\n"%atom[0])
+        vaspFile.write("\n")
 
+#
+#
+#
+#
+#
 def save_POSCAR(fileName,crystal,multiplyers,data):
     """
         Saving data to POSCAR file
@@ -200,12 +237,12 @@ def save_POSCAR(fileName,crystal,multiplyers,data):
         vaspFile.write(data['comment'])
         vaspFile.write("\n1.0\n")
         for m,d in zip(multiplyers,data['directions']):
-            for field in d: 
+            for field in d:
                 vaspFile.write("  %.10f"%((m+1)*field))
             vaspFile.write("\n")
         for atomName in data['atomNames']:
             vaspFile.write("%s "%atomName)
-        vaspFile.write("\n")    
+        vaspFile.write("\n")
         for atomNumber in data['cellAtoms']:
             vaspFile.write("%d "%(np.prod(np.array(multiplyers)+1)*atomNumber))
         vaspFile.write("\nCarthesian\n")
@@ -216,7 +253,6 @@ def save_POSCAR(fileName,crystal,multiplyers,data):
                         vaspFile.write(" %.10f "%vasp)
                     vaspFile.write(" %s\n"%atom[0])
         vaspFile.write("\n")
-
 #
 #
 #
@@ -242,8 +278,8 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
         with open(fileName+"/flip"+str(i)+"/INCAR","w+") as vaspFile:
             vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
             vaspFile.write("MAGMOM = ")
-            for i,atom in enumerate(crystal):
-                if i == flip[0]:
+            for bit,atom in zip(flip,crystal):
+                if bit:
                     vaspFile.write("%f "%-atom[2])
                 else:
                     vaspFile.write("%f "%atom[2])
