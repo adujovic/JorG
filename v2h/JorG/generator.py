@@ -189,7 +189,7 @@ from aux.periodic import elementMagneticMoment
 def generate_from_NN(cell,
         referenceAtom,directions,nearestNeighbor,atomNames,
         Wyckoffs='abcdefghijklmnopqrstuvwxyz',
-        atomTypeMask=maskFull, moments=None):
+        atomTypeMask=maskFull, moments=None, extraMultiplier=np.zeros(3,dtype=int)):
 
     try:
         if len(moments) != len(cell):
@@ -228,6 +228,7 @@ def generate_from_NN(cell,
         multipliers = get_number_of_pictures(directions,
                                              cutOff,
                                              referenceAtom)
+        multipliers += extraMultiplier
         extraDirections = [(mul+1)*d 
                            for mul,d in
                            zip(multipliers,

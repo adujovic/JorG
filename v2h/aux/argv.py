@@ -5,7 +5,7 @@ import re
 import aux.periodic as periodic
 
 class options:
-    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "incar", "output", "mask", "symmetry", "refined", "redundant"]
+    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "incar", "output", "mask", "symmetry", "refined", "redundant", "extra-dimentions"]
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Find minimal number of unique spin-flips')
         typeOfRange = self.parser.add_mutually_exclusive_group()
@@ -33,6 +33,8 @@ class options:
                                  help='output directory')
         self.parser.add_argument('--elements','-E', 
                                  help='string of all elements taken into account (eg. \'CuO\')')
+        self.parser.add_argument('--extra-dimentions','-X', default=None, action='store',dest='extra-dimentions', 
+                                 help='string \"X Y Z\" of extra cell copies in each directions (eg. \"0 0 1\")')
         self.parser.add_argument('--group',choices=range(1,19), type=int, nargs='+',
                                  help='group number (eg. 1 <=> \'HLiNaKRbCsFr\')')
         self.parser.add_argument('--period',choices=periodic.periodNames, nargs='+',

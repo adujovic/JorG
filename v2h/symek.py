@@ -32,6 +32,7 @@ if __name__ == '__main__':
     USEREFINED     = currentOptions('refined')
     wyckoffs       = currentOptions('Wyckoffs')
     outDirName     = currentOptions('output')
+    extraDimentions= currentOptions('extra-dimentions')
    
     if outDirName == None:
       # if output directory is not given:  
@@ -134,6 +135,18 @@ if __name__ == '__main__':
 
 
     """
+    if extraDimentions is not None:
+        for separator in [' ', ',', ';', '.', '/']:
+            extraMultiplier = np.fromstring(extraDimentions, dtype=int, sep=separator)
+            if len(extraMultiplier) >= 3:
+                extraMultiplier = extraMultiplier[:3]
+                break
+        if len(extraMultiplier) != 3:
+            print("Error with the extraDimentions given. Omitting this functionality!")
+            extraMultiplier = np.zeros(3,dtype=int)
+    else:
+        extraMultiplier = np.zeros(3,dtype=int)
+
     if nearestNeighbor is None:
         nearestNeighbor = 2
 
@@ -152,16 +165,18 @@ if __name__ == '__main__':
                                          atomNames,
                                          wyckoffs,
                                          atomTypeMask,
-                                         moments=oldMoments)
+                                         moments=oldMoments,
+                                         extraMultiplier=extraMultiplier)
         extraDirections = [(mul+1)*d 
                            for mul,d in
                            zip(copiesInEachDirection,
                                directions)]
     else:
         copiesInEachDirection = get_number_of_pictures(directions,cutOff,referenceAtom)
-        extraDirections = [(mul+1)*d 
-                           for mul,d in
+        extraDirections = [(mul+extra+1)*d 
+                           for mul,extra,d in
                            zip(copiesInEachDirection,
+                               extraMultiplier,
                                directions)]
         crystal, newReference =\
                 generate_crystal(copiesInEachDirection,
@@ -184,10 +199,10 @@ if __name__ == '__main__':
                  outDirName+"/output_report.txt");
     save_POSCAR(outDirName+"/POSCAR",
                 crystal,
-                copiesInEachDirection,
+                copiesInEachDirection+extraMultiplier,
                 readData)
-
-    print_label("OUTPUT: %dx%dx%d"%(1+copiesInEachDirection[0],1+copiesInEachDirection[1],1+copiesInEachDirection[2]),labelStyle=color.BF)
+    realCopies = copiesInEachDirection+1
+    print_label("OUTPUT: %dx%dx%d"%(*realCopies,),labelStyle=color.BF)
     print_crystal(extraDirections,crystal)
 
     
@@ -311,9 +326,11 @@ if __name__ == '__main__':
         systemOfEquations      = np.delete(systemOfEquations,      tuple(remover), axis=0)
     
     if not currentOptions('redundant'): # If the System of Equations is required to be consistent
-        resultantSystem   = np.array([systemOfEquations[0]])
-        gram_schmidt      = np.array([systemOfEquations[0]])
-        systemOfEquations = np.delete(systemOfEquations, (0), axis=0)
+        resultantSystem        = np.array([systemOfEquations[0]])
+        gram_schmidt           = np.array([systemOfEquations[0]])
+        systemOfEquations      = np.delete(systemOfEquations, (0), axis=0)
+        resultantFlippings     = np.array([flippingConfigurations[0]])
+        flippingConfigurations = np.delete(flippingConfigurations, (0), axis=0)
         while len(resultantSystem) < nearestNeighbor:
             if len(systemOfEquations) == 0:
                 print("ERROR! Not enough equations! Please rerun.")
@@ -322,10 +339,13 @@ if __name__ == '__main__':
             for vector in gram_schmidt:
                 tmpVector -= np.inner(tmpVector,vector)*vector/np.inner(vector,vector)
             if np.linalg.norm(tmpVector) > 1e-5:
-                gram_schmidt    = np.vstack((gram_schmidt,tmpVector))
-                resultantSystem = np.vstack((resultantSystem,systemOfEquations[0]))
-                systemOfEquations = np.delete(systemOfEquations, (0), axis=0)
-        systemOfEquations = resultantSystem
+                gram_schmidt           = np.vstack((gram_schmidt,tmpVector))
+                resultantSystem        = np.vstack((resultantSystem,systemOfEquations[0]))
+                systemOfEquations      = np.delete(systemOfEquations, (0), axis=0)
+                resultantFlippings     = np.vstack((resultantFlippings,flippingConfigurations[0]))
+                flippingConfigurations = np.delete(flippingConfigurations, (0), axis=0)
+        systemOfEquations      = resultantSystem
+        flippingConfigurations = resultantFlippings
     
     print_label("System of equations:",labelStyle=color.BF)
     for eq in systemOfEquations:
