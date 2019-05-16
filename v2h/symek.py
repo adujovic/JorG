@@ -214,11 +214,6 @@ if __name__ == '__main__':
             selected.append(i)
             caseID += 1
                 
-#    if nearestNeighbor < len(flipper) :
-#        save_INCAR(outDirName,incarData,crystal,flipper[:nearestNeighbor])    
-#    else:
-#        save_INCAR(outDirName,incarData,crystal,flipper)    
-#
     crystal8 = apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff,
                                 reference=newReference)
@@ -233,10 +228,10 @@ if __name__ == '__main__':
                                 wyckoffDict=wyckoffDict,
                                 logAccuracy=logAccuracy)
  
-    from itertools import product
-    from JorG.configurations import *
-    allOptions = []
-    configurations = product([1,-1],repeat=len(allFlippable))
+#    from itertools import product
+#    from JorG.configurations import *
+#    allOptions = []
+#    configurations = product([1,-1],repeat=len(allFlippable))
     numberOfConfigurations = int(2**len(allFlippable))
 
     print("")
@@ -261,7 +256,7 @@ if __name__ == '__main__':
     print("")
     system('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal))
     system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
-    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
+    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,2*nearestNeighbor))
     system('rm .*%d.dat'%randomInteger)
     system('cd asa/solver; make clean; cd ../../')
 
@@ -271,6 +266,48 @@ if __name__ == '__main__':
     except IndexError:
         flippingConfigurations=[flippingConfigurations]
 
+    systemOfEquations = np.zeros((2*len(flipper),len(flipper)))
+    for i,config in enumerate(flippingConfigurations):
+        for atomI,isFlippedI in zip(crystal,config):
+            if atomI[2] != 0.0:
+                for atomJ,isFlippedJ in zip(crystal8,config):
+                    if atomJ[2] != 0.0:
+                        distance = np.linalg.norm(atomI[1]-atomJ[1])
+                        if np.abs(distance) < 1e-2:
+                            continue
+                        for j,uniqueFlip in enumerate(flipper):
+                            if np.abs(distance-uniqueFlip[2]) < 1e-2:
+                                systemOfEquations[i][j] -= (1.-2.*isFlippedI)*atomI[2]*(1.-2.*isFlippedJ)*atomJ[2]
+                                break
+
+
+    # Based on https://stackoverflow.com/questions/28816627/how-to-find-linearly-independent-rows-from-a-matrix
+    # We remove lineary dependent rows
+    remover=[]
+    for i in range(systemOfEquations.shape[1]): 
+        if i in remover:
+            continue
+        for j in range(systemOfEquations.shape[1]):
+            if j in remover:
+                continue
+            inner_product = np.inner(
+                systemOfEquations[i],
+                systemOfEquations[j]
+            )
+            norm_i = np.linalg.norm(systemOfEquations[i])
+            norm_j = np.linalg.norm(systemOfEquations[j])
+    
+            if np.abs(inner_product - norm_j * norm_i) < 1E-5:
+                remover.append(j)
+    
+    if len(remover):
+        for i in np.sort(remover)[::-1]:
+            systemOfEquations = np.delete(systemOfEquations, (i), axis=0)
+
+    print_label("System of equations:")
+    for eq in systemOfEquations:
+        print_vector(eq)
+    np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)    
 
     save_INCAR(outDirName,incarData,crystal,flippingConfigurations)
     exit()

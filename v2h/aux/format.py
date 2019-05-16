@@ -29,6 +29,13 @@ class color:
     WHITE         = "\033[97m"
 
 from sys import stdout
+def print_vector(vector,linewidth=88,end='\n',vectorStyle=color.DARKCYAN,stream=stdout):
+    output  = ' [ ' + vectorStyle
+    for x in vector:
+        output += ' {:=10.5f}'.format(x)
+    output += color.END + ' ] '
+    stream.write("|"+output.center(linewidth+len(vectorStyle+color.END))+"|"+end)
+
 def print_atom(atom,end='\n',vector=color.END,elementStyle=color.BF+color.YELLOW,stream=stdout):
     output  = elementStyle + str(atom[0]) + color.END
     output += ' [ ' + vector
