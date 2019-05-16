@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -A OPEN-15-43
+#PBS -q qprod
+#PBS -l select=2:ncpus=24:mpiprocs=24:ompthreads=1
+#PBS -l walltime=1:00:00
+#PBS -N flip0CsNiF
+#PBS -j oe
+#PBS -S /bin/bash
+
+ml purge
+ml VASP/5.4.4-intel-2017c-mkl=cluster
+
+prodort OMP_NUM_THREADS=1
+prodort I_MPI_COMPATIBILITY=4
+cd $PBS_O_WORKDIR
+
+time mpirun vasp_std > out
+

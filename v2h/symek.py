@@ -220,6 +220,7 @@ if __name__ == '__main__':
     save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
     save_xyz   (outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
     system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
+    system ("cp ../pickUP/pickUP.py %s/pickUP.py"%outDirName)
 
     from JorG.equivalent import find_all_flips
     allFlippable = find_all_flips(crystal[newReference],crystal,
@@ -303,6 +304,7 @@ if __name__ == '__main__':
     if len(remover):
         for i in np.sort(remover)[::-1]:
             systemOfEquations = np.delete(systemOfEquations, (i), axis=0)
+            flippingConfigurations = np.delete(flippingConfigurations, (i), axis=0)
 
     print_label("System of equations:")
     for eq in systemOfEquations:
