@@ -122,9 +122,9 @@ if __name__ == '__main__':
 
     """
 
-    print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=referenceAtom)
+    print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=referenceAtom,labelStyle=color.BF)
 
-    print_label("INPUT")
+    print_label("INPUT",labelStyle=color.BF)
     print_crystal(directions,cell,atomNames=atomNames)
     print_moments(oldMoments,cell=cell,atomNames=atomNames)
 
@@ -187,7 +187,7 @@ if __name__ == '__main__':
                 copiesInEachDirection,
                 readData)
 
-    print_label("OUTPUT: %dx%dx%d"%(1+copiesInEachDirection[0],1+copiesInEachDirection[1],1+copiesInEachDirection[2]))
+    print_label("OUTPUT: %dx%dx%d"%(1+copiesInEachDirection[0],1+copiesInEachDirection[1],1+copiesInEachDirection[2]),labelStyle=color.BF)
     print_crystal(extraDirections,crystal)
 
     
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     caseID = 1
     selected = [newReference]
 
-    print_label("Reference atom in the new system is No. %d:"%(newReference+1),atoms=[crystal[newReference]],vectorStyle=color.DARKCYAN)
+    print_label("Reference atom in the new system is No. %d:"%(newReference+1),atoms=[crystal[newReference]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
 
     for (i,atom,distance,wyck) in flipper:
         if caseID <= nearestNeighbor:
@@ -237,6 +237,7 @@ if __name__ == '__main__':
 
     print("")
     print_label("Checking total number of configurations: %d"%numberOfConfigurations,labelStyle=color.BF+color.DARKRED)
+    print_label("Preparing solver...",labelStyle=color.BF+color.BLUE)
 
     randomInteger = np.random.randint(10000000,99999999)
 
@@ -256,8 +257,8 @@ if __name__ == '__main__':
 
     print("")
     system('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal))
-    system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,nearestNeighbor))
-    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,2*nearestNeighbor))
+    system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor))
+    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor))
     system('rm .*%d.dat'%randomInteger)
     system('cd asa/solver; make clean; cd ../../')
 
@@ -267,12 +268,13 @@ if __name__ == '__main__':
     except IndexError:
         flippingConfigurations=[flippingConfigurations]
 
-    systemOfEquations = np.zeros((2*len(flipper),len(flipper)))
+    systemOfEquations = np.zeros((4*len(flipper),len(flipper)))
     for i,config in enumerate(flippingConfigurations):
         for atomI,isFlippedI in zip(crystal,config):
-            if atomI[2] != 0.0:
-                for atomJ,isFlippedJ in zip(crystal8,config):
-                    if atomJ[2] != 0.0:
+            if atomI[2] != 0.0 and atomI[0] in atomTypeMask:
+                for atomJ in crystal8:
+                    isFlippedJ = config[atomJ[3]]
+                    if atomJ[2] != 0.0 and atomJ[0] in atomTypeMask:
                         distance = np.linalg.norm(atomI[1]-atomJ[1])
                         if np.abs(distance) < 1e-2:
                             continue
@@ -281,15 +283,18 @@ if __name__ == '__main__':
                                 systemOfEquations[i][j] -= (1.-2.*isFlippedI)*atomI[2]*(1.-2.*isFlippedJ)*atomJ[2]
                                 break
 
+    # removing 0 = 0 equations !
+    tautologies = np.argwhere(np.apply_along_axis(np.linalg.norm,1,systemOfEquations)<1e-5)[:,0]
+    systemOfEquations = np.delete(systemOfEquations,tuple(tautologies),axis=0)
 
     # Based on https://stackoverflow.com/questions/28816627/how-to-find-linearly-independent-rows-from-a-matrix
     # We remove lineary dependent rows
     remover=[]
-    for i in range(systemOfEquations.shape[1]): 
+    for i in range(systemOfEquations.shape[0]): 
         if i in remover:
             continue
-        for j in range(systemOfEquations.shape[1]):
-            if j in remover:
+        for j in range(systemOfEquations.shape[0]):
+            if j in remover or i == j:
                 continue
             inner_product = np.inner(
                 systemOfEquations[i],
@@ -302,26 +307,38 @@ if __name__ == '__main__':
                 remover.append(j)
     
     if len(remover):
-        for i in np.sort(remover)[::-1]:
-            systemOfEquations = np.delete(systemOfEquations, (i), axis=0)
-            flippingConfigurations = np.delete(flippingConfigurations, (i), axis=0)
-
-    print_label("System of equations:")
+        flippingConfigurations = np.delete(flippingConfigurations, tuple(remover), axis=0)
+        systemOfEquations      = np.delete(systemOfEquations,      tuple(remover), axis=0)
+    
+    if not currentOptions('redundant'): # If the System of Equations is required to be consistent
+        resultantSystem   = np.array([systemOfEquations[0]])
+        gram_schmidt      = np.array([systemOfEquations[0]])
+        systemOfEquations = np.delete(systemOfEquations, (0), axis=0)
+        while len(resultantSystem) < nearestNeighbor:
+            if len(systemOfEquations) == 0:
+                print("ERROR! Not enough equations! Please rerun.")
+                exit(-3)
+            tmpVector = np.copy(systemOfEquations[0])
+            for vector in gram_schmidt:
+                tmpVector -= np.inner(tmpVector,vector)*vector/np.inner(vector,vector)
+            if np.linalg.norm(tmpVector) > 1e-5:
+                gram_schmidt    = np.vstack((gram_schmidt,tmpVector))
+                resultantSystem = np.vstack((resultantSystem,systemOfEquations[0]))
+                systemOfEquations = np.delete(systemOfEquations, (0), axis=0)
+        systemOfEquations = resultantSystem
+    
+    print_label("System of equations:",labelStyle=color.BF)
     for eq in systemOfEquations:
         print_vector(eq)
-    np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)    
+    if currentOptions('redundant'):
+        print_label("Redundant system of equations.",labelStyle=color.BF)
+        print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=color.BF)
+        print_label("It may be better. But it may also mess everything.",labelStyle=color.BF)
+    else:
+        print_label("det SoE = %.1e"%np.linalg.det(resultantSystem),labelStyle=color.BF)
 
+
+    np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)    
     save_INCAR(outDirName,incarData,crystal,flippingConfigurations)
     exit()
     
-#    with Pool(processes=4) as pool:
-#        output = [pool.apply_async(
-#                   get_configuration_penalty, (configuration, flipper,
-#                                               crystal, crystal8,
-#                                               allFlippable, newReference))
-#              for configuration in configurations ]
-#    for entry in output:
-#        try:
-#            print(entry.get(timeout=1))
-#        except TimeoutError:
-#            print("We lacked patience and got a multiprocessing.TimeoutError")

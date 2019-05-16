@@ -36,7 +36,7 @@ def print_vector(vector,linewidth=88,end='\n',vectorStyle=color.DARKCYAN,stream=
     output += color.END + ' ] '
     stream.write("|"+output.center(linewidth+len(vectorStyle+color.END))+"|"+end)
 
-def print_atom(atom,end='\n',vector=color.END,elementStyle=color.BF+color.YELLOW,stream=stdout):
+def print_atom(atom,end='\n',vector=color.END,elementStyle=color.BF+color.DARKYELLOW,stream=stdout):
     output  = elementStyle + str(atom[0]) + color.END
     output += ' [ ' + vector
     output += '{:= 10.5f} {:= 10.5f} {:= 10.5f}'.format(*atom[1],)
@@ -60,7 +60,7 @@ import numpy as np
 def print_crystal(directions, cell,
                   linewidth=88,atomNames=None,
                   labelStyle=color.BF,
-                  elementStyle=color.BF+color.YELLOW,
+                  elementStyle=color.BF+color.DARKYELLOW,
                   numberStyle=color.IT
                   ,stream=stdout):
     if linewidth < 44:
@@ -137,7 +137,7 @@ def print_crystal(directions, cell,
 
 
 def print_moments(moments,cell=None,atomNames=None,linewidth=88,
-                  colors=[color.DARKYELLOW,
+                  colors=[color.DARKGREEN,
                           color.DARKGREEN,
                           color.DARKBLUE,
                           color.DARKMAGENTA],
@@ -173,9 +173,9 @@ def print_moments(moments,cell=None,atomNames=None,linewidth=88,
     stream.write("+"+linewidth*'-'+"+"+'\n')
 
 
-def print_label(text,linewidth=88,labelStyle=color.BF+color.YELLOW,
+def print_label(text,linewidth=88,labelStyle=color.BF+color.DARKYELLOW,
                 stream=stdout,atoms=None,
-                elementStyle=color.BF+color.DARKYELLOW,
+                elementStyle=color.BF+color.DARKGREEN,
                 vectorStyle=color.END):
     if len(text) > linewidth - 2:
         label = text[:linewidth-5]+"..."

@@ -99,14 +99,27 @@ int main(int argc, char** argv){
 
     size_t unique_flips = std::stoi(argv[5]);
 
-    std::cout<<"########################################"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##         Ising Model Solver         ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"########################################"<<std::endl;
-
+    std::cout<<"******************************************************************************************"<<std::endl;
+    std::cout<<"******************************************************************************************"<<std::endl;
+    std::cout<<"***                                                                                    ***"<<std::endl; 
+    std::cout<<"***       ▄▄▄▄         ▀▀█             ▀                                               ***"<<std::endl; 
+    std::cout<<"***      █▀   ▀  ▄▄▄     █    ▄   ▄  ▄▄▄    ▄ ▄▄    ▄▄▄▄                               ***"<<std::endl; 
+    std::cout<<"***      ▀█▄▄▄  █▀ ▀█    █    ▀▄ ▄▀    █    █▀  █  █▀ ▀█                               ***"<<std::endl; 
+    std::cout<<"***          ▀█ █   █    █     █▄█     █    █   █  █   █                               ***"<<std::endl; 
+    std::cout<<"***      ▀▄▄▄█▀ ▀█▄█▀    ▀▄▄    █    ▄▄█▄▄  █   █  ▀█▄▀█                               ***"<<std::endl; 
+    std::cout<<"***                                                 ▄  █                               ***"<<std::endl; 
+    std::cout<<"***                                                  ▀▀                                ***"<<std::endl; 
+    std::cout<<"***                                                                                    ***"<<std::endl; 
+    std::cout<<"***      ▄▄▄▄▄           ▀                       ▄    ▄            █         ▀▀█       ***"<<std::endl; 
+    std::cout<<"***        █     ▄▄▄   ▄▄▄    ▄ ▄▄    ▄▄▄▄       ██  ██  ▄▄▄    ▄▄▄█   ▄▄▄     █       ***"<<std::endl; 
+    std::cout<<"***        █    █   ▀    █    █▀  █  █▀ ▀█       █ ██ █ █▀ ▀█  █▀ ▀█  █▀  █    █       ***"<<std::endl; 
+    std::cout<<"***        █     ▀▀▀▄    █    █   █  █   █       █ ▀▀ █ █   █  █   █  █▀▀▀▀    █       ***"<<std::endl; 
+    std::cout<<"***      ▄▄█▄▄  ▀▄▄▄▀  ▄▄█▄▄  █   █  ▀█▄▀█       █    █ ▀█▄█▀  ▀█▄██  ▀█▄▄▀    ▀▄▄     ***"<<std::endl; 
+    std::cout<<"***                                   ▄  █                                             ***"<<std::endl; 
+    std::cout<<"***                                    ▀▀                                              ***"<<std::endl; 
+    std::cout<<"******************************************************************************************"<<std::endl;
+    std::cout<<"******************************************************************************************"<<std::endl;
+                                      
     std::random_device randomDevice{};
     std::mt19937 generator{randomDevice()};
     std::normal_distribution<> gauss{0.0,1.0};
@@ -159,7 +172,7 @@ int main(int argc, char** argv){
 
     std::unordered_set<std::bitset<SITESNUMBER>> solutions;
     size_t iteration = 0U;
-    for(auto n = 2.0; n<512.0; n*=2){
+    for(auto n = 4.0; n<1024.0; n*=2){
         model.reset();
         d.clear();
         for (const auto& atom1 : flippable) {
@@ -177,7 +190,7 @@ int main(int argc, char** argv){
         std::cout<<"Limits are set to be: ["<<lowerlimit<<","<<upperlimit<<']'<<std::endl;
 #endif
 
-        for(unsigned m = 0; m<flippable.size(); ++m){
+        for(unsigned m = 0; m<unique_flips; ++m){
             model.randomize_state();
 
             auto x = model.run(&mask);

@@ -5,7 +5,7 @@ import re
 import aux.periodic as periodic
 
 class options:
-    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "incar", "output", "mask", "symmetry", "refined"]
+    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "incar", "output", "mask", "symmetry", "refined", "redundant"]
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Find minimal number of unique spin-flips')
         typeOfRange = self.parser.add_mutually_exclusive_group()
@@ -17,8 +17,10 @@ class options:
                                  help='narrows down the atomic selection to the atoms in positions defined by string (eg. \'abc\')')
         self.parser.add_argument('--symmetry', '-S', action='store_true',
                                  help='symmetry run only (default False)')
+        self.parser.add_argument('--redundant', action='store_true',
+                                 help='creates a redundant system of equations for final calculation of the Heisenberg exchange interaction (default False)')
         self.parser.add_argument('--spin-orbit', '--SOC', action='store_true',
-                                 help='is sping-orbit coupling enabled (default False)')
+                                 help='(work-in-progress) is sping-orbit coupling enabled (default False)')
         self.parser.add_argument('--refined',  action='store_true',
                                  help='should use refined supercell (default False)')
         self.parser.add_argument('--reference', '-r', default=-1, type=int,

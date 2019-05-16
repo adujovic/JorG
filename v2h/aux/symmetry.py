@@ -30,9 +30,9 @@ def write_report(comments,data,crystal,fileName=None, atomDict=None, linewidth=8
     else:
         raport = open(fileName,"w+")
    
-    offset=len(color.BF+color.YELLOW+color.INV+color.END)
+    offset=len(color.BF+color.DARKYELLOW+color.INV+color.END)
     raport.write(linewidth*"*"+"\n")
-    raport.write(3*"*"+(color.BF+color.YELLOW+color.INV+"Symmetry analysis"+color.END).center(linewidth-6+offset)+3*"*"+"\n")
+    raport.write(3*"*"+(color.BF+color.DARKYELLOW+color.INV+"Symmetry analysis"+color.END).center(linewidth-6+offset)+3*"*"+"\n")
     raport.write(linewidth*"*"+"\n")
 
     for i,(comment,record) in enumerate(zip(comments,data)):
@@ -43,22 +43,22 @@ def write_report(comments,data,crystal,fileName=None, atomDict=None, linewidth=8
         
         raport.write(3*"*"+("Spacegroup: "+color.BF+color.DARKMAGENTA
                           +"%s "%(record['international'])
-                          +color.DARKYELLOW+"(%d) "%(record['number'])
-                          +color.END).center(linewidth-6+len(color.BF+color.DARKMAGENTA+color.DARKYELLOW+color.END))
+                          +color.DARKGREEN+"(%d) "%(record['number'])
+                          +color.END).center(linewidth-6+len(color.BF+color.DARKMAGENTA+color.DARKGREEN+color.END))
                           +3*"*"+'\n')
         raport.write(3*"*"+("Mapping to equivalent atoms with the Wyckoff positions:".center(linewidth-6)+3*"*"+'\n'))
 
-        offset=len(color.BF+color.DARKYELLOW+color.GRAY+color.DARKGRAY+color.GRAY+color.END+color.DARKBLUE+color.END) 
+        offset=len(color.BF+color.DARKGREEN+color.GRAY+color.DARKGRAY+color.GRAY+color.END+color.DARKBLUE+color.END) 
         if atomDict is None:
             for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
-                raport.write(3*"*"+(color.BF+color.DARKYELLOW+"%s: "%(atom[0])
+                raport.write(3*"*"+(color.BF+color.DARKGREEN+"%s: "%(atom[0])
                                    +color.GRAY+" %d "%(i+1)+color.DARKGRAY+" -> "
                                    +color.GRAY+" %d "%(x+1)+color.END+" W: "
                                    +color.DARKBLUE+"%s"%(wyck)+color.END).center(linewidth-6+offset)+3*"*"+"\n")
                 wyckoffCount[wyck] += 1 
         else: 
             for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
-                raport.write(3*"*"+(color.BF+color.DARKYELLOW+"%s: "%(atomDict[atom[0]])
+                raport.write(3*"*"+(color.BF+color.DARKGREEN+"%s: "%(atomDict[atom[0]])
                                    +color.GRAY+" %d "%(i+1)+color.DARKGRAY+" -> "
                                    +color.GRAY+" %d "%(x+1)+color.END+" W: "
                                    +color.DARKBLUE+"%s"%(wyck)+color.END).center(linewidth-6+offset)+3*"*"+"\n")
