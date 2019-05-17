@@ -6,3 +6,4 @@ NELMIN =             20    #  minimum of two steps
 NELMDL =             -5    #  no update of charge for 3 steps 
 EDIFF  =             10E-6 # accuracy for electronic minimization
 MAGMOM = 1.0 2.0 -2.0 -1.0 -1.0 2.0 2.0 2.0 2.0 2.0 2.0 0.6
+LWAVE  = .FALSE.
