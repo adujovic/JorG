@@ -35,5 +35,10 @@ if __name__ == '__main__':
 
 
     print("Js:")
-    print(sol)
+    try:
+        for s in sol:
+            print(s,end=' ')
+        print("")
+    except:
+        print(sol)
 
