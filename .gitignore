@@ -113,7 +113,10 @@ venv.bak/
 dmypy.json
 
 # output
-output
+output/
 out
 *.dat
 *.xyz
+_POSCARs/
+_INCARs/
+best.flips

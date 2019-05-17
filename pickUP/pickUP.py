@@ -13,10 +13,10 @@ if __name__ == '__main__':
     system("touch .energies.dat")
     try:
         for i in range(len(systemOfEquations)):
-            system("grep 'free  energy' flip%d/OUTCAR | awk '{print $5}'>>.energies.dat"%i)
+            system("grep 'energy  without entropy=' flip%d/OUTCAR | awk '{print $7}'>>.energies.dat"%i)
     except TypeError:
-        system("grep 'free  energy' flip0/OUTCAR | awk '{print $5}'>>.energies.dat")
-    system("grep 'free  energy' noFlip/OUTCAR | awk '{print $5}'>>.energies.dat")
+        system("grep 'energy  without entropy=' flip0/OUTCAR | awk '{print $7}'>>.energies.dat")
+    system("grep 'energy  without entropy=' noFlip/OUTCAR | awk '{print $7}'>>.energies.dat")
     energies = np.loadtxt(".energies.dat")
 #    print(energies)
     system("rm -f .energies.dat")
@@ -36,3 +36,4 @@ if __name__ == '__main__':
 
     print("Js:")
     print(sol)
+
