@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+from sys import path
+path.insert(0,r'../')
+
 import numpy as np
 from aux.periodic import maskFull
 

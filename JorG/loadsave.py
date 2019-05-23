@@ -1,7 +1,11 @@
+# -*- coding: utf-8 -*-
+from sys import path
+path.insert(0,r'../')
+
 import re
 import numpy as np
 from os import system
-from aux.periodic import periodicTableNumber
+from aux.periodic import *
 
 
 def load_POSCAR(inputName,direct=False):
@@ -141,7 +145,7 @@ def load_POSCAR(inputName,direct=False):
 #
 
 import numpy as np
-def load_INCAR(cell,INCARname="INCAR"):
+def load_INCAR(cell,INCARname="INCAR",atomNames=periodicTableElement):
     oldMoments = []
     with open(INCARname,"r") as INCARfile:
         incarData = INCARfile.read()

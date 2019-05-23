@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+from sys import path
+path.insert(0,r'../')
+
 import numpy as np
 def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
     """

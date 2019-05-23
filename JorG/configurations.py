@@ -1,5 +1,7 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+from sys import path
+path.insert(0,r'../')
+
 import numpy as np
 from itertools import product
 

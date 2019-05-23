@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import Voronoi, ConvexHull 
 from mpl_toolkits.mplot3d import proj3d
-from loadsave import load_POSCAR
-from sys import argv
+from sys import argv,path
+path.insert(0,'../')
+from JorG.loadsave import load_POSCAR
 
 if len(argv) == 1:
     POSCARname = "POSCAR"

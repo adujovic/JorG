@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import argv
-from sys import maxsize
+from sys import argv,maxsize,path
+path.insert(0,r'../')
 from os import system,environ
 import re
 from datetime import datetime
@@ -55,7 +55,7 @@ if __name__ == '__main__':
           TODO: bulletproofing """
 #    
     readData             = load_POSCAR(POSCARfile)
-    oldMoments,incarData = load_INCAR (readData['cell'],INCARfile)
+    oldMoments,incarData = load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
 #    
     cell          = readData['cell']
     cellSymmetry  = readData['cellSymmetry']
