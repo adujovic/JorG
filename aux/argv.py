@@ -5,7 +5,10 @@ import re
 import aux.periodic as periodic
 
 class options:
-    keys = ["cutOff", "neighbor", "Wyckoffs", "reference", "input", "incar", "output", "mask", "symmetry", "refined", "redundant", "extra-dimentions"]
+    keys = ["cutOff", "neighbor", "Wyckoffs", "reference",
+            "input", "incar", "output", "mask", "symmetry",
+            "refined", "redundant", "extra-dimentions"]
+
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Find minimal number of unique spin-flips')
         typeOfRange = self.parser.add_mutually_exclusive_group()
@@ -51,39 +54,43 @@ class options:
             output += "\n".join(wrap("%s =  %s"%("{:<10}".format(str(opt)),str(self.opt.__dict__[opt])),70,subsequent_indent=14*" "))
             output += "\n"
         return output[:-1]
-    
+ 
+    def generate_part(self,MendeleyevSet,extraChar=''):
+        output=''
+        for el in self.opt.__dict__[MendeleyevSet]:
+            output += eval("periodic.mask%s%s"%(extraChar,str(el)))
+        return output
+
+    def generate_separate(self):
+        output=''
+        for element in re.findall('[A-Z][a-z]?',self.opt.__dict__['elements']):
+            output += '$'+element
+        output += '$'    
+        return output           
+
+    def generate_mask(self):
+        output = ''
+        if self.opt.__dict__['period'] is not None:
+            output += self.generate_part('period')
+        if self.opt.__dict__['group'] is not None:
+            output += self.generate_part('group','G')
+        if self.opt.__dict__['block'] is not None:
+            output += self.generate_part('block')
+        if self.opt.__dict__['elements'] is not None: 
+            output += self.generate_separate()
+        if output == '':
+            return periodic.maskFull
+        return output
+   
     def __call__(self, key):
         if key not in self.keys:
-            print("No key %s defined, please try: "%key)
-            output = ""
-            for k in self.keys:
-                output += k + ", "
-            print(output[:-2])
+            print("No key \"%s\" defined, please try: "%key)
+            print("%s"%(str(self.keys)))
             exit(-300)
         elif key == 'reference':
             return self.opt.__dict__['reference'] - 1; 
         elif key in self.opt.__dict__:
             return self.opt.__dict__[key]
         elif key == 'mask':
-            output = ''
-            if self.opt.__dict__['period'] is not None:
-                for el in self.opt.__dict__['period']:
-                    output += eval("periodic.mask"+el)
-            if self.opt.__dict__['group'] is not None:
-                for el in self.opt.__dict__['group']:
-                    output += eval("periodic.maskG%d"%el)
-            if self.opt.__dict__['block'] is not None:
-                for el in self.opt.__dict__['block']:
-                    output += eval("periodic.mask"+el)
-            if self.opt.__dict__['elements'] is not None: 
-                for element in re.findall('[A-Z][a-z]?',self.opt.__dict__['elements']):
-                    if "$"+element+"$" in periodic.maskFull:
-                        output += '$'+element
-                    else:
-                        print("Unknown element provided ("+element+")")
-                output += '$'    
-            if output == '':
-                return periodic.maskFull
-            return output
-           
-                
+            return self.generate_mask()
+
