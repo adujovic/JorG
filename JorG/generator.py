@@ -149,116 +149,109 @@ def wyckoffs_dict(originalCell,      cell,
 
 import numpy as np
 import spglib
-from aux.periodic import periodicTableNumber
-from aux.periodic import periodicTableElement
-from aux.periodic import maskFull 
-def check_in_cell(cell,referenceAtom,directions,nearestNeighbor,atomNames,
-                  originalCell,originalDirections, cutOff,
-                  Wyckoffs='abcdefghijklmnopqrstuvwxyz',
-                  originalSymmetry=None,atomTypeMask=maskFull):
+from aux.periodic import *
+from itertools import product
 
-    (wyckoffPositionDict,
-     symmetry,
-     originalSymmetry) = wyckoffs_dict(originalCell,
-                                       cell,
-                                       originalDirections,
-                                       directions,
-                                       atomNames)
-    distances = []
+class generate_from_NN:
+    Wyckoffs='abcdefghijklmnopqrstuvwxyz'
+    originalSymmetry=None
+    atomTypeMask=maskFull
+    moments = None 
+    extraMultiplier=np.zeros(3,dtype=int)
+    wyckoffPositionDict=None
+    distances=[]
+    cutOff=-1
 
-    for i,(atom,wyck) in enumerate(
-                         zip(cell,
-                             symmetry['wyckoffs'])):
-        wyckoff = wyckoffPositionDict[wyck]
-        atomType = atomNames[atom[0]]
-        distance = np.around(np.linalg.norm(atom[1] - referenceAtom[1]),2)
-        if ( distance     not in distances    and
-             wyckoff          in Wyckoffs     and
-             "$"+atomType+"$" in atomTypeMask    ):
-            distances.append(distance)
+    def __init__(self,cell,
+                 referenceAtom,
+                 directions,
+                 nearestNeighbor,
+                 atomNames):
+        self.cell            = cell
+        self.referenceAtom   = referenceAtom
+        self.directions      = directions
+        self.nearestNeighbor = nearestNeighbor
+        self.atomNames       = atomNames
 
-    distances.sort()
-    if np.ma.masked_greater(distances,cutOff).count() <= nearestNeighbor:
-        return False,distances,None
-    return True,distances,wyckoffPositionDict
+   
+        try:
+            originalSymmetryCell = (directions,
+                                [np.dot(row[1],np.linalg.inv(directions)) for row in cell],
+                                [periodicTableNumber[atomNames[row[0]]] for row in cell])
+            originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
+        except:
+            pass
+   
+        diagonal = np.sqrt(np.sum([np.dot(d-referenceAtom[1],d-referenceAtom[1]) for d in directions]))
 
-#
-#
-#
-#
-#
-#
-#
-from aux.periodic import elementMagneticMoment
-def generate_from_NN(cell,
-        referenceAtom,directions,nearestNeighbor,atomNames,
-        Wyckoffs='abcdefghijklmnopqrstuvwxyz',
-        atomTypeMask=maskFull, moments=None, extraMultiplier=np.zeros(3,dtype=int)):
+    def check_in_cell(cell,referenceAtom,directions)
+        (self.wyckoffPositionDict,
+         symmetry,
+         self.originalSymmetry) = wyckoffs_dict(self.cell,
+                                           cell,
+                                           self.directions,
+                                           directions,
+                                           self.atomNames)
+        self.distances = []
+    
+        for i,(atom,wyck) in enumerate(
+                             zip(cell,
+                                 symmetry['wyckoffs'])):
+            wyckoff = self.wyckoffPositionDict[wyck]
+            atomType = self.atomNames[atom[0]]
+            distance = np.around(np.linalg.norm(atom[1] - referenceAtom[1]),2)
+            if ( distance     not in self.distances    and
+                 wyckoff          in self.Wyckoffs     and
+                 "$"+atomType+"$" in self.atomTypeMask    ):
+                self.distances.append(distance)
+    
+        self.distances.sort()
+        if np.ma.masked_greater(self.distances,self.cutOff).count() <= nearestNeighbor:
+            return False
+        return True
 
-    try:
-        if len(moments) != len(cell):
-            moments = None
-    except:
-       moments = None 
-
-    try:
-        originalSymmetryCell = (directions,
-                            [np.dot(row[1],np.linalg.inv(directions)) for row in cell],
-                            [periodicTableNumber[atomNames[row[0]]] for row in cell])
-        originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
-    except:
-        pass
-
-    diagonal = np.sqrt(np.sum([np.dot(d-referenceAtom[1],d-referenceAtom[1]) for d in directions]))
-    ISFOUND,distances,wyckoffPositionDict = \
-      check_in_cell(cell,
-                    referenceAtom,
-                    directions,
-                    nearestNeighbor,
-                    atomNames,
-                    cell,
-                    directions,
-                    diagonal,
-                    Wyckoffs,
-                    originalSymmetry,
-                    atomTypeMask)
+    def __call__(self):
+    ISFOUND= check_in_cell(self.cell, self.referenceAtom, self.directions)
 
     crystal = []
-    if len(distances) > 1:
+    if len(self.distances) > 1:
         minDirection = distances[-1]
     else:
         minDirection = 0.99*np.min([np.linalg.norm(d) for d in directions])
-    for cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(nearestNeighbor+1,3),1.0)):
-        multipliers = get_number_of_pictures(directions,
+    for cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(self.nearestNeighbor+1,3),1.0)):
+        self.cutOff = cutOff
+        multipliers = get_number_of_pictures(self.directions,
                                              cutOff,
-                                             referenceAtom)
-        multipliers += extraMultiplier
+                                             self.referenceAtom)
+        multipliers += self.extraMultiplier
         extraDirections = [(mul+1)*d 
                            for mul,d in
                            zip(multipliers,
-                               directions)]
+                               self.directions)]
         crystal = []                   
         for name in atomNames:
-            for x in range(multipliers[0]+1):
-                for y in range(multipliers[1]+1):
-                    for z in range(multipliers[2]+1):
-                        if moments is None:
-                            for atom in cell:
-                                if atomNames[atom[0]] == name:
-                                    position = np.copy(atom[1])
-                                    for a,n in zip([x,y,z],directions):
-                                        position += a*n
-                                    if isinstance(atom[0],int):
-                                        crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atomNames[atom[0]]]]])    
-                                    else:
-                                        crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atom[0]]]])    
-                        else:
-                            for atom,moment in zip(cell,moments):
-                                if atomNames[atom[0]] == name:
-                                    position = np.copy(atom[1])
-                                    for a,n in zip([x,y,z],directions):
-                                        position += a*n
-                                    crystal.append([atom[0],position,moment])    
+            for ((x,y),z) in product(
+                               product(range(multipliers[0]+1),
+                                       range(multipliers[1]+1)),
+                               range(multipliers[2]+1))
+                           
+                if self.moments is None:
+                     for atom in cell:
+                         if atomNames[atom[0]] == name:
+                             position = np.copy(atom[1])
+                             for a,n in zip([x,y,z],directions):
+                                 position += a*n
+                             if isinstance(atom[0],int):
+                                 crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atomNames[atom[0]]]]])    
+                             else:
+                                 crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atom[0]]]])    
+                 else:
+                     for atom,moment in zip(cell,moments):
+                         if atomNames[atom[0]] == name:
+                             position = np.copy(atom[1])
+                             for a,n in zip([x,y,z],directions):
+                                 position += a*n
+                             crystal.append([atom[0],position,moment])    
 
         newReference = None
         newReferenceAtom = None
