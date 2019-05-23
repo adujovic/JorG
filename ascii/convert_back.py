@@ -2,33 +2,40 @@
 
 import sys
 import argparse as ap
+from itertools import product
+
 
 parser = ap.ArgumentParser(description='Convert from \"textbytes\" to ascii characters')
-parser.add_argument('--input', '-I', '-i', default=1,
+parser.add_argument('--input', '-I', '-i', default=None,
                     help='input file')
-parser.add_argument('--output', '-O', '-o', default=1,
+parser.add_argument('--output', '-O', '-o', default=None,
                     help='output file')
+parser.add_argument('--back', '-B', action='store_true',
+                    help='translation back')
 
 flags = parser.parse_args()
 
-if flags.__dict__['input'] == 1:
-    textbytes = [raw_input("Feed me input:\n\t")]
-else:
+try:
     with open(flags.__dict__['input'],"r") as inFile:
-        textbytes = inFile.readlines()
+        text = inFile.read()
+except:
+    text = raw_input("Feed me input:\n\t")
 
 output = ""
-for arg in textbytes:
-    for byte in range(0,len(arg),8):
+if flags.__dict__['back']:
+    for byte in range(0,len(text),8):
         char = 0
         for b in range(8):
-            char += int(arg[byte+b])*(2**(7-b))
+            char += int(text[byte+b])*(2**(7-b))
         output += "%c"%char
-
-if flags.__dict__['output'] == 1:
-    print('Output is:\n')
-    print(output)
 else:
+    for c in text:
+        output+="%08d"%int(str(bin(ord(c)))[2:])
+
+try:
     with open(flags.__dict__['output'],"w+") as outFile:
         outFile.write(output)
+except:
+    print('Output is:\n')
+    print(output)
 
