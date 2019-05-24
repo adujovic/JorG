@@ -15,10 +15,17 @@ from aux.argv import options
 from JorG.loadsave import * 
 from JorG.generator import * 
 from multiprocessing import Pool, TimeoutError
+import time
 
+
+class errors:
+    failed_to_generate = -301
 
 def main(**args):
     pass
+#    start = time.time()
+#    end = time.time()
+#    print(end - start)
 
 if __name__ == '__main__':
     currentOptions = options(*argv)
@@ -153,20 +160,28 @@ if __name__ == '__main__':
     if cutOff is None:
         if nearestNeighbor is None:
             nearestNeighbor = 1
-        (cutOff,
-         crystal,
-         symmetryFull, 
-         newReference, 
-         copiesInEachDirection,
-         wyckoffDict) = generate_from_NN(cell,
-                                         referenceAtom,
-                                         directions,
-                                         nearestNeighbor,
-                                         atomNames,
-                                         wyckoffs,
-                                         atomTypeMask,
-                                         moments=oldMoments,
-                                         extraMultiplier=extraMultiplier)
+
+        generator = generate_from_NN(cell,
+                                     referenceAtom,
+                                     directions,
+                                     nearestNeighbor,
+                                     atomNames)
+        generator.wyckoffs         = wyckoffs
+        generator.atomTypeMask     = atomTypeMask
+        generator.moments          = oldMoments
+        generator.extraMultiplier  = extraMultiplier
+
+        try:
+            (cutOff,
+             crystal,
+             symmetryFull, 
+             newReference, 
+             copiesInEachDirection,
+             wyckoffDict           ) = generator()
+        except:
+            print("Failed to generate crystal")
+            exit(errors.failed_to_generate)
+        
         extraDirections = [(mul+1)*d 
                            for mul,d in
                            zip(copiesInEachDirection,
