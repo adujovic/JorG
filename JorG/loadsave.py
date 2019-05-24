@@ -69,13 +69,25 @@ class POSCARloader:
         if text[5]=='':
             atomNames = [str(i) for i in range(len(cellAtoms))]
 
-        return atomNames,cellAtoms,cellSize
-
         cellInputType = text[7][0]
         if cellInputType in "Dd":
             ISDIRECT = True
         elif cellInputType in "Ss":
             ISSELECTIVE = True
+
+        atomRead = 0
+        atomType = 0
+        for i in range(8,8+cellSize):
+            if atomRead == 0:
+                print(POSCARloader.parse_atomName(text[i]))
+            print(atomType,end=" ")
+            print(POSCARloader.parse_atom(text[i]))
+            atomRead += 1
+            if atomRead == cellAtoms[atomType]:
+                atomType += 1
+                atomRead = 0
+                
+
 
     @staticmethod
     def parse_atom(text):
