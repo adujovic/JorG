@@ -245,28 +245,28 @@ class generate_from_NN:
                                zip(self.multipliers,
                                    self.directions)]
             self.crystal = []                   
-            for name in self.atomNames:
-                for (x,y,z) in product(range(self.multipliers[0]+1),
-                                       range(self.multipliers[1]+1),
-                                       range(self.multipliers[2]+1)):
-                               
-                    if self.moments is None:
-                         for atom in cell:
-                             if atomNames[atom[0]] == name:
-                                 position = np.copy(atom[1])
-                                 for a,n in zip([x,y,z],self.directions):
-                                     position += a*n
-                                 if isinstance(atom[0],int):
-                                     self.crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[self.atomNames[atom[0]]]]])    
-                                 else:
-                                     self.crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atom[0]]]])    
-                    else:
-                        for atom,moment in zip(self.cell,self.moments):
-                            if self.atomNames[atom[0]] == name:
-                                position = np.copy(atom[1])
-                                for a,n in zip([x,y,z],self.directions):
-                                    position += a*n
-                                self.crystal.append([atom[0],position,moment])    
+            for (name,x,y,z) in product(self.atomNames,
+                                   range(self.multipliers[0]+1),
+                                   range(self.multipliers[1]+1),
+                                   range(self.multipliers[2]+1)):
+                           
+                if self.moments is None:
+                     for atom in cell:
+                         if atomNames[atom[0]] == name:
+                             position = np.copy(atom[1])
+                             for a,n in zip([x,y,z],self.directions):
+                                 position += a*n
+                             if isinstance(atom[0],int):
+                                 self.crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[self.atomNames[atom[0]]]]])    
+                             else:
+                                 self.crystal.append([atom[0],position,elementMagneticMoment[periodicTableElement[atom[0]]]])    
+                else:
+                    for atom,moment in zip(self.cell,self.moments):
+                        if self.atomNames[atom[0]] == name:
+                            position = np.copy(atom[1])
+                            for a,n in zip([x,y,z],self.directions):
+                                position += a*n
+                            self.crystal.append([atom[0],position,moment])    
     
             self.newReference = None
             self.newReferenceAtom = None
