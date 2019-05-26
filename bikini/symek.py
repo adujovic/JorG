@@ -287,8 +287,8 @@ if __name__ == '__main__':
 
     print("")
     system('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal))
-    system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor))
-    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor))
+    system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8))
+    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8))
     system('rm .*%d.dat'%randomInteger)
     system('cd asa/solver; make clean; cd ../../')
 
@@ -298,19 +298,21 @@ if __name__ == '__main__':
     except IndexError:
         flippingConfigurations=[flippingConfigurations]
 
-    systemOfEquations = np.zeros((4*len(flipper),len(flipper)))
+    systemOfEquations = np.zeros((4*len(flipper)+8,len(flipper)))
     for i,config in enumerate(flippingConfigurations):
         for atomI,isFlippedI in zip(crystal,config):
             if atomI[2] != 0.0 and atomI[0] in atomTypeMask:
                 for atomJ in crystal8:
                     isFlippedJ = config[atomJ[3]]
+                    if isFlippedI == isFlippedJ:
+                        continue
                     if atomJ[2] != 0.0 and atomJ[0] in atomTypeMask:
                         distance = np.linalg.norm(atomI[1]-atomJ[1])
                         if np.abs(distance) < 1e-2:
                             continue
                         for j,uniqueFlip in enumerate(flipper):
                             if np.abs(distance-uniqueFlip[2]) < 1e-2:
-                                systemOfEquations[i][j] -= (1.-2.*isFlippedI)*atomI[2]*(1.-2.*isFlippedJ)*atomJ[2]
+                                systemOfEquations[i][j] -= atomI[2]*atomJ[2]
                                 break
 
     # removing 0 = 0 equations !
