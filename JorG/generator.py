@@ -223,24 +223,48 @@ class generate_from_NN:
             return False
         return True
 
+    def fix_moments(self):
+        if self.moments is None:
+            self.moments = []
+            for atom in self.cell:
+                self.moments.append(elementMagneticMoment[periodicTableElement[atom[0]]])
+
+    @staticmethod
+    def get_symmetry(cell,directions):
+        return (directions,
+                [np.dot(row[1],np.linalg.inv(directions))
+                    for row in cell],
+                [periodicTableNumber[row[0]]
+                    for row in cell])
+
+    @staticmethod
+    def get_extra_directions(multipliers,directions):
+        return [(mul+1)*d for mul,d in
+                     zip(multipliers,
+                         directions)]
+
+    def find_new_refernce(self):
+        self.newReference = None
+        self.newReferenceAtom = None
+        for i,atom in enumerate(self.crystal):
+            if np.linalg.norm(atom[1] - self.referenceAtom[1]) < 1e-3:
+                self.newReference = i
+                self.newReferenceAtom = atom
+
     def __call__(self):
+        self.fix_moments()
         self.ISFOUND= self.check_in_cell(self.cell, self.referenceAtom, self.directions)
         if self.ISFOUND:
-            symmetryCell = (extraDirections,
-                            [np.dot(row[1],np.linalg.inv(extraDirections))
-                                for row in self.crystal],
-                            [periodicTableNumber[row[0]]
-                                for row in self.crystal])
+            symmetryCell = generate_from_NN.get_symmetry(self.cell,self.directions)
             self.crystalSymmetry = spglib.get_symmetry_dataset(symmetryCell)
             self.cutOff = self.distances[self.nearestNeighbor]
             return (self.cutOff,
-                    self.crystal,
+                    self.cell,
                     self.crystalSymmetry,
                     self.newReference,
                     self.multipliers,
                     self.wyckoffPositionDict)
 
-    
         self.crystal = []
         if len(self.distances) > 1:
             minDirection = self.distances[-1]
@@ -249,17 +273,10 @@ class generate_from_NN:
         for cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(self.nearestNeighbor+1,3),1.0)):
             self.cutOff = cutOff
             self.multipliers = get_number_of_pictures(self.directions,
-                                                 cutOff,
+                                                 self.cutOff,
                                                  self.referenceAtom)
             self.multipliers += self.extraMultiplier
-            extraDirections = [(mul+1)*d 
-                               for mul,d in
-                               zip(self.multipliers,
-                                   self.directions)]
-            if self.moments is None:
-                self.moments = []
-                for atom in self.cell:
-                    self.moments.append(elementMagneticMoment[periodicTableElement[atom[0]]])
+            extraDirections = generate_from_NN.get_extra_directions(self.multipliers,self.directions)
 
             self.crystal = []                   
             for (name,mul,(atom,moment)) in product(
@@ -274,23 +291,15 @@ class generate_from_NN:
                     position += np.dot(mul,self.directions)
                     self.crystal.append([atom[0],position,moment])    
     
-            self.newReference = None
-            self.newReferenceAtom = None
-            for i,atom in enumerate(self.crystal):
-                if np.linalg.norm(atom[1] - self.referenceAtom[1]) < 1e-3:
-                    self.newReference = i
-                    self.newReferenceAtom = atom
     
+            self.find_new_refernce()
+
             self.ISFOUND = self.check_in_cell(
                            self.crystal,
                            self.newReferenceAtom,
                            extraDirections)
             if self.ISFOUND :
-                symmetryCell = (extraDirections,
-                                [np.dot(row[1],np.linalg.inv(extraDirections))
-                                    for row in self.crystal],
-                                [periodicTableNumber[row[0]]
-                                    for row in self.crystal])
+                symmetryCell = generate_from_NN.get_symmetry(self.crystal,extraDirections)
                 self.crystalSymmetry = spglib.get_symmetry_dataset(symmetryCell)
                 self.cutOff = self.distances[self.nearestNeighbor]
                 return (self.cutOff,
