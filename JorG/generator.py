@@ -186,9 +186,7 @@ class generate_from_NN:
                 pass
    
         try:
-            originalSymmetryCell = (directions,
-                                [np.dot(row[1],np.linalg.inv(directions)) for row in cell],
-                                [periodicTableNumber[row[0]] for row in cell])
+            originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
             originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
         except:
             print("Failed to generate symmetry!")
