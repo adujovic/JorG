@@ -4,14 +4,17 @@ path.insert(0,r'../')
 
 import re
 import numpy as np
-from os import system
+from os import makedirs,mkdir,rmdir
+import shutil
 from aux.periodic import *
 
+class error:
+    systemerror = -1
 
 def load_POSCAR(inputName,direct=False):
-    """
-        Reading POSCAR file. Extensive testing required.
-                                                        """
+#   """
+#       Reading POSCAR file. Extensive testing required.
+#                                                       """
     data = {}
 
     # Returned data:
@@ -24,10 +27,10 @@ def load_POSCAR(inputName,direct=False):
     cellAtomsCopy = np.array([],dtype=np.int) # number of atoms in cell
     atomNames     = []                        # name of atoms in cell
 
-    """ Templates:
-        according to vasp.wiki:
-          direct coords are for 6th lines starting with 'D' or 'd'
-      carthesian coords are for 6th lines starting with 'C', 'c', 'K' or 'k' """
+#   """ Templates:
+#       according to vasp.wiki:
+#         direct coords are for 6th lines starting with 'D' or 'd'
+#     carthesian coords are for 6th lines starting with 'C', 'c', 'K' or 'k' """
     directTemplate     = "Dd"
     carthTemplate      = "CcKk"
     selectiveTemplate  = "Ss"
@@ -202,10 +205,10 @@ def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
 #
 #
 def save_vanilla_POSCAR(fileName,data):
-    """
-        Saving data to POSCAR file
-{'comment': 'Re/117 - (A3) - HCP [A2] A3 (117) (htqc', 'directions': [array([ 1.38476066, -2.39847581, -0.        ]), array([1.38476066, 2.39847581, 0.        ]), array([0.        , 0.        , 4.47184109])], 'cell': [[0, array([0., 0., 0.])], [0, array([ 1.38476066, -0.79949194,  2.23592055])]], 'cellSymmetry': ([(1.3847606573816698, -2.398475814907534, -0.0), (1.3847606573816698, 2.398475814907534, 0.0), (0.0, 0.0, 4.471841090100609)], [(0.0, -0.0, -0.0), (0.6666666666666714, 0.3333333333333428, 0.5)], [75, 75]), 'cellVolume': 29.704785298855388, 'cellCenter': array([1.38476066, 0.        , 2.23592055]), 'cellAtoms': array([2]), 'atomNames': ['Re']}
-                                    """
+#    """
+#        Saving data to POSCAR file
+#{'comment': 'Re/117 - (A3) - HCP [A2] A3 (117) (htqc', 'directions': [array([ 1.38476066, -2.39847581, -0.        ]), array([1.38476066, 2.39847581, 0.        ]), array([0.        , 0.        , 4.47184109])], 'cell': [[0, array([0., 0., 0.])], [0, array([ 1.38476066, -0.79949194,  2.23592055])]], 'cellSymmetry': ([(1.3847606573816698, -2.398475814907534, -0.0), (1.3847606573816698, 2.398475814907534, 0.0), (0.0, 0.0, 4.471841090100609)], [(0.0, -0.0, -0.0), (0.6666666666666714, 0.3333333333333428, 0.5)], [75, 75]), 'cellVolume': 29.704785298855388, 'cellCenter': array([1.38476066, 0.        , 2.23592055]), 'cellAtoms': array([2]), 'atomNames': ['Re']}
+#                                    """
     with open(fileName,"w+") as vaspFile:
         vaspFile.write(data['comment'])
         vaspFile.write("\n1.0\n")
@@ -267,8 +270,17 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
     """
         Saving data to POSCAR file
                                     """
-    system("mkdir -p %s/noFlip"%fileName)
-    system("cp %s/POSCAR %s/noFlip/POSCAR"%(fileName,fileName))
+    try:
+        mkdir("%s/noFlip"%fileName)
+    except OSError:  
+        print("Creation of the directory %s/noFlip failed - does it exist?"%fileName)
+        exit(error.systemerror)
+
+    try:
+        shutil.copy2("%s/POSCAR"%fileName , "%s/noFlip/POSCAR"%fileName)
+    except OSError:  
+        print("Copying POSCAR to noFlip didn't work out!")
+        exit(error.systemerror)
 
     with open(fileName+"/noFlip/INCAR","w+") as vaspFile:
         vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
@@ -277,8 +289,16 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
             vaspFile.write("%f "%atom[2])
         vaspFile.write("\n")
     for i,flip in enumerate(flips):
-        system("mkdir -p %s/flip%d"%(fileName,i))
-        system("cp %s/POSCAR %s/flip%d/POSCAR"%(fileName,fileName,i))
+        try:
+            mkdir("%s/flip%d"%(fileName,i))
+        except OSError:  
+            print("Creation of the directory %s/flip%d failed - does it exist?"%(fileName,i))
+            exit(error.systemerror)
+        try:
+            shutil.copy2("%s/POSCAR"%fileName , "%s/flip%d/POSCAR"%(fileName,i))
+        except OSError:  
+            print("Copying POSCAR to flip%i didn't work out!"%i)
+            exit(error.systemerror)
         with open(fileName+"/flip"+str(i)+"/INCAR","w+") as vaspFile:
             vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
             vaspFile.write("MAGMOM = ")
