@@ -4,10 +4,10 @@ path.insert(0,r'../')
 
 import numpy as np
 def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
-    """
-        Finding the amount of copies
-        of the original SuperCell
-                                        """
+#    """
+#        Finding the amount of copies
+#        of the original SuperCell
+#                                        """
     multipliers = [] # returned
     dDirs = np.tile(directions,(2,1))
     #
@@ -34,7 +34,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
         normal = np.cross(dDirs[i+1],dDirs[i+2])
         normal /= np.linalg.norm(normal)
         height = np.dot(dDirs[i],normal)
-        relative = np.dot(dDirs[i]-referenceAtom[1],normal)
+        relative = np.dot(referenceAtom[1],normal)
         if cutOff > relative:
             multipliers.append(int((cutOff-relative)/height)) # calculating multipliers
         else:
@@ -51,39 +51,32 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 import numpy as np
 from aux.periodic import elementMagneticMoment,periodicTableElement
 from itertools import product
-def generate_crystal(multiplyers,cell,directions,atomNames,reference,moments=None):
-    """
-        Generator of minimal required SuperCell
-                                                """
+def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=None):
+#    """
+#        Generator of minimal required SuperCell
+#                                                """
     try:
         if len(moments) != len(cell):
             moments = None
     except:
         pass
 
+    if moments is None:
+        magneticMoments = moments
+    elif len(moments) == len(cell):
+        magneticMoments = moments
+    else:
+        magneticMoments = [periodicTableElement[atom[0]] for atom in cell]
     crystal = []
-    for name in atomNames:
-        for (x,y,z) in product(range(multipliers[0]+1),
-                               range(multipliers[1]+1),
-                               range(multipliers[2]+1)):
-            if moments is None:
-                for atom in cell:
-                    if atomNames[atom[0]] == name:
-                        position = np.copy(atom[1])
-                        for a,n in zip([x,y,z],directions):
-                            position += a*n
-
-                        flag = "%s"%atomNames[int(atom[0])]
-                        crystal.append([flag,position,elementMagneticMoment[periodicTableElement[atomNames[int(atom[0])]]]])
-            else:
-                for atom,moment in zip(cell,moments):
-                    if atomNames[atom[0]] == name:
-                        position = np.copy(atom[1])
-                        for a,n in zip([x,y,z],directions):
-                            position += a*n
-
-                        flag = "%s"%atomNames[int(atom[0])]
-                        crystal.append([flag,position,moment])
+    for (name,mul,(atom,moment)) in product(atomNames,
+                                          product(range(multipliers[0]+1),
+                                                  range(multipliers[1]+1),
+                                                  range(multipliers[2]+1)),
+                                          zip(cell,magneticMoments)):
+        if atom[0] == name:
+            position = np.copy(atom[1])
+            position += np.dot(mul,directions)
+            crystal.append([atom[0],position,moment])
 
     newReference = None
     for i,atom in enumerate(crystal):

@@ -26,11 +26,22 @@ from .periodic import periodicTableElement
 from sys import stdout
 import numpy as np
 
+def print_line(raport,line,linewidth=88):
+    raport.write(3*"*"+(line).center(linewidth-6)+3*"*"+"\n")
+
+def get_equivalent_line(i,j,atom,wyck):
+    output = color.BF+color.DARKGREEN
+    output += "%s: "%(atom[0])
+    output += color.GRAY+" %d "%(i+1)+color.DARKGRAY+" -> "
+    output += color.GRAY+" %d "%(j+1)+color.END+" W: "
+    output += color.DARKBLUE+"%s"%(wyck)+color.END
+    return output
+
 def write_single(comment, record, crystal,
                  raport, atomDict, linewidth=88):
     uniqueWyckoffs = set(record['wyckoffs'])
     wyckoffCount =  dict.fromkeys(uniqueWyckoffs,0)
-    raport.write(color.INV+3*"*"+(comment).center(linewidth-6)+3*"*"+color.END+"\n")
+    print_line(raport,comment,linewidth)
     raport.write(linewidth*"*"+"\n")
 
     offset = len(color.BF+color.DARKMAGENTA+color.DARKGREEN+color.END)
@@ -39,21 +50,13 @@ def write_single(comment, record, crystal,
                       +color.DARKGREEN+"(%d) "%(record['number'])
                       +color.END).center(linewidth-6+offset)
                       +3*"*"+'\n')
-    raport.write(3*"*"+("Mapping to equivalent atoms with the Wyckoff positions:".center(linewidth-6)+3*"*"+'\n'))
+    print_line(raport,"Mapping to equivalent atoms with the Wyckoff positions:",linewidth)
 
     offset=len(color.BF+color.DARKGREEN+color.GRAY+color.DARKGRAY+color.GRAY+color.END+color.DARKBLUE+color.END)
 
-    for i, (x,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
-        output = color.BF+color.DARKGREEN
-        try:
-            output += "%s: "%(atomDict[atom[0]])
-        except:
-            output += "%s: "%(atom[0])
-        output += color.GRAY+" %d "%(i+1)+color.DARKGRAY+" -> "
-        output += color.GRAY+" %d "%(x+1)+color.END+" W: "
-        output += color.DARKBLUE+"%s"%(wyck)+color.END
-        output = 3*"*"+(output.center(linewidth-6+offset)+3*"*"+"\n")
-        raport.write(output)
+    for i,(j,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
+        output = get_equivalent_line(i,j,atom,wyck)
+        print_line(raport,output,linewidth+offset)
         wyckoffCount[wyck] += 1
 
     raport.write(linewidth*"*"+"\n")

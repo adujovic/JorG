@@ -164,7 +164,7 @@ if __name__ == '__main__':
         extraMultiplier = np.zeros(3,dtype=int)
 
     if nearestNeighbor is None:
-        nearestNeighbor = 2
+        nearestNeighbor = -1
 
     if cutOff is None:
         if nearestNeighbor is None:
@@ -225,7 +225,7 @@ if __name__ == '__main__':
                 crystal,
                 copiesInEachDirection+extraMultiplier,
                 readData)
-    realCopies = copiesInEachDirection+1
+    realCopies = [copy+1 for copy in copiesInEachDirection]
     print_label("OUTPUT: %dx%dx%d"%(*realCopies,),labelStyle=color.BF)
     print_crystal(extraDirections,crystal)
 
@@ -252,10 +252,12 @@ if __name__ == '__main__':
     print_label("Reference atom in the new system is No. %d:"%(newReference+1),atoms=[crystal[newReference]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
 
     for (i,atom,distance,wyck) in flipper:
-        if caseID <= nearestNeighbor:
+        if caseID <= nearestNeighbor or nearestNeighbor < 0:
             print_case(caseID,atom,i+1,wyck,distance)
             selected.append(i)
             caseID += 1
+
+    nearestNeighbor = caseID-1 
 
     crystal8 = generator.apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff,
