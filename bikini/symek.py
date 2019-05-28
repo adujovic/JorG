@@ -3,7 +3,8 @@
 
 from sys import argv,maxsize,path
 path.insert(0,r'../')
-from os import system,environ
+from os import system,environ,mkdir,makedirs,rmdir
+import errno
 import re
 from datetime import datetime
 import numpy as np
@@ -19,7 +20,8 @@ import time
 
 
 class errors:
-    failed_to_generate = -301
+    failed_to_generate = -201
+    systemerror = -1
 
 def main(**args):
     pass
@@ -50,14 +52,15 @@ if __name__ == '__main__':
       outDirName = re.sub('/$','',outDirName)
 
     # cr4eating output path
-    temporaryName = ""
-    for partOfOutput in re.split('/',outDirName):
-      temporaryName += partOfOutput
-      system("mkdir -p %s"%temporaryName)
-      temporaryName += "/"
+    try:
+        makedirs("%s"%outDirName)
+    except OSError as err:  
+        if err.errno != errno.EEXIST:
+            print("Creation of the directory %s failed - does it exist?"%outDirName)
+            exit(error.systemerror)
+        else:
+            print("%s exists: Data will be overwritten!"%outDirName)
 
-    # clean output path ? SHOULD WE?
-#    system("rm -r "+temporaryName+"*")
     """ Reading POSCAR and INCAR files.
           TODO: bulletproofing """
 #    
@@ -227,12 +230,16 @@ if __name__ == '__main__':
                                                     """
     logAccuracy  = 2     #  accuracy of distance is 10^(-logAccuracy)
     
-    from JorG.equivalent import find_unique_flips
-    flipper = find_unique_flips(crystal[newReference],crystal,
-                                symmetryFull,cutOff,
-                                atomTypeMask,Wyckoffs=wyckoffs,
-                                wyckoffDict=wyckoffDict,
-                                logAccuracy=logAccuracy)
+    from JorG.equivalent import findFlips
+    flipSearch = findFlips()
+    flipSearch.symmetry     = symmetryFull
+    flipSearch.crystal      = crystal
+    flipSearch.atomTypeMask = atomTypeMask
+    flipSearch.Wyckoffs     = wyckoffs
+    flipSearch.wyckoffDict  = wyckoffDict
+    flipSearch.logAccuracy  = logAccuracy
+    flipper      = flipSearch.unique(crystal[newReference],cutOff)
+    allFlippable = flipSearch.all(crystal[newReference],cutOff)
     
     caseID = 1
     selected = [newReference]
@@ -251,19 +258,12 @@ if __name__ == '__main__':
     save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
     save_xyz   (outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
     system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
-    system ("cp ../pickUP/pickUP.py %s/pickUP.py"%outDirName)
-
-    from JorG.equivalent import find_all_flips
-    allFlippable = find_all_flips(crystal[newReference],crystal,
-                                symmetryFull,cutOff,
-                                atomTypeMask,Wyckoffs=wyckoffs,
-                                wyckoffDict=wyckoffDict,
-                                logAccuracy=logAccuracy)
+    try:
+        shutil.copy2("../pickUP/pickUP.py","%s/pickUP.py"%outDirName)
+    except OSError:  
+        print("Copying pickUP.py to %s didn't work out!"%outDirName)
+        exit(error.systemerror)
  
-#    from itertools import product
-#    from JorG.configurations import *
-#    allOptions = []
-#    configurations = product([1,-1],repeat=len(allFlippable))
     numberOfConfigurations = int(2**len(allFlippable))
 
     print("")

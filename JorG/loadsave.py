@@ -5,6 +5,7 @@ path.insert(0,r'../')
 import re
 import numpy as np
 from os import makedirs,mkdir,rmdir
+import errno
 import shutil
 from aux.periodic import *
 
@@ -272,9 +273,10 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
                                     """
     try:
         mkdir("%s/noFlip"%fileName)
-    except OSError:  
-        print("Creation of the directory %s/noFlip failed - does it exist?"%fileName)
-        exit(error.systemerror)
+    except OSError as err:  
+        if err.errno != errno.EEXIST:
+            print("Creation of the directory %s/noFlip failed - does it exist?"%fileName)
+            exit(error.systemerror)
 
     try:
         shutil.copy2("%s/POSCAR"%fileName , "%s/noFlip/POSCAR"%fileName)
@@ -291,8 +293,9 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
     for i,flip in enumerate(flips):
         try:
             mkdir("%s/flip%d"%(fileName,i))
-        except OSError:  
-            print("Creation of the directory %s/flip%d failed - does it exist?"%(fileName,i))
+        except OSError as err:  
+            if err.errno != errno.EEXIST:
+                print("Creation of the directory %s/flip%d failed - does it exist?"%(fileName,i))
             exit(error.systemerror)
         try:
             shutil.copy2("%s/POSCAR"%fileName , "%s/flip%d/POSCAR"%(fileName,i))
