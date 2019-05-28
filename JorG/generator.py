@@ -58,7 +58,7 @@ def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=Non
     try:
         if len(moments) != len(cell):
             moments = None
-    except:
+    except TypeError:
         pass
 
     if moments is None:
@@ -103,7 +103,7 @@ def wyckoffs_dict(originalCell,      cell,
                           for row in cell],
                       [periodicTableNumber[atomNames[row[0]]]
                           for row in cell])
-    except:
+    except TypeError:
         symmetryCell = (directions,
                       [np.dot(row[1],np.linalg.inv(directions))
                           for row in cell],
@@ -119,7 +119,7 @@ def wyckoffs_dict(originalCell,      cell,
                              for row in originalCell],
                          [periodicTableNumber[atomNames[row[0]]]
                              for row in originalCell])
-    except:
+    except TypeError:
         originalSymCell = (originalDirections,
                          [np.dot(row[1],np.linalg.inv(originalDirections))
                              for row in originalCell],
@@ -175,13 +175,13 @@ class generate_from_NN:
         for atom in cell:
             try:
                 atom[0] = atomNames[atom[0]]
-            except:
+            except Exception:
                 pass
 
         try:
             originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
             originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
-        except:
+        except Exception:
             print("Failed to generate symmetry!")
             pass
 

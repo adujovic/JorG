@@ -39,5 +39,5 @@ if __name__ == '__main__':
         for s in sol:
             print(s,end=' ')
         print("")
-    except:
+    except TypeError:
         print(sol)

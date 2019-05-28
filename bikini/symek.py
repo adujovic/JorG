@@ -186,7 +186,7 @@ if __name__ == '__main__':
              newReference,
              copiesInEachDirection,
              wyckoffDict           ) = generatorNN()
-        except:
+        except Exception:
             print("Failed to generate crystal")
             exit(errors.failed_to_generate)
 

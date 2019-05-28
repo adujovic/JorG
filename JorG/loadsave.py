@@ -25,7 +25,7 @@ def load_INCAR(cell,INCARname="INCAR",atomNames=periodic.periodicTableElement):
 
         if oldMomentsText is None:
             for atom in cell:
-                oldMoments.append(periodic.elementMagneticMoment[atomNames[atom[0]]])
+                oldMoments.append(periodic.elementMagneticMoment[atom[0]])
         else:
             magmomLine = oldMomentsText.group(1)
             for record in re.findall("\s*([0-9]+)\s*\*\s*([\-0-9\.]+)",magmomLine):
@@ -206,7 +206,7 @@ class POSCARloader:
                     self.rawTxt.append(clearTxt)
             except FileNotFoundError:
                 print("File \"%s\" not found!"%inputName)
-            except:
+            except Exception:
                 print("Unexcepted error!")
                 exit(error.unexcepted)
 
@@ -232,13 +232,13 @@ class POSCARloader:
     def find_directions(text):
         try:
             scale = np.float64(text[1])
-        except:
+        except TypeError:
             scale = 1.0
         directions = []
         for i in range(2,5):
             try:
                 directions.append(scale*np.fromstring(text[i],sep=" ")) # crystal directions
-            except: 
+            except ValueError: 
                 print("Can't convert crystal directions in \"%s\""%text[i])
                 exit(error.unconvertable)
             if(len(directions[-1]) != 3):

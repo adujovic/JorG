@@ -12,7 +12,7 @@ def main(**args):
 
 if __name__ == '__main__':
     totalTracker  = -(time.time())
-    cell            = [[0, np.array([0., 0., 0.])], [0, np.array([1.395805, 1.395805, 1.395805])]]
+    cell            = [['Mn', np.array([0., 0., 0.])], ['Mn', np.array([1.395805, 1.395805, 1.395805])]]
     referenceAtom   = [0, np.array([0., 0., 0.])]
     directions      = [np.array([2.79161, 0.     , 1.     ]), np.array([1.     , 2.79161, 0.     ]), np.array([0.     , 1.     , 2.79161])]
     nearestNeighbor = 3
@@ -45,7 +45,8 @@ if __name__ == '__main__':
              wyckoffDict           ) = generator()
             print("Test succeeded")
             print("\t\tCrystal size: %d atoms"%len(crystal))
-        except:
+        except Exception as e:
+            print(e)
             print("Test failed")
         tracker += time.time()
         print("\t\tRuntime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))

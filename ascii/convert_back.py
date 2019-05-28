@@ -18,7 +18,7 @@ flags = parser.parse_args()
 try:
     with open(flags.__dict__['input'],"r") as inFile:
         text = inFile.read()
-except:
+except IOError:
     text = raw_input("Feed me input:\n\t")
 
 output = ""
@@ -35,6 +35,6 @@ else:
 try:
     with open(flags.__dict__['output'],"w+") as outFile:
         outFile.write(output)
-except:
+except IOError:
     print('Output is:\n')
     print(output)

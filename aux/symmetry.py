@@ -69,7 +69,7 @@ def write_single(comment, record, crystal,
 def write_report(comments,data,crystal,fileName=None, atomDict=None, linewidth=88):
     try:
         raport = open(fileName,"w+")
-    except:
+    except IOError:
         raport = stdout
 
 
