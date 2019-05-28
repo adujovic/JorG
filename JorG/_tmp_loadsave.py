@@ -5,12 +5,13 @@ path.insert(0,r'../')
 import re
 import numpy as np
 from os import system
-from aux.periodic import *
+import aux.periodic as periodic
+import copy
 
 class error:
-    unexcepted     = -1000
-    nonconvertable = -1001
-    vaspError      = -9999
+    unexcepted     = 10
+    nonconvertable = 11
+    vaspError      = 99
 
 
 class POSCARloader:
@@ -34,6 +35,20 @@ class POSCARloader:
                 print("Unexcepted error!")
                 exit(error.unexcepted)
     
+    class fix_names(dict):
+        def __init__(self):
+            self.update(periodic.periodicTableElement)
+        def __missing__(self,key):
+            return key
+    fix_names = fix_names()
+    
+    class fix_atomic_numbers(dict):
+        def __init__(self):
+            self.update(periodic.periodicTableNumber)
+        def __missing__(self,key):
+            return key
+    fix_atomic_numbers = fix_atomic_numbers()
+
     @staticmethod
     def find_comment(text):
         return text[0]
@@ -56,41 +71,66 @@ class POSCARloader:
                 exit(error.unconvertable)
         return directions
 
-    @staticmethod
-    def find_cell(text):
-        ISDIRECT    = False
-        ISSELECTIVE = False
+    def check_type(self,character):
+        self.ISDIRECT    = False
+        self.ISSELECTIVE = False
+        if character in "DdSs":
+            self.ISDIRECT   = True
+        if character in "Ss":
+            self.ISSELECTIVE = True
 
+    def find_single_atom(self,line,atomRead,atomType):
+        if not self.ISSELECTIVE    \
+           and atomRead == 0  \
+           and self.atomNames[atomType] == atomType:
+            self.atomNames[atomType] = POSCARloader.parse_atomName(line)
+
+        atomCoordinates = POSCARloader.parse_atom(line)
+        if self.ISDIRECT:
+            self.cell.append((self.atomNames[atomType],
+                         np.dot(self.directions,atomCoordinates)))
+            self.center += np.dot(self.directions,atomCoordinates) 
+            self.cellSymmetry[1].append(tuple(atomCoordinates))
+        else:
+            self.cell.append((self.atomNames[atomType],atomCoordinates))
+            self.cellSymmetry[1].append(tuple(
+                    np.dot(np.linalg.inv(self.directions),atomCoordinates)))
+            self.center += atomCoordinates 
+
+        self.cellSymmetry[2].append(self.fix_atomic_numbers[self.atomNames[atomType]])
+
+    def find_cell(self,text):
+        self.center = np.zeros(3)
         if re.match("\d",text[5]):
             text.insert(5,'')
-        atomNames = text[5].split(" ")
+        self.atomNames = text[5].split(" ")
         cellAtoms = np.fromstring(text[6],sep=" ",dtype=np.int)
         cellSize = np.sum(cellAtoms)
         if text[5]=='':
-            atomNames = [i for i in range(len(cellAtoms))]
+            self.atomNames = [i for i in range(len(cellAtoms))]
+
+        self.directions = POSCARloader.find_directions(text)
+        self.volume     = np.linalg.det(self.directions)
+
+        self.cell = []
+        self.cellSymmetry = [[tuple(d) for d in self.directions],
+                             [],[]] # directions, direct units cell, atomic numbers
 
         cellInputType = text[7][0]
-        if cellInputType in "Dd":
-            ISDIRECT = True
-        elif cellInputType in "Ss":
-            ISSELECTIVE = True
+        self.check_type(cellInputType)
 
         atomRead = 0
         atomType = 0
         for i in range(8,8+cellSize):
-            if not ISSELECTIVE    \
-               and atomRead == 0  \
-               and atomNames[atomType] == atomType:
-                atomNames[atomType] = POSCARloader.parse_atomName(text[i])
-            print(atomNames[atomType],end=" ")
-            print(POSCARloader.parse_atom(text[i]))
+            self.find_single_atom(text[i],atomRead,atomType)
             atomRead += 1
             if atomRead == cellAtoms[atomType]:
                 atomType += 1
                 atomRead = 0
+
+        self.center /= cellSize
+        self.atomNames = [POSCARloader.fix_names[atom] for atom in self.atomNames]
                 
-
-
     @staticmethod
     def parse_atom(text):
         found = re.search("([\-\+]?\d+\.?\d*)\s([\-\+]?\d+\.?\d*)\s([\-\+]?\d+\.?\d*)",text)
@@ -118,160 +158,27 @@ class POSCARloader:
         return None
 
     def __call__(self,i=0):
-        return self.rawTxt[i]
+        try:
+            return self.data[i]
+        except IndexError:
+            print("Run parse first!")
+            
 
-    @staticmethod
-    def parse_file(text):
-        comment    = POSCARloader.find_comment(text)
-        directions = POSCARloader.find_directions(text)
-        cell       = POSCARloader.find_cell(text)
-
-        return (comment,directions,cell)
+    def parse_file(self,text):
+        self.comment = POSCARloader.find_comment(text)
+        self.find_cell(text)
 
     def parse(self):
+        self.data = []
         for text in self.rawTxt:
-            print(self.parse_file(text))
-
-        
-
-
-#    def find_cellSymmetry(self,text):
-#    def find_cellCenter(self,text):
-#    def find_cellAtomsCopy(self,text):
-#    def find_atomNames(self,text):
-
-
-
-
-
-
-###    def load_POSCAR(inputName,direct=False):
-###        """
-###            Reading POSCAR file. Extensive testing required.
-###                                                            """
-###        data = {}
-###    
-###        # Returned data:
-###        comment       = ""  # first line of POSCAR file
-###        directions    = []  # crystal directions
-###        cell          = []  # cell read from POSCAR file
-###        cellSymmetry  = ([],[],[])   # input for spglib symmetry refiner
-###        cellVolume    = 0.0          # volume of cell
-###        cellCenter    = np.zeros(3)  # center of volume
-###        cellAtomsCopy = np.array([],dtype=np.int) # number of atoms in cell
-###        atomNames     = []                        # name of atoms in cell
-###    
-###        """ Templates:
-###            according to vasp.wiki:
-###              direct coords are for 6th lines starting with 'D' or 'd'
-###          carthesian coords are for 6th lines starting with 'C', 'c', 'K' or 'k' """
-###        directTemplate     = "Dd"
-###        carthTemplate      = "CcKk"
-###        selectiveTemplate  = "Ss"
-###    
-###        # additional variables
-###        cellAtoms     = np.array([],dtype=np.int)
-###        cellSize = 1
-###        cellInputType = 'x'
-###        ISDIRECT = -1 
-###        invDirections = []  # inverted crystal directions
-###        offset = 0
-###        with open(inputName,"r+") as inFile:
-###            for i,raw in enumerate(inFile.readlines()):
-###                line = re.sub("^\s*","",raw)  # remove all blank characters from begining of the line
-###                line = re.sub("\s+"," ",line) # replace all blank characters in a row to a single space
-###                if i == 0:
-###                    comment = line[:-1]
-###                elif i == 1:
-###                    scale = np.float64(line[:-1]) # scaling factor
-###                    if(scale < 0.0):
-###                        scale = 1.0
-###                elif i in range(2,5):
-###                    try:
-###                        directions.append(scale*np.fromstring(line,sep=" ")) # crystal directions
-###                    except:
-###                        print("Error reading file %s in line %d:\nCan't convert crystal directions."%(inputName,i))
-###                        exit(-2)
-###                    if(len(directions[-1]) != 3):   
-###                        print("Error reading file %s in line %d:\nCrystal directions has %d != 3 dimensions!"%(inputName,i,len(directions[-1])))
-###                        exit(-3)
-###                    cellSymmetry[0].append(tuple(directions[-1]))
-###                    cellCenter += 0.5*directions[-1]
-###                elif i == 5:
-###                    cellVolume = np.abs(np.linalg.det(np.array(directions)))
-###                    try:
-###                        invDirections = np.linalg.inv(directions)
-###                    except:
-###                        print("Error reading file %s in line %d:\nCrystal directions are not basis in 3D!"%(inputName,i))
-###                        exit(-4)
-###                    if re.match("\D",line):
-###                        offset += 1
-###                        atomNames=line[:-1].split(" ")
-###                    else:    
-###                        cellAtoms = np.fromstring(line,sep=" ",dtype=np.int)
-###                        cellAtomsCopy = np.copy(cellAtoms)
-###                        cellSize = np.sum(cellAtoms)
-###                if i == 6 and offset == 1:
-###                    cellAtoms = np.fromstring(line,sep=" ",dtype=np.int)
-###                    cellAtomsCopy = np.copy(cellAtoms)
-###                    cellSize = np.sum(cellAtoms)
-###                elif i == 6 + offset:
-###                    cellInputType = line[0]
-###                    if cellInputType in carthTemplate:
-###                        ISDIRECT = False
-###                    elif cellInputType in directTemplate:
-###                        ISDIRECT = True
-###                    elif cellInputType in selectiveTemplate:
-###                        offset += 1
-###                    else:
-###                        print("Error in POSCAR: unknown input in line %d: %s"%(i,line[:-1]))
-###                        exit(-1)
-###                elif ISDIRECT == -1 and i == 7:
-###                    cellInputType = line[0]
-###                    if cellInputType in carthTemplate:
-###                        ISDIRECT = False
-###                    elif cellInputType in directTemplate:
-###                        ISDIRECT = True
-###                    else:
-###                        print("Error in POSCAR: unknown input in line %d: %s"%(i,line[:-1]))
-###                        exit(-1)
-###                elif i in range(7+offset,7+offset+cellSize):
-###                    found = re.search("([\-\+]?\d+\.?\d*)\s([\-\+]?\d+\.?\d*)\s([\-\+]?\d+\.?\d*)",line)
-###                    if found:
-###                        atomType = np.flatnonzero(cellAtoms)
-###                        cellAtoms[atomType[0]] -= 1
-###                        atom  = [atomType[0],np.zeros(3)]
-###                        coords = np.fromstring(found.group(0),sep=" ")
-###                        if ISDIRECT:
-###                            cellSymmetry[1].append(tuple(coords))
-###                            if direct:
-###                                atom[1] = coords
-###                            else:
-###                                for coord,vector in zip(coords,directions):
-###                                    atom[1] += coord*vector 
-###                        else:
-###                            cellSymmetry[1].append(tuple(np.dot(coords,invDirections)))
-###                            if direct:
-###                                atom[1] = np.dot(coords,invDirections)
-###                            else:
-###                                atom[1] = coords
-###                        cell.append(atom)    
-###                        cellSymmetry[2].append(atomType[0])
-###                    found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([a-zA-Z]+)",line)
-###                    if found:
-###                        if found.group(1) not in atomNames:
-###                            atomNames.append(found.group(1))
-###                        
-###        for i,e in enumerate(cellSymmetry[2]):
-###            cellSymmetry[2][i] = periodicTableNumber[atomNames[e]]
-###    
-###        data['comment']       = comment
-###        data['directions']    = directions
-###        data['cell']          = cell
-###        data['cellSymmetry']  = cellSymmetry
-###        data['cellVolume']    = cellVolume
-###        data['cellCenter']    = cellCenter
-###        data['cellAtoms']     = cellAtomsCopy
-###        data['atomNames']     = atomNames
-###        return data 
+            self.parse_file(text)
+            self.data.append({})
+            self.data[-1]['comment']       = self.comment
+            self.data[-1]['directions']    = self.directions
+            self.data[-1]['cell']          = self.cell
+            self.data[-1]['cellSymmetry']  = self.cellSymmetry
+            self.data[-1]['cellVolume']    = self.volume
+            self.data[-1]['cellCenter']    = self.center
+            self.data[-1]['cellAtoms']     = copy.deepcopy(self.cell)
+            self.data[-1]['atomNames']     = self.atomNames
 
