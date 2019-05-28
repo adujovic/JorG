@@ -64,7 +64,10 @@ if __name__ == '__main__':
     """ Reading POSCAR and INCAR files.
           TODO: bulletproofing """
 #    
-    readData             = load_POSCAR(POSCARfile)
+    load_POSCAR          = POSCARloader(POSCARfile)
+    load_POSCAR.parse()
+    readData             = load_POSCAR(0)
+    print(readData)
     oldMoments,incarData = load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
 #    
     cell          = readData['cell']
@@ -81,7 +84,7 @@ if __name__ == '__main__':
       referenceAtom = cell[reference]
     else:
       for i,atom in enumerate(cell):  
-        if "$"+atomNames[atom[0]]+"$" in atomTypeMask:  
+        if "$"+atom[0]+"$" in atomTypeMask:  
           referenceAtom = atom
           reference = i
           break
@@ -134,11 +137,11 @@ if __name__ == '__main__':
 
     """
 
-    print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=referenceAtom,labelStyle=color.BF)
+    print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=[referenceAtom],labelStyle=color.BF)
 
     print_label("INPUT",labelStyle=color.BF)
-    print_crystal(directions,cell,atomNames=atomNames)
-    print_moments(oldMoments,cell=cell,atomNames=atomNames)
+    print_crystal(directions,cell)
+    print_moments(oldMoments,cell=cell)
 
     """ 
     
