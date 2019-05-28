@@ -83,11 +83,12 @@ public:
 #endif
         }
 
-    virtual ~IsingModel() override {}
+    ~IsingModel() override {}
 
     typedef std::tuple<unsigned,unsigned,double>  TwoSiteInteraction;
     typedef std::vector<TwoSiteInteraction>       HamiltonianType;
     typedef celerium::ArithmeticVector            VectorType;
+
 protected:
     std::random_device                              randomDevice;
     std::shared_ptr<std::mt19937>                   randomEngine;
@@ -129,7 +130,6 @@ public:
                               std::uniform_int_distribution
                                    <unsigned long long int>>& uniform,
                               const std::bitset<N>* mask=nullptr){ 
-
         unsigned ones  = (*uniform)(*randomEngine)%static_cast<size_t>(sqrt(N));
         unsigned zeros = N - ones;
         std::string face(ones,'1');
@@ -147,7 +147,6 @@ public:
                               size_t maxNumberOfFlips=
                                      static_cast<size_t>(1.0+2.0*log(N)),
                               const std::bitset<N>* mask=nullptr){ 
-
         unsigned ones  = std::min(maxNumberOfFlips,N);
         unsigned zeros = N - ones;
         std::string face(ones,'1');

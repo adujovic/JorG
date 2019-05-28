@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import numpy as np
-from os import system
+from subprocess import call
 
 def main(**args):
     pass
@@ -10,16 +10,16 @@ if __name__ == '__main__':
     systemOfEquations = np.loadtxt('systemOfEquations.txt')
 #    print(systemOfEquations)
 
-    system("touch .energies.dat")
+    call("touch .energies.dat", shell=True)
     try:
         for i in range(len(systemOfEquations)):
-            system("grep 'energy  without entropy=' flip%d/OUTCAR | awk '{print $7}'>>.energies.dat"%i)
+            call("grep 'energy  without entropy=' flip%d/OUTCAR | awk '{print $7}'>>.energies.dat"%i, shell=True)
     except TypeError:
-        system("grep 'energy  without entropy=' flip0/OUTCAR | awk '{print $7}'>>.energies.dat")
-    system("grep 'energy  without entropy=' noFlip/OUTCAR | awk '{print $7}'>>.energies.dat")
+        call("grep 'energy  without entropy=' flip0/OUTCAR | awk '{print $7}'>>.energies.dat", shell=True)
+    call("grep 'energy  without entropy=' noFlip/OUTCAR | awk '{print $7}'>>.energies.dat", shell=True)
     energies = np.loadtxt(".energies.dat")
 #    print(energies)
-    system("rm -f .energies.dat")
+    call("rm -f .energies.dat", shell=True)
 
     try:
         dE = np.zeros(len(systemOfEquations))
