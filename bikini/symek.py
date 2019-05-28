@@ -4,6 +4,7 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../')
 from os import system,environ,mkdir,makedirs,rmdir
+from subprocess import call
 import errno
 import re
 from datetime import datetime
@@ -115,7 +116,7 @@ if __name__ == '__main__':
         exit(0)
     else:
         aux.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
-                     outDirName+"/input_report.txt", atomDict=atomNames);
+                     outDirName+"/input_report.txt", atomDict=atomNames)
 
     if USEREFINED:
         refinedCell = (spglib.standardize_cell(cellSymmetry,
@@ -219,7 +220,7 @@ if __name__ == '__main__':
     aux.symmetry.write_report(["Analysis of symmetry in the generated cell"],
                  [symmetryFull],
                  crystal,
-                 outDirName+"/output_report.txt");
+                 outDirName+"/output_report.txt")
     loadsave.save_POSCAR(outDirName+"/POSCAR",
                 crystal,
                 copiesInEachDirection+extraMultiplier,
@@ -293,11 +294,11 @@ if __name__ == '__main__':
             dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
 
     print("")
-    system('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal))
-    system('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8))
-    system('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8))
-    system('rm .*%d.dat'%randomInteger)
-    system('cd asa/solver; make clean; cd ../../')
+    call('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal), shell=True)
+    call('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8), shell=True)
+    call('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8), shell=True)
+    call('rm .*%d.dat'%randomInteger, shell=True)
+    call('cd asa/solver; make clean; cd ../../', shell=True)
 
     flippingConfigurations = np.loadtxt('best.flips',bool)
     try:
