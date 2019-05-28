@@ -244,18 +244,6 @@ class generate_from_NN:
 
     def __call__(self):
         self.fix_moments()
-        self.ISFOUND= self.check_in_cell(self.cell, self.referenceAtom, self.directions)
-        if self.ISFOUND:
-            symmetryCell = generate_from_NN.get_symmetry(self.cell,self.directions)
-            self.crystalSymmetry = spglib.get_symmetry_dataset(symmetryCell)
-            self.cutOff = self.distances[self.nearestNeighbor]
-            return (self.cutOff,
-                    self.cell,
-                    self.crystalSymmetry,
-                    self.newReference,
-                    self.multipliers,
-                    self.wyckoffPositionDict)
-
         self.crystal = []
         if len(self.distances) > 1:
             minDirection = self.distances[-1]
@@ -264,8 +252,8 @@ class generate_from_NN:
         for cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(self.nearestNeighbor+1,3),1.0)):
             self.cutOff = cutOff
             self.multipliers = get_number_of_pictures(self.directions,
-                                                 self.cutOff,
-                                                 self.referenceAtom)
+                                                      self.cutOff,
+                                                      self.referenceAtom)
             self.multipliers += self.extraMultiplier
             extraDirections = generate_from_NN.get_extra_directions(self.multipliers,self.directions)
 

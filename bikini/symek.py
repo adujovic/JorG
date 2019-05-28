@@ -12,6 +12,7 @@ import spglib
 from aux.argv import options
 import time
 import shutil
+from itertools import product
 
 import aux.symmetry
 from aux.format import color,print_vector,print_atom,print_case
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     outDirName     = currentOptions('output')
     extraDimentions= currentOptions('extra-dimentions')
 
-    if outDirName == None:
+    if outDirName is None:
       # if output directory is not given:
       outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
     else:
@@ -63,8 +64,8 @@ if __name__ == '__main__':
         else:
             print("%s exists: Data will be overwritten!"%outDirName)
 
-    """ Reading POSCAR and INCAR files.
-          TODO: bulletproofing """
+#    """ Reading POSCAR and INCAR files.
+#          TODO: bulletproofing """
 #
     load_POSCAR          = loadsave.POSCARloader(POSCARfile)
     load_POSCAR.parse()
@@ -93,9 +94,8 @@ if __name__ == '__main__':
       print("Error: can not find any atoms (%s) in input file!"%re.sub('\$','',atomTypeMask))
       exit(-7)
 
-
-    """ Checking the symmetry
-                    of the input """
+#    """ Checking the symmetry
+#                    of the input """
     symmetryCrude   = spglib.get_symmetry_dataset(cellSymmetry)
 
     if(SYMMETRYRUN):
@@ -131,12 +131,12 @@ if __name__ == '__main__':
                 if np.linalg.norm(atom[1] - newPosition) <= 1e-1:
                     atom[1] = newPosition
                     continue
-    """
-
-        Printing input data
-
-
-    """
+#    """
+#
+#        Printing input data
+#
+#
+#    """
 
     print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=[referenceAtom],labelStyle=color.BF)
 
@@ -144,12 +144,12 @@ if __name__ == '__main__':
     print_crystal(directions,cell)
     print_moments(oldMoments,cell=cell)
 
-    """
-
-        Generating output
-
-
-    """
+#    """
+#
+#        Generating output
+#
+#
+#    """
     if extraDimentions is not None:
         for separator in [' ', ',', ';', '.', '/']:
             extraMultiplier = np.fromstring(extraDimentions, dtype=int, sep=separator)
@@ -166,8 +166,8 @@ if __name__ == '__main__':
         nearestNeighbor = -1
 
     if cutOff is None:
-        if nearestNeighbor is None:
-            nearestNeighbor = 1
+        if nearestNeighbor is -1:
+            nearestNeighbor = 2
 
         generatorNN = generator.generate_from_NN(cell,
                                      referenceAtom,
@@ -214,8 +214,8 @@ if __name__ == '__main__':
                                                       extraDirections,
                                                       atomNames)
 #
-    """ Checking the symmetry
-                    of the output """
+#    """ Checking the symmetry
+#                    of the output """
     aux.symmetry.write_report(["Analysis of symmetry in the generated cell"],
                  [symmetryFull],
                  crystal,
@@ -229,9 +229,9 @@ if __name__ == '__main__':
     print_crystal(extraDirections,crystal)
 
 
-    """
-        Searching for unique atoms for calculations
-                                                    """
+#   """
+#        Searching for unique atoms for calculations
+#                                                    """
     logAccuracy  = 2     #  accuracy of distance is 10^(-logAccuracy)
 
     from JorG.equivalent import findFlips
@@ -261,8 +261,8 @@ if __name__ == '__main__':
     crystal8 = generator.apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff,
                                 reference=newReference)
-    loadsave.save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
-    loadsave.save_xyz   (outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
+    loadsave.save_xyz(outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
+    loadsave.save_xyz(outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
     system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
     try:
         shutil.copy2("../pickUP/pickUP.py","%s/pickUP.py"%outDirName)
@@ -306,21 +306,20 @@ if __name__ == '__main__':
         flippingConfigurations=[flippingConfigurations]
 
     systemOfEquations = np.zeros((4*len(flipper)+8,len(flipper)))
-    for i,config in enumerate(flippingConfigurations):
-        for atomI,isFlippedI in zip(crystal,config):
-            if atomI[2] != 0.0 and atomI[0] in atomTypeMask:
-                for atomJ in crystal8:
-                    isFlippedJ = config[atomJ[3]]
-                    if isFlippedI == isFlippedJ:
-                        continue
-                    if atomJ[2] != 0.0 and atomJ[0] in atomTypeMask:
-                        distance = np.linalg.norm(atomI[1]-atomJ[1])
-                        if np.abs(distance) < 1e-2:
-                            continue
-                        for j,uniqueFlip in enumerate(flipper):
-                            if np.abs(distance-uniqueFlip[2]) < 1e-2:
-                                systemOfEquations[i][j] -= atomI[2]*atomJ[2]
-                                break
+    for (i,config) in enumerate(flippingConfigurations):
+        for (atomI,isFlipped),atomJ in product(zip(crystal,config),
+                                                   crystal8):
+            if (atomI[2] != 0.0 and atomI[0] in atomTypeMask
+            and atomJ[2] != 0.0 and atomJ[0] in atomTypeMask):
+                if isFlipped == config[atomJ[3]]:
+                    continue
+                distance = np.linalg.norm(atomI[1]-atomJ[1])
+                if np.abs(distance) < 1e-2:
+                    continue
+                for j,uniqueFlip in enumerate(flipper):
+                    if np.abs(distance-uniqueFlip[2]) < 1e-2:
+                        systemOfEquations[i][j] -= atomI[2]*atomJ[2]
+                        break
 
     # removing 0 = 0 equations !
     tautologies = np.argwhere(np.apply_along_axis(np.linalg.norm,1,systemOfEquations)<1e-5)[:,0]
@@ -345,10 +344,13 @@ if __name__ == '__main__':
             if np.abs(inner_product - norm_j * norm_i) < 1E-5:
                 remover.append(j)
 
-    if len(remover):
+    if remover:
         flippingConfigurations = np.delete(flippingConfigurations, tuple(remover), axis=0)
         systemOfEquations      = np.delete(systemOfEquations,      tuple(remover), axis=0)
 
+    if systemOfEquations.size == 0:
+        print("ERROR! Not enough equations! Please rerun.")
+        exit(-3)
     if not currentOptions('redundant'): # If the System of Equations is required to be consistent
         resultantSystem        = np.array([systemOfEquations[0]])
         gram_schmidt           = np.array([systemOfEquations[0]])
@@ -356,7 +358,7 @@ if __name__ == '__main__':
         resultantFlippings     = np.array([flippingConfigurations[0]])
         flippingConfigurations = np.delete(flippingConfigurations, (0), axis=0)
         while len(resultantSystem) < nearestNeighbor:
-            if len(systemOfEquations) == 0:
+            if systemOfEquations.size == 0:
                 print("ERROR! Not enough equations! Please rerun.")
                 exit(-3)
             tmpVector = np.copy(systemOfEquations[0])
