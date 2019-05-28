@@ -4,7 +4,7 @@ from matplotlib import colors
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3D
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.spatial import Voronoi, ConvexHull 
+from scipy.spatial import Voronoi, ConvexHull
 from mpl_toolkits.mplot3d import proj3d
 from sys import argv,path
 path.insert(0,'../')
@@ -31,7 +31,7 @@ def supportXYZ(center, radius):
     differences = []
     for v in np.identity(3):
         differences.append(support(center,radius,v))
-    differences = np.array(differences)    
+    differences = np.array(differences)
     return [np.min(differences),np.max(differences)]
 
 data = load_POSCAR(POSCARname)
@@ -49,7 +49,7 @@ cutOff = np.linalg.norm(np.sum(basis,axis=0))
 
 points = []
 names  = []
-for n,a in zip(atomNames,superCell):  
+for n,a in zip(atomNames,superCell):
     points.append(a)
     names.append(n)
 
@@ -59,13 +59,13 @@ for i in multipliers:
         for k in multipliers:
             if i == 0 and j == 0 and k == 0:
                 continue
-            for name,a in zip(atomNames,superCell):  
+            for name,a in zip(atomNames,superCell):
                 v = a + i*basis[0]+j*basis[1]+k*basis[2]
                 if(np.linalg.norm(v-center) <= cutOff):
-                    points.append(v)  
+                    points.append(v)
                     names.append(name)
 points = np.array(points)
-                   
+
 # calculate Voronoi diagram
 sv = Voronoi(points)
 
@@ -86,7 +86,7 @@ for name,atom,region in zip(atomNames,superCell,regions):
     for point in region:
         if point != -1:
             vertices.append(sv.vertices[point])
-    vertices = np.array(vertices)    
+    vertices = np.array(vertices)
 
     radius = cutOff*2;
     if len(vertices) > 3:
@@ -102,12 +102,11 @@ for name,atom,region in zip(atomNames,superCell,regions):
             polygon = Poly3DCollection([vertices[simplex]], alpha=0.2)
             polygon.set_color(atomColors[name])
             ax.add_collection3d(polygon)
-        add_sphere(ax,atom,radius,atomColors[name],alpha=1.0,res=10)   
+        add_sphere(ax,atom,radius,atomColors[name],alpha=1.0,res=10)
         aspect_data.append(supportXYZ(atom,radius))
         print(name,radius,WSradius)
 
 scale_from_ascpect = [np.min(aspect_data), np.max(aspect_data)]
-ax.auto_scale_xyz(scale_from_ascpect,scale_from_ascpect,scale_from_ascpect)        
+ax.auto_scale_xyz(scale_from_ascpect,scale_from_ascpect,scale_from_ascpect)
 plt.show()
 exit()
-

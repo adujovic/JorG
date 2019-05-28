@@ -39,8 +39,8 @@ if __name__ == '__main__':
             generator.nearestNeighbor = i
             (cutOff,
              crystal,
-             symmetryFull, 
-             newReference, 
+             symmetryFull,
+             newReference,
              copiesInEachDirection,
              wyckoffDict           ) = generator()
             print("Test succeeded")
@@ -49,6 +49,6 @@ if __name__ == '__main__':
             print("Test failed")
         tracker += time.time()
         print("\t\tRuntime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))
-  
+
     totalTracker += time.time()
     print("\nTotal runtime: %02d:%02d:%02d"%(int(totalTracker/3600),int(totalTracker/60),int(totalTracker)))

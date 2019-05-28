@@ -7,7 +7,7 @@ import numpy as np
 from os import makedirs,mkdir,rmdir
 import errno
 import shutil
-from aux.periodic import *
+import aux.periodic as periodic
 
 class error:
     systemerror = -1
@@ -16,23 +16,23 @@ class error:
     vaspError      = 99
 
 
-def load_INCAR(cell,INCARname="INCAR",atomNames=periodicTableElement):
+def load_INCAR(cell,INCARname="INCAR",atomNames=periodic.periodicTableElement):
     oldMoments = []
     with open(INCARname,"r") as INCARfile:
         incarData = INCARfile.read()
-     
+
         oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
 
         if oldMomentsText is None:
             for atom in cell:
-                oldMoments.append(elementMagneticMoment[atomNames[atom[0]]])
+                oldMoments.append(periodic.elementMagneticMoment[atomNames[atom[0]]])
         else:
             magmomLine = oldMomentsText.group(1)
             for record in re.findall("\s*([0-9]+)\s*\*\s*([\-0-9\.]+)",magmomLine):
                 magmomLine = re.sub("{:s}\s*\*\s*{:s}".format(record[0],record[1]),(record[1]+" ")*int(record[0]),magmomLine)
             for moment in magmomLine.split():
                 oldMoments.append(np.float(moment))
-    
+
     return oldMoments,incarData
 #
 #
@@ -95,7 +95,7 @@ def save_vanilla_POSCAR(fileName,data):
                 vaspFile.write(" %.10f "%vasp)
             try:
                 vaspFile.write(" %s\n"%data['atomNames'][atom[0]])
-            except TypeError:    
+            except TypeError:
                 vaspFile.write(" %s\n"%atom[0])
         vaspFile.write("\n")
 
@@ -140,14 +140,14 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
                                     """
     try:
         mkdir("%s/noFlip"%fileName)
-    except OSError as err:  
+    except OSError as err:
         if err.errno != errno.EEXIST:
             print("Creation of the directory %s/noFlip failed - does it exist?"%fileName)
             exit(error.systemerror)
 
     try:
         shutil.copy2("%s/POSCAR"%fileName , "%s/noFlip/POSCAR"%fileName)
-    except OSError:  
+    except OSError:
         print("Copying POSCAR to noFlip didn't work out!")
         exit(error.systemerror)
 
@@ -160,13 +160,13 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
     for i,flip in enumerate(flips):
         try:
             mkdir("%s/flip%d"%(fileName,i))
-        except OSError as err:  
+        except OSError as err:
             if err.errno != errno.EEXIST:
                 print("Creation of the directory %s/flip%d failed - does it exist?"%(fileName,i))
             exit(error.systemerror)
         try:
             shutil.copy2("%s/POSCAR"%fileName , "%s/flip%d/POSCAR"%(fileName,i))
-        except OSError:  
+        except OSError:
             print("Copying POSCAR to flip%i didn't work out!"%i)
             exit(error.systemerror)
         with open(fileName+"/flip"+str(i)+"/INCAR","w+") as vaspFile:
@@ -201,7 +201,7 @@ class POSCARloader:
                     clearTxt = [re.sub("^\s+","",line) for line in inFile.readlines()]
                     # Remove white characters from the end
                     clearTxt = [re.sub("\s+$","",line) for line in clearTxt]
-                    #remove double white characters 
+                    #remove double white characters
                     clearTxt = [re.sub("\s+"," ",line) for line in clearTxt]
                     self.rawTxt.append(clearTxt)
             except FileNotFoundError:
@@ -209,14 +209,14 @@ class POSCARloader:
             except:
                 print("Unexcepted error!")
                 exit(error.unexcepted)
-    
+
     class fix_names(dict):
         def __init__(self):
             self.update(periodic.periodicTableElement)
         def __missing__(self,key):
             return key
     fix_names = fix_names()
-    
+
     class fix_atomic_numbers(dict):
         def __init__(self):
             self.update(periodic.periodicTableNumber)
@@ -234,14 +234,14 @@ class POSCARloader:
             scale = np.float64(text[1])
         except:
             scale = 1.0
-        directions = []    
+        directions = []
         for i in range(2,5):
             try:
                 directions.append(scale*np.fromstring(text[i],sep=" ")) # crystal directions
-            except:
+            except: 
                 print("Can't convert crystal directions in \"%s\""%text[i])
                 exit(error.unconvertable)
-            if(len(directions[-1]) != 3):   
+            if(len(directions[-1]) != 3):
                 print("Crystal directions in %s has %d != 3 dimensions!"%(text[i],len(directions[-1])))
                 exit(error.unconvertable)
         return directions
@@ -264,29 +264,35 @@ class POSCARloader:
         if self.ISDIRECT:
             self.cell.append((self.atomNames[atomType],
                          np.dot(self.directions,atomCoordinates)))
-            self.center += np.dot(self.directions,atomCoordinates) 
+            self.center += np.dot(self.directions,atomCoordinates)
             self.cellSymmetry[1].append(tuple(atomCoordinates))
         else:
             self.cell.append((self.atomNames[atomType],atomCoordinates))
             self.cellSymmetry[1].append(tuple(
                     np.dot(np.linalg.inv(self.directions),atomCoordinates)))
-            self.center += atomCoordinates 
+            self.center += atomCoordinates
 
         self.cellSymmetry[2].append(self.fix_atomic_numbers[self.atomNames[atomType]])
 
+    def find_atom_names(self,line):
+        self.atomNames = line.split()
+
+    def find_cell_size(self,line):
+        self.cellAtoms = np.fromstring(line,sep=" ",dtype=np.int)
+        self.cellSize = np.sum(self.cellAtoms)
+
     def find_cell(self,text):
-        self.center = np.zeros(3)
         if re.match("\d",text[5]):
             text.insert(5,'')
-        self.atomNames = text[5].split(" ")
-        self.cellAtoms = np.fromstring(text[6],sep=" ",dtype=np.int)
-        cellSize = np.sum(self.cellAtoms)
-        if text[5]=='':
+        self.find_atom_names(text[5])
+        self.find_cell_size (text[6])
+        if not self.atomNames:
             self.atomNames = [i for i in range(len(self.cellAtoms))]
 
         self.directions = POSCARloader.find_directions(text)
         self.volume     = np.linalg.det(self.directions)
 
+        self.center = np.zeros(3)
         self.cell = []
         self.cellSymmetry = ([tuple(d) for d in self.directions],
                              [],[]) # directions, direct units cell, atomic numbers
@@ -296,23 +302,23 @@ class POSCARloader:
 
         atomRead = 0
         atomType = 0
-        for i in range(8,8+cellSize):
+        for i in range(8,8+self.cellSize):
             self.find_single_atom(text[i],atomRead,atomType)
             atomRead += 1
             if atomRead == self.cellAtoms[atomType]:
                 atomType += 1
                 atomRead = 0
 
-        self.center /= cellSize
+        self.center /= self.cellSize
         self.atomNames = [POSCARloader.fix_names[atom] for atom in self.atomNames]
-                
+
     @staticmethod
     def parse_atom(text):
         found = re.search("([\-\+]?\d+\.?\d*)\s([\-\+]?\d+\.?\d*)\s([\-\+]?\d+\.?\d*)",text)
         if found:
             return np.fromstring(found.group(0),sep=" ")
         return None
-        
+
     @staticmethod
     def parse_atomName(text):
         found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([a-zA-Z]+).*",text)
@@ -323,21 +329,21 @@ class POSCARloader:
     @staticmethod
     def parse_constrains(text):
         found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([tTfF]).*\s([tTfF]).*\s([tTfF]).*",text)
-        if found:
-            constrains = [False, False, False]
-            for i in range(3):
-                if 'T' in found.group(i+1) or \
-                   't' in found.group(i+1):
-                    constrains[i] = True
-            return constrains
-        return None
+        if not found:
+            return None
+        constrains = [False, False, False]
+        for i in range(3):
+            if 'T' in found.group(i+1) or \
+               't' in found.group(i+1):
+                constrains[i] = True
+        return constrains
 
     def __call__(self,i=0):
         try:
             return self.data[i]
         except IndexError:
             print("Run parse first!")
-            
+
 
     def parse_file(self,text):
         self.comment = POSCARloader.find_comment(text)
@@ -356,4 +362,3 @@ class POSCARloader:
             self.data[-1]['cellCenter']    = self.center
             self.data[-1]['cellAtoms']     = self.cellAtoms
             self.data[-1]['atomNames']     = self.atomNames
-

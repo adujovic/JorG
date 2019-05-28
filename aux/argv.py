@@ -38,7 +38,7 @@ class options:
                                  help='output directory')
 
     def add_arguments_elements(self):
-        self.parser.add_argument('--elements','-E', 
+        self.parser.add_argument('--elements','-E',
                                  help='string of all elements taken into account (eg. \'CuO\')')
         self.parser.add_argument('--group',choices=range(1,19), type=int, nargs='+',
                                  help='group number (eg. 1 <=> \'HLiNaKRbCsFr\')')
@@ -56,17 +56,17 @@ class options:
                                  help='(work-in-progress) is sping-orbit coupling enabled (default False)')
         self.parser.add_argument('--refined',  action='store_true',
                                  help='should use refined supercell (default False)')
-        self.parser.add_argument('--extra-dimentions','-X', default=None, action='store',dest='extra-dimentions', 
+        self.parser.add_argument('--extra-dimentions','-X', default=None, action='store',dest='extra-dimentions',
                                  help='string \"X Y Z\" of extra cell copies in each directions (eg. \"0 0 1\")')
 
-    def __str__(self):   
+    def __str__(self):
         from textwrap import wrap
         output = ""
         for opt in self.opt.__dict__:
             output += "\n".join(wrap("%s =  %s"%("{:<10}".format(str(opt)),str(self.opt.__dict__[opt])),70,subsequent_indent=14*" "))
             output += "\n"
         return output[:-1]
- 
+
     def generate_part(self,MendeleyevSet,extraChar=''):
         output=''
         for el in self.opt.__dict__[MendeleyevSet]:
@@ -77,8 +77,8 @@ class options:
         output=''
         for element in re.findall('[A-Z][a-z]?',self.opt.__dict__['elements']):
             output += '$'+element
-        output += '$'    
-        return output           
+        output += '$'
+        return output
 
     def generate_mask(self):
         output = ''
@@ -88,21 +88,20 @@ class options:
             output += self.generate_part('group','G')
         if self.opt.__dict__['block'] is not None:
             output += self.generate_part('block')
-        if self.opt.__dict__['elements'] is not None: 
+        if self.opt.__dict__['elements'] is not None:
             output += self.generate_separate()
         if output == '':
             return periodic.maskFull
         return output
-   
+
     def __call__(self, key):
         if key not in self.keys:
             print("No key \"%s\" defined, please try: "%key)
             print("%s"%(str(self.keys)))
             exit(-300)
         elif key == 'reference':
-            return self.opt.__dict__['reference'] - 1; 
+            return self.opt.__dict__['reference'] - 1;
         elif key in self.opt.__dict__:
             return self.opt.__dict__[key]
         elif key == 'mask':
             return self.generate_mask()
-

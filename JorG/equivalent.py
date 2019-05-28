@@ -12,9 +12,9 @@ class Identity(dict):
             return key
 
 class findFlips:
-    wyckoffDict  = Identity() 
+    wyckoffDict  = Identity()
     logAccuracy  = 2
-    crystal      = None 
+    crystal      = None
     symmetry     = None
     atomTypeMask = maskFull
     Wyckoffs     = "abcdefghijklmnopqrstuvwz"
@@ -33,12 +33,12 @@ class findFlips:
            if ( self.wyckoffDict[self.symmetry['wyckoffs'][i]] in self.Wyckoffs and
                 d > 0.0 and d <= cutOff and '$'+atom[0]+'$' in self.atomTypeMask):
                 self.distances.append((d,atom[0]))
-        
+
         self.distances = np.array(self.distances, dtype=[('distance', np.float), ('element', 'U3')])
         self.distances.sort(order='distance')
 
     def search_for_equivalent(self,distance,index,referenceAtom):
-        for i in np.argwhere(self.symmetry['equivalent_atoms'] 
+        for i in np.argwhere(self.symmetry['equivalent_atoms']
                           == self.symmetry['equivalent_atoms'][index]).flatten():
             if (distance == np.around(np.linalg.norm(self.crystal[i][1]-referenceAtom[1]),
                                      decimals=self.logAccuracy)
@@ -51,9 +51,9 @@ class findFlips:
             return None
 
         self.find_all_distances(referenceAtom,cutOff)
-        
-        self.checker = [ False for x in range(len(self.crystal))] 
-        flipper = [] 
+
+        self.checker = [ False for x in range(len(self.crystal))]
+        flipper = []
         case    = 1
         for ((distance,name),(i,atom)) in product(self.distances,enumerate(self.crystal)):
             if self.checker[i] or atom[0] != name:
@@ -70,7 +70,7 @@ class findFlips:
 
     def all(self,referenceAtom,cutOff):
         flipper = []
-        for i,atom in enumerate(self.crystal): 
+        for i,atom in enumerate(self.crystal):
             if "$"+atom[0]+"$" in self.atomTypeMask                         \
                 and self.wyckoffDict[self.symmetry['wyckoffs'][i]] in self.Wyckoffs   \
                 and np.linalg.norm(atom[1]-referenceAtom[1]) > 1e-3:
@@ -79,7 +79,7 @@ class findFlips:
         return flipper
 
 
-def find_all_distances(reference, 
+def find_all_distances(reference,
                        crystal8,
                        cutOff, flipper,
                        logAccuracy = 2):
@@ -98,4 +98,3 @@ def find_all_distances(reference,
     distances = np.array(distances)
     distances.sort()
     return distances
-            

@@ -25,4 +25,3 @@ for path,bands in zip(File['path'],File['frequency']):
         for omega in frequencies:
             print(omega, end=" ")
         print("")
-

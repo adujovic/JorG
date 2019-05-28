@@ -31,8 +31,8 @@ def check(treshold):
                 newlyFound.append(np.int(np.linalg.norm(l)))
             if 0 in newlyFound:
                 continue
-            if newlyFound not in found:    
-                print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*newlyFound,err).center(display))    
+            if newlyFound not in found:
+                print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*newlyFound,err).center(display))
                 found.append(newlyFound)
 
 print("KPOINT multiplier proposition:".center(display))
@@ -49,4 +49,3 @@ check(0.5)
 print("Just don't:".center(display))
 check(1.0)
 
-           

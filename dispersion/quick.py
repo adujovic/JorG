@@ -77,9 +77,9 @@ for i in range(-10,10+1):
       for atom2 in elementaryCell: # checking minimal distance
         d = norm(newAtom[1] - atom[1])
         if d < dMin:
-          dMin = d  
+          dMin = d
       if dMin <= dMax + eps:
-        crystal.append(newAtom)  
+        crystal.append(newAtom)
 
 momenta = []
 for kx in np.linspace(0,np.pi,RES):
@@ -102,7 +102,7 @@ for i,hoppings in zip(range(len(hoppingsList)),hoppingsList):
           for atom in crystal:
               distance = norm(band[1] - atom[1])
               H[band[0],atom[0]] += np.exp(-1.j*np.dot(momentum,band[1] - atom[1])/a)*hoppings.get(distance, 0.0)
-      sol = np.linalg.eigh(H) 
+      sol = np.linalg.eigh(H)
       for k in momentum:
           f.write("%.15f "%k)
       for j,E in enumerate(sol[0]):
@@ -112,7 +112,7 @@ for i,hoppings in zip(range(len(hoppingsList)),hoppingsList):
               minE[j] = E
           f.write("%.15f "%E)
       f.write("\n")
-      
+
     for i,(eP,eM) in enumerate(zip(maxE,minE)):
         print i, eP, eM, eP - eM,
-    print ""    
+    print ""

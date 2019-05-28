@@ -9,15 +9,17 @@ import re
 from datetime import datetime
 import numpy as np
 import spglib
-from aux.periodic import *
-from aux.symmetry import *
-from aux.format import *
 from aux.argv import options
-from JorG.loadsave import * 
-from JorG.generator import * 
-from multiprocessing import Pool, TimeoutError
 import time
+import shutil
 
+import aux.symmetry
+from aux.format import color,print_vector,print_atom,print_case
+from aux.format import print_crystal,print_moments,print_label
+import JorG.loadsave as loadsave
+import JorG.generator as generator
+
+#from multiprocessing import Pool, TimeoutError
 
 class errors:
     failed_to_generate = -201
@@ -34,27 +36,27 @@ if __name__ == '__main__':
     POSCARfile     = currentOptions('input')
     INCARfile      = currentOptions('incar')
     cutOff         = currentOptions('cutOff')
-    nearestNeighbor= currentOptions('neighbor')  
-    atomTypeMask   = currentOptions('mask')  
+    nearestNeighbor= currentOptions('neighbor')
+    atomTypeMask   = currentOptions('mask')
     reference      = currentOptions('reference')
     SYMMETRYRUN    = currentOptions('symmetry')
     USEREFINED     = currentOptions('refined')
     wyckoffs       = currentOptions('Wyckoffs')
     outDirName     = currentOptions('output')
     extraDimentions= currentOptions('extra-dimentions')
-   
+
     if outDirName == None:
-      # if output directory is not given:  
+      # if output directory is not given:
       outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
     else:
-      # remove multiple '/' and possible '/' at the end  
+      # remove multiple '/' and possible '/' at the end
       outDirName = re.sub('/+','/',outDirName)
       outDirName = re.sub('/$','',outDirName)
 
     # cr4eating output path
     try:
         makedirs("%s"%outDirName)
-    except OSError as err:  
+    except OSError as err:
         if err.errno != errno.EEXIST:
             print("Creation of the directory %s failed - does it exist?"%outDirName)
             exit(error.systemerror)
@@ -63,13 +65,13 @@ if __name__ == '__main__':
 
     """ Reading POSCAR and INCAR files.
           TODO: bulletproofing """
-#    
-    load_POSCAR          = POSCARloader(POSCARfile)
+#
+    load_POSCAR          = loadsave.POSCARloader(POSCARfile)
     load_POSCAR.parse()
     readData             = load_POSCAR(0)
     print(readData)
-    oldMoments,incarData = load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
-#    
+    oldMoments,incarData = loadsave.load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
+#
     cell          = readData['cell']
     cellSymmetry  = readData['cellSymmetry']
     atomNames     = readData['atomNames']
@@ -83,17 +85,17 @@ if __name__ == '__main__':
     if reference >= 0:
       referenceAtom = cell[reference]
     else:
-      for i,atom in enumerate(cell):  
-        if "$"+atom[0]+"$" in atomTypeMask:  
+      for i,atom in enumerate(cell):
+        if "$"+atom[0]+"$" in atomTypeMask:
           referenceAtom = atom
           reference = i
           break
     if referenceAtom is None:
       print("Error: can not find any atoms (%s) in input file!"%re.sub('\$','',atomTypeMask))
       exit(-7)
-    
 
-    """ Checking the symmetry 
+
+    """ Checking the symmetry
                     of the input """
     symmetryCrude   = spglib.get_symmetry_dataset(cellSymmetry)
 
@@ -106,17 +108,17 @@ if __name__ == '__main__':
         refinedCell      = (spglib.refine_cell(cellSymmetry,
                                                symprec=1e-1))
         symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
-        write_report(["(1) the crude input cell",
+        aux.symmetry.write_report(["(1) the crude input cell",
                       "(2) the standarized cell",
                       "(3) the refined primitive cell"],
                 [symmetryCrude,symmetryStandard,symmetryRefined],
                 cell, atomDict=atomNames)
         exit(0)
     else:
-        write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
+        aux.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
                      outDirName+"/input_report.txt", atomDict=atomNames);
 
-    if USEREFINED: 
+    if USEREFINED:
         refinedCell = (spglib.standardize_cell(cellSymmetry,
                                                to_primitive=0,
                                                no_idealize=0,
@@ -143,8 +145,8 @@ if __name__ == '__main__':
     print_crystal(directions,cell)
     print_moments(oldMoments,cell=cell)
 
-    """ 
-    
+    """
+
         Generating output
 
 
@@ -168,58 +170,58 @@ if __name__ == '__main__':
         if nearestNeighbor is None:
             nearestNeighbor = 1
 
-        generator = generate_from_NN(cell,
+        generatorNN = generator.generate_from_NN(cell,
                                      referenceAtom,
                                      directions,
                                      nearestNeighbor,
                                      atomNames)
-        generator.wyckoffs         = wyckoffs
-        generator.atomTypeMask     = atomTypeMask
-        generator.moments          = oldMoments
-        generator.extraMultiplier  = extraMultiplier
+        generatorNN.wyckoffs         = wyckoffs
+        generatorNN.atomTypeMask     = atomTypeMask
+        generatorNN.moments          = oldMoments
+        generatorNN.extraMultiplier  = extraMultiplier
 
         try:
             (cutOff,
              crystal,
-             symmetryFull, 
-             newReference, 
+             symmetryFull,
+             newReference,
              copiesInEachDirection,
-             wyckoffDict           ) = generator()
+             wyckoffDict           ) = generatorNN()
         except:
             print("Failed to generate crystal")
             exit(errors.failed_to_generate)
-        
-        extraDirections = [(mul+1)*d 
+
+        extraDirections = [(mul+1)*d
                            for mul,d in
                            zip(copiesInEachDirection,
                                directions)]
     else:
-        copiesInEachDirection = get_number_of_pictures(directions,cutOff,referenceAtom)
-        extraDirections = [(mul+extra+1)*d 
+        copiesInEachDirection = generator.get_number_of_pictures(directions,cutOff,referenceAtom)
+        extraDirections = [(mul+extra+1)*d
                            for mul,extra,d in
                            zip(copiesInEachDirection,
                                extraMultiplier,
                                directions)]
         crystal, newReference =\
-                generate_crystal(copiesInEachDirection,
+                generator.generate_crystal(copiesInEachDirection,
                                  cell,
                                  directions,
                                  atomNames,
                                  reference=reference,
                                  moments=oldMoments)
-        wyckoffDict, symmetryFull, symmetryOriginal = wyckoffs_dict(cell, 
+        wyckoffDict, symmetryFull, symmetryOriginal = generator.wyckoffs_dict(cell,
                                                       crystal,
                                                       directions,
                                                       extraDirections,
-                                                      atomNames)        
-#    
-    """ Checking the symmetry 
+                                                      atomNames)
+#
+    """ Checking the symmetry
                     of the output """
-    write_report(["Analysis of symmetry in the generated cell"],
+    aux.symmetry.write_report(["Analysis of symmetry in the generated cell"],
                  [symmetryFull],
                  crystal,
                  outDirName+"/output_report.txt");
-    save_POSCAR(outDirName+"/POSCAR",
+    loadsave.save_POSCAR(outDirName+"/POSCAR",
                 crystal,
                 copiesInEachDirection+extraMultiplier,
                 readData)
@@ -227,12 +229,12 @@ if __name__ == '__main__':
     print_label("OUTPUT: %dx%dx%d"%(*realCopies,),labelStyle=color.BF)
     print_crystal(extraDirections,crystal)
 
-    
+
     """
         Searching for unique atoms for calculations
                                                     """
     logAccuracy  = 2     #  accuracy of distance is 10^(-logAccuracy)
-    
+
     from JorG.equivalent import findFlips
     flipSearch = findFlips()
     flipSearch.symmetry     = symmetryFull
@@ -243,7 +245,7 @@ if __name__ == '__main__':
     flipSearch.logAccuracy  = logAccuracy
     flipper      = flipSearch.unique(crystal[newReference],cutOff)
     allFlippable = flipSearch.all(crystal[newReference],cutOff)
-    
+
     caseID = 1
     selected = [newReference]
 
@@ -254,19 +256,19 @@ if __name__ == '__main__':
             print_case(caseID,atom,i+1,wyck,distance)
             selected.append(i)
             caseID += 1
-                
-    crystal8 = apply_mirrorsXYZ(extraDirections,crystal,
+
+    crystal8 = generator.apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff,
                                 reference=newReference)
-    save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
-    save_xyz   (outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
+    loadsave.save_xyz   (outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
+    loadsave.save_xyz   (outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
     system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
     try:
         shutil.copy2("../pickUP/pickUP.py","%s/pickUP.py"%outDirName)
-    except OSError:  
+    except OSError:
         print("Copying pickUP.py to %s didn't work out!"%outDirName)
         exit(error.systemerror)
- 
+
     numberOfConfigurations = int(2**len(allFlippable))
 
     print("")
@@ -326,7 +328,7 @@ if __name__ == '__main__':
     # Based on https://stackoverflow.com/questions/28816627/how-to-find-linearly-independent-rows-from-a-matrix
     # We remove lineary dependent rows
     remover=[]
-    for i in range(systemOfEquations.shape[0]): 
+    for i in range(systemOfEquations.shape[0]):
         if i in remover:
             continue
         for j in range(systemOfEquations.shape[0]):
@@ -338,14 +340,14 @@ if __name__ == '__main__':
             )
             norm_i = np.linalg.norm(systemOfEquations[i])
             norm_j = np.linalg.norm(systemOfEquations[j])
-    
+
             if np.abs(inner_product - norm_j * norm_i) < 1E-5:
                 remover.append(j)
-    
+
     if len(remover):
         flippingConfigurations = np.delete(flippingConfigurations, tuple(remover), axis=0)
         systemOfEquations      = np.delete(systemOfEquations,      tuple(remover), axis=0)
-    
+
     if not currentOptions('redundant'): # If the System of Equations is required to be consistent
         resultantSystem        = np.array([systemOfEquations[0]])
         gram_schmidt           = np.array([systemOfEquations[0]])
@@ -367,7 +369,7 @@ if __name__ == '__main__':
                 flippingConfigurations = np.delete(flippingConfigurations, (0), axis=0)
         systemOfEquations      = resultantSystem
         flippingConfigurations = resultantFlippings
-    
+
     print_label("System of equations:",labelStyle=color.BF)
     for eq in systemOfEquations:
         print_vector(eq)
@@ -379,7 +381,6 @@ if __name__ == '__main__':
         print_label("det SoE = %.1e"%np.linalg.det(resultantSystem),labelStyle=color.BF)
 
 
-    np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)    
-    save_INCAR(outDirName,incarData,crystal,flippingConfigurations)
+    np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)
+    loadsave.save_INCAR(outDirName,incarData,crystal,flippingConfigurations)
     exit()
-    

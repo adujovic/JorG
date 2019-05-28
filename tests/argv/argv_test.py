@@ -35,13 +35,13 @@ if __name__ == '__main__':
     print('Reading: output', end='\t')
     outDirName = currentOptions('output')
     if outDirName == None:
-      # if output directory is not given:  
+      # if output directory is not given:
       outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
     else:
-      # remove multiple '/' and possible '/' at the end  
+      # remove multiple '/' and possible '/' at the end
       outDirName = re.sub('/+','/',outDirName)
       outDirName = re.sub('/$','',outDirName)
-    print(outDirName)  
+    print(outDirName)
     print('Reading: mask', end='\t')
     print(currentOptions('mask'))
     print('Reading: symmetry', end='\t')
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print(currentOptions('refined'))
     print('Reading: extra-dimentions', end='\t')
     print(currentOptions('extra-dimentions'))
-   
+
     tracker += time.time()
     print("Runtime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))
     exit(0)

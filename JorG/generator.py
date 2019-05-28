@@ -8,23 +8,23 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
         Finding the amount of copies
         of the original SuperCell
                                         """
-    multipliers = [] # returned 
-    dDirs = np.tile(directions,(2,1)) 
-    #                                                                  
-    #          .---------------------------.    
-    #         / \                           \   
-    #        /   \                           \  
-    #       /     \                           \ 
+    multipliers = [] # returned
+    dDirs = np.tile(directions,(2,1))
+    #
+    #          .---------------------------.
+    #         / \                           \
+    #        /   \                           \
+    #       /     \                           \
     #      /       ^---------------------------.
-    #     /       /                           /  
-    #    /       /     reference point       /    
-    #   /       / C   .                     /     
-    #  ^       /                           /       
-    # B \     /                           /        
-    #    \   /                           /         
-    #     \ /                           /          
-    #      0--------------------------->           
-    #                   A                                     
+    #     /       /                           /
+    #    /       /     reference point       /
+    #   /       / C   .                     /
+    #  ^       /                           /
+    # B \     /                           /
+    #    \   /                           /
+    #     \ /                           /
+    #      0--------------------------->
+    #                   A
     # A,B,C -> Vectors
     # normalA = (BxC)/|BxC|
     # normalB = (CxA)/|CxA|
@@ -39,7 +39,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
             multipliers.append(int((cutOff-relative)/height)) # calculating multipliers
         else:
             multipliers.append(0)
-    
+
     return multipliers
 
 #
@@ -49,7 +49,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 #
 
 import numpy as np
-from aux.periodic import *
+from aux.periodic import elementMagneticMoment,periodicTableElement
 from itertools import product
 def generate_crystal(multiplyers,cell,directions,atomNames,reference,moments=None):
     """
@@ -72,16 +72,16 @@ def generate_crystal(multiplyers,cell,directions,atomNames,reference,moments=Non
                         position = np.copy(atom[1])
                         for a,n in zip([x,y,z],directions):
                             position += a*n
-                            
+
                         flag = "%s"%atomNames[int(atom[0])]
-                        crystal.append([flag,position,elementMagneticMoment[periodicTableElement[atomNames[int(atom[0])]]]])    
+                        crystal.append([flag,position,elementMagneticMoment[periodicTableElement[atomNames[int(atom[0])]]]])
             else:
                 for atom,moment in zip(cell,moments):
                     if atomNames[atom[0]] == name:
                         position = np.copy(atom[1])
                         for a,n in zip([x,y,z],directions):
                             position += a*n
-                            
+
                         flag = "%s"%atomNames[int(atom[0])]
                         crystal.append([flag,position,moment])
 
@@ -110,7 +110,7 @@ def wyckoffs_dict(originalCell,      cell,
                           for row in cell],
                       [periodicTableNumber[atomNames[row[0]]]
                           for row in cell])
-    except: 
+    except:
         symmetryCell = (directions,
                       [np.dot(row[1],np.linalg.inv(directions))
                           for row in cell],
@@ -149,22 +149,22 @@ def wyckoffs_dict(originalCell,      cell,
 
 import numpy as np
 import spglib
-from aux.periodic import *
+from aux.periodic import elementMagneticMoment,maskFull
 from itertools import product
 
 class generate_from_NN:
     Wyckoffs='abcdefghijklmnopqrstuvwxyz'
     originalSymmetry    = None
     atomTypeMask        = maskFull
-    moments             = None 
+    moments             = None
     extraMultiplier     = np.zeros(3,dtype=int)
     wyckoffPositionDict = None
     distances           = []
     cutOff              = -1
-    crystal             = None 
-    crystalSymmetry     = None 
-    newReference        = None 
-    multipliers         = None 
+    crystal             = None
+    crystalSymmetry     = None
+    newReference        = None
+    multipliers         = None
     ISFOUND             = False
 
 
@@ -181,17 +181,17 @@ class generate_from_NN:
 
         for atom in cell:
             try:
-                atom[0] = atomNames[atom[0]]    
+                atom[0] = atomNames[atom[0]]
             except:
                 pass
-   
+
         try:
             originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
             originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
         except:
             print("Failed to generate symmetry!")
             pass
-   
+
         diagonal = np.sqrt(np.sum([np.dot(d-referenceAtom[1],d-referenceAtom[1]) for d in directions]))
 
     def check_in_cell(self,cell,referenceAtom,directions):
@@ -204,7 +204,7 @@ class generate_from_NN:
                                            self.atomNames)
         self.distances = []
 
-    
+
         for i,(atom,wyck) in enumerate(
                              zip(cell,
                                  symmetry['wyckoffs'])):
@@ -215,7 +215,7 @@ class generate_from_NN:
                  wyckoff          in self.Wyckoffs     and
                  "$"+atomType+"$" in self.atomTypeMask    ):
                 self.distances.append(distance)
-    
+
         self.distances.sort()
         if np.ma.masked_greater(self.distances,self.cutOff).count() <= self.nearestNeighbor:
             return False
@@ -276,7 +276,7 @@ class generate_from_NN:
             self.multipliers += self.extraMultiplier
             extraDirections = generate_from_NN.get_extra_directions(self.multipliers,self.directions)
 
-            self.crystal = []                   
+            self.crystal = []
             for (name,mul,(atom,moment)) in product(
                                               self.atomNames,
                                               product(
@@ -287,9 +287,9 @@ class generate_from_NN:
                 if atom[0] == name:
                     position  = np.copy(atom[1])
                     position += np.dot(mul,self.directions)
-                    self.crystal.append([atom[0],position,moment])    
-    
-    
+                    self.crystal.append([atom[0],position,moment])
+
+
             self.find_new_refernce()
 
             self.ISFOUND = self.check_in_cell(
@@ -321,7 +321,7 @@ def apply_mirrorsXYZ(dimensions,cell, cutOff=-1.0, reference=0):
     for p in product([0,-1],repeat=3):
         projection = np.array([p])
         translation = np.dot(projection,dimensions)[0]
-        for i,atom in enumerate(cell): 
+        for i,atom in enumerate(cell):
 #            if cutOff > 0:
 #                if np.linalg.norm(atom[1]+translation - cell[reference][1]) > cutOff:
 #                    continue

@@ -2,7 +2,7 @@ class color:
     """
         From:
         https://stackoverflow.com/questions/8924173/how-do-i-print-bold-text-in-python
-    """    
+    """
     BF    = '\033[1m'
     IT    = '\033[3m'
     UN    = '\033[4m'
@@ -65,7 +65,7 @@ def print_crystal(directions, cell,
                   ,stream=stdout):
     if linewidth < 44:
         stream.write("Too low linewidth!"+'\n')
-    
+
     report = {}
     if atomNames is None:
         for atom in cell:
@@ -99,7 +99,7 @@ def print_crystal(directions, cell,
     offset = len(label)-len(name)-len(number)-len(delimiter)
     stream.write("|"+((len(name)+len(number)+len(delimiter)+1)*'-').center(linewidth)+"|"+'\n')
     stream.write('|'+label.center(linewidth+offset)+'|'+'\n')
-    
+
 
     stream.write("|"+linewidth*' '+"|"+'\n')
     stream.write("|"+color.BF+'Crystal axes:'.center(linewidth)+color.END+"|"+'\n')
@@ -210,4 +210,3 @@ def print_label(text,linewidth=88,labelStyle=color.BF+color.DARKYELLOW,
                 output = output.center(linewidth-2 + vectorOffset)
             stream.write("| "+output+" |"+'\n')
     stream.write("+"+linewidth*'-'+"+"+'\n')
-
