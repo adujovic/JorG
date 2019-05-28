@@ -69,7 +69,6 @@ if __name__ == '__main__':
     load_POSCAR          = loadsave.POSCARloader(POSCARfile)
     load_POSCAR.parse()
     readData             = load_POSCAR(0)
-    print(readData)
     oldMoments,incarData = loadsave.load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
 #
     cell          = readData['cell']

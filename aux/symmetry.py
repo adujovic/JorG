@@ -1,4 +1,4 @@
-from .format import color,print_vector,print_atom,print_case,print_crystal,print_moments,print_label
+from .format import print_vector,print_atom,print_case,print_crystal,print_moments,print_label
 
 def show_symmetry(symmetry):
     for i in range(symmetry['rotations'].shape[0]):
@@ -30,11 +30,10 @@ def print_line(raport,line,linewidth=88):
     raport.write(3*"*"+(line).center(linewidth-6)+3*"*"+"\n")
 
 def get_equivalent_line(i,j,atom,wyck):
-    output = color.BF+color.DARKGREEN
-    output += "%s: "%(atom[0])
-    output += color.GRAY+" %d "%(i+1)+color.DARKGRAY+" -> "
-    output += color.GRAY+" %d "%(j+1)+color.END+" W: "
-    output += color.DARKBLUE+"%s"%(wyck)+color.END
+    output = "%s: "%(atom[0])
+    output += " %d "%(i+1)+" -> "
+    output += " %d "%(j+1)+" W: "
+    output += "%s"%(wyck)
     return output
 
 def write_single(comment, record, crystal,
@@ -44,31 +43,26 @@ def write_single(comment, record, crystal,
     print_line(raport,comment,linewidth)
     raport.write(linewidth*"*"+"\n")
 
-    offset = len(color.BF+color.DARKMAGENTA+color.DARKGREEN+color.END)
-    raport.write(3*"*"+("Spacegroup: "+color.BF+color.DARKMAGENTA
+    raport.write(3*"*"+("Spacegroup: "
                       +"%s "%(record['international'])
-                      +color.DARKGREEN+"(%d) "%(record['number'])
-                      +color.END).center(linewidth-6+offset)
+                      +"(%d) "%(record['number'])
+                      ).center(linewidth-6)
                       +3*"*"+'\n')
     print_line(raport,"Mapping to equivalent atoms with the Wyckoff positions:",linewidth)
 
-    offset=len(color.BF+color.DARKGREEN+color.GRAY+color.DARKGRAY+color.GRAY+color.END+color.DARKBLUE+color.END)
 
     for i,(j,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
         output = get_equivalent_line(i,j,atom,wyck)
-        print_line(raport,output,linewidth+offset)
+        print_line(raport,output,linewidth)
         wyckoffCount[wyck] += 1
 
     raport.write(linewidth*"*"+"\n")
 
-    part=len(color.BF+color.DARKRED+color.END+color.BF+color.DARKGREEN+color.END)
-    offset=0
     output = ""
     for wyck in uniqueWyckoffs:
-        output += color.BF+color.DARKRED+" #%s "%(wyck)+color.END
-        output += " = "+color.BF+color.DARKGREEN+" %d "%(wyckoffCount[wyck])+color.END
-        offset += part
-    raport.write(3*"*"+(output.center(linewidth-6+offset)+3*"*"+"\n"))
+        output += " #%s "%(wyck)
+        output += " = "+" %d "%(wyckoffCount[wyck])
+    raport.write(3*"*"+(output.center(linewidth-6)+3*"*"+"\n"))
 
     raport.write(linewidth*"*"+"\n")
 
@@ -79,9 +73,8 @@ def write_report(comments,data,crystal,fileName=None, atomDict=None, linewidth=8
         raport = stdout
 
 
-    offset=len(color.BF+color.DARKYELLOW+color.INV+color.END)
     raport.write(linewidth*"*"+"\n")
-    raport.write(3*"*"+(color.BF+color.DARKYELLOW+color.INV+"Symmetry analysis"+color.END).center(linewidth-6+offset)+3*"*"+"\n")
+    raport.write(3*"*"+("Symmetry analysis").center(linewidth-6)+3*"*"+"\n")
     raport.write(linewidth*"*"+"\n")
 
     for i,(comment,record) in enumerate(zip(comments,data)):
