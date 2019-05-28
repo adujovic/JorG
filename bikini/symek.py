@@ -90,6 +90,7 @@ if __name__ == '__main__':
     """ Checking the symmetry 
                     of the input """
     symmetryCrude   = spglib.get_symmetry_dataset(cellSymmetry)
+
     if(SYMMETRYRUN):
         standarizedCell  = (spglib.standardize_cell(cellSymmetry,
                                                to_primitive=1,
