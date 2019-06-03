@@ -210,6 +210,9 @@ class POSCARloader:
                 print("Unexcepted error!")
                 exit(error.unexcepted)
 
+    def __len__(self):
+        return len(self.data)
+
     class fix_names(dict):
         def __init__(self):
             self.update(periodic.periodicTableElement)

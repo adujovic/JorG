@@ -65,8 +65,8 @@ if __name__ == '__main__':
         else:
             print("%s exists: Data will be overwritten!"%outDirName)
 
-#    """ Reading POSCAR and INCAR files.
-#          TODO: bulletproofing """
+#    """ Reading POSCAR and INCAR files
+#                                       """
 #
     load_POSCAR          = loadsave.POSCARloader(POSCARfile)
     load_POSCAR.parse()
