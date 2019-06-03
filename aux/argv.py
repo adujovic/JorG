@@ -59,14 +59,6 @@ class options:
         self.parser.add_argument('--extra-dimentions','-X', default=None, action='store',dest='extra-dimentions',
                                  help='string \"X Y Z\" of extra cell copies in each directions (eg. \"0 0 1\")')
 
-    def __str__(self):
-        from textwrap import wrap
-        output = ""
-        for opt in self.opt.__dict__:
-            output += "\n".join(wrap("%s =  %s"%("{:<10}".format(str(opt)),str(self.opt.__dict__[opt])),70,subsequent_indent=14*" "))
-            output += "\n"
-        return output[:-1]
-
     def generate_part(self,MendeleyevSet,extraChar=''):
         output=''
         for el in self.opt.__dict__[MendeleyevSet]:

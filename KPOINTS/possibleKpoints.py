@@ -1,12 +1,17 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
+from sys import maxsize,path
+path.insert(0,r'../')
 import numpy as np
-from loadsave import load_POSCAR
+from JorG.loadsave import POSCARloader
 
 display    = 42
 resolution = 0.001
 
-directions = load_POSCAR("POSCAR")
+loader = POSCARloader("POSCAR")
+loader.parse()
+directions = loader()['directions'] 
 volume = np.linalg.det(directions)
 
 invdirections = []
