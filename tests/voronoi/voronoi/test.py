@@ -19,7 +19,6 @@ if __name__ == '__main__':
     loader.parse()
     for i in range(len(loader)):
         voronoi = Voronoi(data=loader(i))
-        voronoi.fill_points()
         voronoi.get_Voronoi_diagram()
         voronoi.show()
     tracker += time.time()
