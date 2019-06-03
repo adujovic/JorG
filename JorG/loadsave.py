@@ -7,7 +7,7 @@ import numpy as np
 from os import makedirs,mkdir,rmdir
 import errno
 import shutil
-import aux.periodic as periodic
+import aux.PeriodicTable as periodic
 
 class error:
     systemerror = -1
@@ -178,17 +178,12 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
                 else:
                     vaspFile.write("%f "%atom[2])
             vaspFile.write("\n")
-# -*- coding: utf-8 -*-
-from sys import path
-path.insert(0,r'../')
 
 import re
 import numpy as np
 from os import system
-import aux.periodic as periodic
+import aux.PeriodicTable as periodic
 import copy
-
-
 class POSCARloader:
     data = []
     rawTxt = []
@@ -348,14 +343,11 @@ class POSCARloader:
             print("Run parse first!")
 
 
-    def parse_file(self,text):
-        self.comment = POSCARloader.find_comment(text)
-        self.find_cell(text)
-
     def parse(self):
         self.data = []
         for text in self.rawTxt:
-            self.parse_file(text)
+            self.comment = POSCARloader.find_comment(text)
+            self.find_cell(text)
             self.data.append({})
             self.data[-1]['comment']       = self.comment
             self.data[-1]['directions']    = self.directions

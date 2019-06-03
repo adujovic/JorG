@@ -18,9 +18,6 @@ gsl::SimulatedAnnealing::SimulatedAnnealing(){
 	asaParameters.t_initial     = 1.e0;
 	asaParameters.mu_t          = 1.0 + 1e-3;
 	asaParameters.t_min         = 1.e-7;
-
-//	std::cout<<"energy"<<"  = "<<energy(NULL)<<std::endl;
-//	std::cout<<"measure"<<" = "<<measure(NULL,NULL)<<std::endl;
 }
 
 gsl::SimulatedAnnealing::~SimulatedAnnealing(){

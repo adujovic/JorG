@@ -22,7 +22,7 @@ def show_cell(lattice, positions, numbers):
     for p, s in zip(positions, numbers):
         print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
 
-from .periodic import periodicTableElement
+from .PeriodicTable import periodicTableElement
 from sys import stdout
 import numpy as np
 

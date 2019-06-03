@@ -49,7 +49,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 #
 
 import numpy as np
-from aux.periodic import elementMagneticMoment,periodicTableElement
+from aux.PeriodicTable import elementMagneticMoment,periodicTableElement
 from itertools import product
 def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=None):
 #    """
@@ -93,7 +93,7 @@ def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=Non
 
 import numpy as np
 import spglib
-from aux.periodic import periodicTableNumber
+from aux.PeriodicTable import periodicTableNumber
 def wyckoffs_dict(originalCell,      cell,
                   originalDirections,directions,atomNames):
     symmetryCell = None
@@ -142,7 +142,8 @@ def wyckoffs_dict(originalCell,      cell,
 
 import numpy as np
 import spglib
-from aux.periodic import elementMagneticMoment,maskFull
+from aux.PeriodicTable import elementMagneticMoment
+from aux.Masks         import maskFull
 from itertools import product
 
 class generate_from_NN:
@@ -172,18 +173,9 @@ class generate_from_NN:
         self.nearestNeighbor = nearestNeighbor
         self.atomNames       = atomNames
 
-        for atom in cell:
-            try:
-                atom[0] = atomNames[atom[0]]
-            except Exception:
-                pass
 
-        try:
-            originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
-            originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
-        except Exception:
-            print("Failed to generate symmetry!")
-            pass
+        originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
+        originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
 
         diagonal = np.sqrt(np.sum([np.dot(d-referenceAtom[1],d-referenceAtom[1]) for d in directions]))
 

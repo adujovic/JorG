@@ -210,8 +210,6 @@ public:
     void reset(){
         this->clear_hamiltonian();
         this->randomize_state();
-//        std::cout<<lattice.nodes<<std::endl;
-//        std::cout<<*mask<<std::endl;
     }
 
     void randomize_state(){

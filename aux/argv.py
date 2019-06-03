@@ -2,7 +2,9 @@
 import argparse as ap
 import numpy as np
 import re
-import aux.periodic as periodic
+from sys import path
+path.insert(0,r'../')
+import aux.Masks as periodic
 
 class options:
     keys = ["cutOff", "neighbor", "Wyckoffs", "reference",
