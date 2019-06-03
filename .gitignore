@@ -117,6 +117,7 @@ output/
 out
 *.dat
 *.xyz
+*.png
 _POSCARs/
 _INCARs/
 best.flips
