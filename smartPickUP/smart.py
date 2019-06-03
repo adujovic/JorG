@@ -85,7 +85,6 @@ for i,recordB in enumerate(data[1:]):
              and recordB[2][b-1][0] in BRUTAL):
             flipped.append(a)
 
-    systemOfEquations
     for f,(j,atom) in product(flipped,enumerate(crystal)):
         if atom[0] not in flipped and atom[1] in 'Ni':
             d = np.around(np.linalg.norm(atom[2]-recordB[2][f-1][1]),decimals=2)

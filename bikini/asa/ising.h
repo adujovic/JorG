@@ -283,7 +283,6 @@ public:
                                std::mt19937& engine,
                                std::uniform_int_distribution
                                     <unsigned long long int>& distribution){
-
         constexpr auto seedSize = 8*sizeof(unsigned long long int);
 
         state = std::bitset<N>(distribution(engine));

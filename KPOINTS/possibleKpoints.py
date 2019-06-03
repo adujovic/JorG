@@ -53,4 +53,3 @@ print("Borderline terrible:".center(display))
 check(0.5)
 print("Just don't:".center(display))
 check(1.0)
-

@@ -57,7 +57,6 @@ public:
     template<size_t N>
     void run(std::array<double,N>& init,
              size_t _n_tries = 1000){
-
         asaParameters.n_tries = _n_tries;
         void* data = static_cast<void*>(init.data());
         gsl_siman_solve(randomNumberGenerator, data,
@@ -84,7 +83,6 @@ public:
                                       void*,
                                       double));
     void set_print  (void   (*)(void*));
-
 }; // end of class SimulatedAnnealing
 
 template<typename T>

@@ -516,7 +516,6 @@ ising::factoryIsing(const size_t& N){
         case 511: return std::make_unique<ising::IsingModel<511>>(new ising::IsingModel<511>);
         case 512: return std::make_unique<ising::IsingModel<512>>(new ising::IsingModel<512>);
         default:  return std::make_unique<ising::IsingModel<512>>(new ising::IsingModel<512>);
-
     }
     return std::make_unique<ising::IsingModel<512>>(new ising::IsingModel<512>);
 }

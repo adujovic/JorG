@@ -94,7 +94,7 @@ class options:
             print("%s"%(str(self.keys)))
             exit(-300)
         elif key == 'reference':
-            return self.opt.__dict__['reference'] - 1;
+            return self.opt.__dict__['reference'] - 1
         elif key in self.opt.__dict__:
             return self.opt.__dict__[key]
         elif key == 'mask':

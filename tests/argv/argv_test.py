@@ -9,8 +9,6 @@ import time
 from datetime import datetime
 import re
 from aux.argv import options
-import time
-
 
 def main(**args):
     pass
@@ -34,7 +32,7 @@ if __name__ == '__main__':
     print(currentOptions('incar'))
     print('Reading: output', end='\t')
     outDirName = currentOptions('output')
-    if outDirName == None:
+    if outDirName is None:
       # if output directory is not given:
       outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
     else:
