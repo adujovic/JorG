@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from sys import argv,maxsize,path
-path.insert(0,r'../')
+path.insert(0,r'../../')
 from os import system,environ,mkdir,makedirs,rmdir
 from subprocess import call
 import errno
@@ -10,14 +10,14 @@ import re
 from datetime import datetime
 import numpy as np
 import spglib
-from aux.argv import options
 import time
 import shutil
 from itertools import product
 
-import aux.symmetry
-from aux.format import color,print_vector,print_atom,print_case
-from aux.format import print_crystal,print_moments,print_label
+import JorG.symmetry
+from JorG.argv import options
+from JorG.format import color,print_vector,print_atom,print_case
+from JorG.format import print_crystal,print_moments,print_label
 import JorG.loadsave as loadsave
 import JorG.generator as generator
 
@@ -108,14 +108,14 @@ if __name__ == '__main__':
         refinedCell      = (spglib.refine_cell(cellSymmetry,
                                                symprec=1e-1))
         symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
-        aux.symmetry.write_report(["(1) the crude input cell",
+        JorG.symmetry.write_report(["(1) the crude input cell",
                       "(2) the standarized cell",
                       "(3) the refined primitive cell"],
                 [symmetryCrude,symmetryStandard,symmetryRefined],
                 cell, atomDict=atomNames)
         exit(0)
     else:
-        aux.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
+        JorG.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
                      outDirName+"/input_report.txt", atomDict=atomNames)
 
     if USEREFINED:
@@ -217,7 +217,7 @@ if __name__ == '__main__':
 #
 #    """ Checking the symmetry
 #                    of the output """
-    aux.symmetry.write_report(["Analysis of symmetry in the generated cell"],
+    JorG.symmetry.write_report(["Analysis of symmetry in the generated cell"],
                  [symmetryFull],
                  crystal,
                  outDirName+"/output_report.txt")

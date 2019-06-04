@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import re
 from sys import argv,maxsize,path
-path.insert(0,r'../')
+path.insert(0,r'../../')
 from JorG.loadsave import POSCARloader
 import numpy as np
 

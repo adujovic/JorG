@@ -3,8 +3,8 @@ from sys import path
 path.insert(0,r'../')
 
 import numpy as np
-from aux.Masks         import maskFull
-from aux.PeriodicTable import periodicTableElement
+from JorG.Masks         import maskFull
+from JorG.PeriodicTable import periodicTableElement
 import spglib
 from itertools import product
 

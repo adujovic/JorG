@@ -7,7 +7,7 @@ import numpy as np
 from os import makedirs,mkdir,rmdir
 import errno
 import shutil
-import aux.PeriodicTable as periodic
+import JorG.PeriodicTable as periodic
 
 class error:
     systemerror = -1
@@ -182,7 +182,7 @@ def save_INCAR(fileName,oldINCAR,crystal,flips):
 import re
 import numpy as np
 from os import system
-import aux.PeriodicTable as periodic
+import JorG.PeriodicTable as periodic
 import copy
 class POSCARloader:
     data = []

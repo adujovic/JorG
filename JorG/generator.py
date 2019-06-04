@@ -49,7 +49,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 #
 
 import numpy as np
-from aux.PeriodicTable import elementMagneticMoment,periodicTableElement
+from JorG.PeriodicTable import elementMagneticMoment,periodicTableElement
 from itertools import product
 def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=None):
 #    """
@@ -93,7 +93,7 @@ def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=Non
 
 import numpy as np
 import spglib
-from aux.PeriodicTable import periodicTableNumber
+from JorG.PeriodicTable import periodicTableNumber
 def wyckoffs_dict(originalCell,      cell,
                   originalDirections,directions,atomNames):
     symmetryCell = None
@@ -142,8 +142,8 @@ def wyckoffs_dict(originalCell,      cell,
 
 import numpy as np
 import spglib
-from aux.PeriodicTable import elementMagneticMoment
-from aux.Masks         import maskFull
+from JorG.PeriodicTable import elementMagneticMoment
+from JorG.Masks         import maskFull
 from itertools import product
 
 class generate_from_NN:

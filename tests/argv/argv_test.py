@@ -8,7 +8,7 @@ from JorG.generator import generate_from_NN
 import time
 from datetime import datetime
 import re
-from aux.argv import options
+from JorG.argv import options
 
 def main(**args):
     pass

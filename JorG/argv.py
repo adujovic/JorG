@@ -4,7 +4,7 @@ import numpy as np
 import re
 from sys import path
 path.insert(0,r'../')
-import aux.Masks as periodic
+import JorG.Masks as periodic
 
 class options:
     keys = ["cutOff", "neighbor", "Wyckoffs", "reference",
