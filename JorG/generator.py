@@ -157,12 +157,11 @@ class generate_from_NN:
     def __init__(self,cell,
                  referenceAtom,
                  directions,
-                 nearestNeighbor,
                  atomNames):
         self.cell            = cell
         self.referenceAtom   = referenceAtom
         self.directions      = directions
-        self.nearestNeighbor = nearestNeighbor
+        self.nearestNeighbor = 1
         self.atomNames       = atomNames
 
         originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
@@ -198,7 +197,7 @@ class generate_from_NN:
         if self.moments is None:
             self.moments = []
             for atom in self.cell:
-                self.moments.append(elementMagneticMoment[periodicTableElement[atom[0]]])
+                self.moments.append(elementMagneticMoment[atom[0]])
 
     @staticmethod
     def get_symmetry(cell,directions):
@@ -222,7 +221,8 @@ class generate_from_NN:
                 self.newReference = i
                 self.newReferenceAtom = atom
 
-    def __call__(self):
+    def __call__(self,nearestNeighbor):
+        self.nearestNeighbor = nearestNeighbor
         self.fix_moments()
         self.crystal = []
         if len(self.distances) > 1:

@@ -4,7 +4,6 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../../')
 import numpy as np
-from JorG.generator import generate_from_NN
 import time
 from datetime import datetime
 import re

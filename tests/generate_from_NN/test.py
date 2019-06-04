@@ -25,24 +25,22 @@ if __name__ == '__main__':
     generator = generate_from_NN(cell,
                                  referenceAtom,
                                  directions,
-                                 nearestNeighbor,
                                  atomNames)
     generator.wyckoffs         = wyckoffs
     generator.atomTypeMask     = atomTypeMask
     generator.moments          = oldMoments
     generator.extraMultiplier  = extraMultiplier
 
-    for i in range(1,34):
+    for i in range(1,5):
         print('Nearest Neighbor #%d\t'%i,end='')
         tracker  = -(time.time())
         try:
-            generator.nearestNeighbor = i
             (cutOff,
              crystal,
              symmetryFull,
              newReference,
              copiesInEachDirection,
-             wyckoffDict           ) = generator()
+             wyckoffDict           ) = generator(i)
             print("Test succeeded")
             print("\t\tCrystal size: %d atoms"%len(crystal))
         except Exception as e:

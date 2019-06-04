@@ -174,7 +174,6 @@ if __name__ == '__main__':
         generatorNN = generator.generate_from_NN(cell,
                                      referenceAtom,
                                      directions,
-                                     nearestNeighbor,
                                      atomNames)
         generatorNN.wyckoffs         = wyckoffs
         generatorNN.atomTypeMask     = atomTypeMask
@@ -187,7 +186,7 @@ if __name__ == '__main__':
              symmetryFull,
              newReference,
              copiesInEachDirection,
-             wyckoffDict           ) = generatorNN()
+             wyckoffDict           ) = generatorNN(nearestNeighbor)
         except Exception:
             print("Failed to generate crystal")
             exit(errors.failed_to_generate)
