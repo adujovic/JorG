@@ -22,8 +22,7 @@ for i in range(3):
 invdirections = np.array(invdirections)
 invdirections /= np.max([np.linalg.norm(b) for b in invdirections])
 
-def check(treshold):
-    global found,multipliers
+def check(treshold,multipliers,found):
     for mul in multipliers:
         loc = mul*invdirections
         err = 0.0
@@ -39,17 +38,18 @@ def check(treshold):
             if newlyFound not in found:
                 print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*newlyFound,err).center(display))
                 found.append(newlyFound)
+    return found
 
 print("KPOINT multiplier proposition:".center(display))
 found = []
 multipliers = np.arange(1.0,100,resolution)
 print("Good:".center(display))
-check(np.sqrt(1e-3))
+found = check(np.sqrt(1e-3),multipliers,found)
 print("Decent:".center(display))
-check(0.1)
+found = check(0.1,multipliers,found)
 print("Plausible:".center(display))
-check(np.sqrt(1e-1))
+found = check(np.sqrt(1e-1),multipliers,found)
 print("Borderline terrible:".center(display))
-check(0.5)
+found = check(0.5,multipliers,found)
 print("Just don't:".center(display))
-check(1.0)
+found = check(1.0,multipliers,found)

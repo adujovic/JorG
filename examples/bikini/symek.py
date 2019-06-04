@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
     for (i,atom,distance,wyck) in flipper:
         if caseID <= nearestNeighbor or nearestNeighbor < 0:
-            print_case(caseID,atom,i+1,wyck,distance)
+            print_case(caseID,atom,i+1,wyckoffPosition=wyck,distance=distance)
             selected.append(i)
             caseID += 1
 
