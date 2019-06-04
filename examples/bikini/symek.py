@@ -264,7 +264,7 @@ if __name__ == '__main__':
                                 reference=newReference)
     loadsave.save_xyz(outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
     loadsave.save_xyz(outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
-    system ("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"))
+    call("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"),shell=True)
     try:
         shutil.copy2("../pickUP/pickUP.py","%s/pickUP.py"%outDirName)
     except OSError:
@@ -298,7 +298,7 @@ if __name__ == '__main__':
     call('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8), shell=True)
     call('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8), shell=True)
     call('rm .*%d.dat'%randomInteger, shell=True)
-    call('cd asa/solver; make clean; cd ../../', shell=True)
+    call('cd ./asa/solver; make clean; cd ../../', shell=True)
 
     flippingConfigurations = np.loadtxt('best.flips',bool)
     try:
