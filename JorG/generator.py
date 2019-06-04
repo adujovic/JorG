@@ -49,42 +49,50 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 #
 
 import numpy as np
-from JorG.PeriodicTable import elementMagneticMoment,periodicTableElement
-from JorG.format import standard
+from JorG.PeriodicTable import elementMagneticMoment
 from itertools import product
-def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=None):
-#    """
-#        Generator of minimal required SuperCell
-#                                                """
-    try:
-        if len(moments) != len(cell):
-            moments = None
-    except TypeError:
-        pass
 
-    if moments is None:
-        magneticMoments = moments
-    elif len(moments) == len(cell):
-        magneticMoments = moments
-    else:
-        magneticMoments = [periodicTableElement[atom[0]] for atom in cell]
-    crystal = []
-    for (name,mul,(atom,moment)) in product(atomNames,
-                                          product(range(multipliers[0]+1),
-                                                  range(multipliers[1]+1),
-                                                  range(multipliers[2]+1)),
-                                          zip(cell,magneticMoments)):
-        if atom[0] == name:
-            position = np.copy(atom[1])
-            position += np.dot(mul,directions)
-            crystal.append([atom[0],position,moment])
+class CrystalGenerator:
+#    multipliers
+    def __init__(self, cell, directions,
+                 atomNames, reference=0):
+        self.cell       = cell
+        self.directions = directions
+        self.reference  = reference
+        self.atomNames  = atomNames
+        self.moments    = None
 
-    newReference = None
-    for i,atom in enumerate(crystal):
-      if np.linalg.norm(atom[1] - cell[reference][1]) < 1e-2:
-        newReference = i
+    def fix_moments(self):
+        if len(self.moments) >= len(self.cell):
+            self.moments = self.moments[:len(self.cell)]
+        else:
+            self.moments = [elementMagneticMoment[atom[0]] for atom in self.cell]
 
-    return (crystal,newReference)
+    def __call__(self,multipliers):
+    #    """
+    #        Generator of minimal required SuperCell
+    #                                                """
+
+        self.fix_moments()
+
+        crystal = []
+        for (name,mul,(atom,moment)) in product(self.atomNames,
+                                              product(range(multipliers[0]+1),
+                                                      range(multipliers[1]+1),
+                                                      range(multipliers[2]+1)),
+                                              zip(self.cell,self.moments)):
+            if atom[0] == name:
+                position = np.copy(atom[1])
+                position += np.dot(mul,self.directions)
+                crystal.append([atom[0],position,moment])
+
+        newReference = None
+        for i,atom in enumerate(crystal):
+          if np.linalg.norm(atom[1] - self.cell[self.reference][1]) < 1e-2:
+            newReference = i
+            break
+
+        return (crystal,newReference)
 
 #
 #

@@ -55,7 +55,7 @@ if __name__ == '__main__':
       outDirName = re.sub('/+','/',outDirName)
       outDirName = re.sub('/$','',outDirName)
 
-    # cr4eating output path
+    # creating output path
     try:
         makedirs("%s"%outDirName)
     except OSError as err:
@@ -203,13 +203,10 @@ if __name__ == '__main__':
                            zip(copiesInEachDirection,
                                extraMultiplier,
                                directions)]
-        crystal, newReference =\
-                generator.generate_crystal(copiesInEachDirection,
-                                 cell,
-                                 directions,
-                                 atomNames,
-                                 reference=reference,
-                                 moments=oldMoments)
+        localGenerator = generator.CrystalGenerator(cell,directions,
+                                                    atomNames,reference=reference)
+        localGenerator.moments = oldMoments
+        crystal, newReference = localGenerator(copiesInEachDirection)
         wyckoffDict, symmetryFull, symmetryOriginal = generator.wyckoffs_dict(cell,
                                                       crystal,
                                                       directions,
