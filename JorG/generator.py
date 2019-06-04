@@ -50,6 +50,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 
 import numpy as np
 from JorG.PeriodicTable import elementMagneticMoment,periodicTableElement
+from JorG.format import standard
 from itertools import product
 def generate_crystal(multipliers,cell,directions,atomNames,reference,moments=None):
 #    """
