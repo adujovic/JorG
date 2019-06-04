@@ -4,7 +4,7 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../../')
 import numpy as np
-from JorG.working_equivalent import findFlips,find_all_distances
+from JorG.equivalent import findFlips,find_all_distances
 import time
 
 def main(**args):
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     flipper = flipSearch.all(referenceAtom,cutOff)
     print(flipper)
     print("All possible distances until %f"%cutOff)
-    print(find_all_distances(reference,crystal8,cutOff,flipper))
+    print(find_all_distances(crystal8,cutOff,np.append(flipper,reference)))
 
     tracker += time.time()
     print("Runtime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))

@@ -80,18 +80,13 @@ class findFlips:
         return flipper
 
 
-def find_all_distances(reference,
-                       crystal8,
-                       cutOff, flipper,
-                       logAccuracy = 2):
-    acceptableFlips = np.append(flipper, reference)
-
-    size = int(len(crystal8)/8)
+def find_all_distances(crystal8, cutOff,
+                       flipper, logAccuracy = 2):
+    size = len(crystal8)//8
     distances = []
     for i,flipA,j,flipB in product(range(8),
-                                   acceptableFlips,
-                                   range(8),
-                                   acceptableFlips):
+                                   flipper,
+                                   repeat=2):
         d = np.round(np.linalg.norm(crystal8[flipA+size*i][1]
                                   - crystal8[flipB+size*j][1]),logAccuracy)
         if d not in distances and d <= cutOff:
