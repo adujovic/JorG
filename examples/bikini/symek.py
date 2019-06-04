@@ -210,8 +210,7 @@ if __name__ == '__main__':
         wyckoffDict, symmetryFull, symmetryOriginal = generator.wyckoffs_dict(cell,
                                                       crystal,
                                                       directions,
-                                                      extraDirections,
-                                                      atomNames)
+                                                      extraDirections)
 #
 #    """ Checking the symmetry
 #                    of the output """

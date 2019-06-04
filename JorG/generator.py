@@ -74,7 +74,6 @@ class CrystalGenerator:
     #                                                """
 
         self.fix_moments()
-
         crystal = []
         for (name,mul,(atom,moment)) in product(self.atomNames,
                                               product(range(multipliers[0]+1),
@@ -104,43 +103,28 @@ import numpy as np
 import spglib
 from JorG.PeriodicTable import periodicTableNumber
 def wyckoffs_dict(originalCell,      cell,
-                  originalDirections,directions,atomNames):
+                  originalDirections,directions):
     symmetryCell = None
-    try:
-        symmetryCell = (directions,
-                      [np.dot(row[1],np.linalg.inv(directions))
-                          for row in cell],
-                      [periodicTableNumber[atomNames[row[0]]]
-                          for row in cell])
-    except TypeError:
-        symmetryCell = (directions,
-                      [np.dot(row[1],np.linalg.inv(directions))
-                          for row in cell],
-                      [periodicTableNumber[row[0]]
-                          for row in cell])
-
+    symmetryCell = (directions,
+                  [np.dot(row[1],np.linalg.inv(directions))
+                      for row in cell],
+                  [periodicTableNumber[row[0]]
+                      for row in cell])
     symmetry = spglib.get_symmetry_dataset(symmetryCell)
 
     originalSymCell = None
-    try:
-        originalSymCell = (originalDirections,
-                         [np.dot(row[1],np.linalg.inv(originalDirections))
-                             for row in originalCell],
-                         [periodicTableNumber[atomNames[row[0]]]
-                             for row in originalCell])
-    except TypeError:
-        originalSymCell = (originalDirections,
-                         [np.dot(row[1],np.linalg.inv(originalDirections))
-                             for row in originalCell],
-                         [periodicTableNumber[row[0]]
-                             for row in originalCell])
+    originalSymCell = (originalDirections,
+                     [np.dot(row[1],np.linalg.inv(originalDirections))
+                         for row in originalCell],
+                     [periodicTableNumber[row[0]]
+                         for row in originalCell])
     originalSym = spglib.get_symmetry_dataset(originalSymCell)
 
     wyckoffPositionDict = {}
-    for i,atom in enumerate(cell):
-        for j,originalAtom in enumerate(originalCell):
-            if np.linalg.norm(atom[1]-originalAtom[1]) < 1e-3:
-                wyckoffPositionDict[symmetry['wyckoffs'][i]] = originalSym['wyckoffs'][j]
+    for (i,atom),(j,originalAtom) in product(enumerate(cell),
+                                             enumerate(originalCell)):
+        if np.linalg.norm(atom[1]-originalAtom[1]) < 1e-3:
+            wyckoffPositionDict[symmetry['wyckoffs'][i]] = originalSym['wyckoffs'][j]
 
     return wyckoffPositionDict,symmetry,originalSym
 #
@@ -170,7 +154,6 @@ class generate_from_NN:
     multipliers         = None
     ISFOUND             = False
 
-
     def __init__(self,cell,
                  referenceAtom,
                  directions,
@@ -181,7 +164,6 @@ class generate_from_NN:
         self.directions      = directions
         self.nearestNeighbor = nearestNeighbor
         self.atomNames       = atomNames
-
 
         originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
         originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
@@ -194,11 +176,8 @@ class generate_from_NN:
          self.originalSymmetry) = wyckoffs_dict(self.cell,
                                            cell,
                                            self.directions,
-                                           directions,
-                                           self.atomNames)
+                                           directions)
         self.distances = []
-
-
         for i,(atom,wyck) in enumerate(
                              zip(cell,
                                  symmetry['wyckoffs'])):
