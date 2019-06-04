@@ -6,7 +6,7 @@ from sys import argv,path
 path.insert(0,'../')
 from matplotlib import colors as mplColors
 from itertools import product
-from voronoi.showcell import showCell
+from JorG.showcell import showCell
 
 class Geometry:
     @staticmethod
@@ -128,5 +128,4 @@ class Voronoi:
         return (self.radius,WSradius)
 
     def show(self,name=None):
-        print(name)
         self.plotter.show(name)

@@ -6,6 +6,9 @@ from sys import path
 path.insert(0,r'../')
 import JorG.Masks as periodic
 
+class error:
+    access = 123
+
 class options:
     keys = ["cutOff", "neighbor", "Wyckoffs", "reference",
             "input", "incar", "output", "mask", "symmetry",
@@ -20,6 +23,11 @@ class options:
         self.add_arguments_optional()
 
         self.opt = self.parser.parse_args(args[1:])
+        self.fix_data()
+
+    def fix_data(self):
+        self.opt.__dict__['reference'] -= 1
+        self.opt.__dict__['mask'] = self.generate_mask()
 
     def add_arguments_geometric(self):
         self.typeOfRange.add_argument('--cutOff', '-R', default=None, type=np.float,
@@ -89,13 +97,9 @@ class options:
         return output
 
     def __call__(self, key):
-        if key not in self.keys:
+        try:
+            return self.opt.__dict__[key]
+        except KeyError:
             print("No key \"%s\" defined, please try: "%key)
             print("%s"%(str(self.keys)))
-            exit(-300)
-        elif key == 'reference':
-            return self.opt.__dict__['reference'] - 1
-        elif key in self.opt.__dict__:
-            return self.opt.__dict__[key]
-        elif key == 'mask':
-            return self.generate_mask()
+            exit(error.access)

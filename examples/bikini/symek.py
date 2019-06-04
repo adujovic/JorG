@@ -112,11 +112,12 @@ if __name__ == '__main__':
                       "(2) the standarized cell",
                       "(3) the refined primitive cell"],
                 [symmetryCrude,symmetryStandard,symmetryRefined],
-                cell, atomDict=atomNames)
+                cell)
         exit(0)
     else:
-        JorG.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,
-                     outDirName+"/input_report.txt", atomDict=atomNames)
+        with open(outDirName+"/input_report.txt",'w+') as raport:
+            JorG.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,stream=raport)
+                     
 
     if USEREFINED:
         refinedCell = (spglib.standardize_cell(cellSymmetry,
@@ -217,10 +218,11 @@ if __name__ == '__main__':
 #
 #    """ Checking the symmetry
 #                    of the output """
-    JorG.symmetry.write_report(["Analysis of symmetry in the generated cell"],
-                 [symmetryFull],
-                 crystal,
-                 outDirName+"/output_report.txt")
+    with open(outDirName+"/output.txt",'w+') as raport:
+        JorG.symmetry.write_report(["Analysis of symmetry in the generated cell"],
+                     [symmetryFull],
+                     crystal,
+                     stream=raport)
     loadsave.save_POSCAR(outDirName+"/POSCAR",
                 crystal,
                 copiesInEachDirection+extraMultiplier,

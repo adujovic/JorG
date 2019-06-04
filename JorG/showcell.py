@@ -14,6 +14,16 @@ path.insert(0,'../')
 class showCell:
     figure  = None # matplotlib figure
     subplot = None # subplot
+
+    def make_spherical(self):
+        self.phi   = np.linspace(0, 2*np.pi, self.resolution) # spherical coordinates
+        self.theta = np.linspace(0,   np.pi, self.resolution)
+
+    def make_points(self,position,radius):
+        return np.array([
+                  position[0]+radius*np.outer(np.cos(self.phi), np.sin(self.theta)),
+                  position[1]+radius*np.outer(np.sin(self.phi), np.sin(self.theta)),
+                  position[2]+radius*np.outer(np.ones(np.size(self.phi)), np.cos(self.theta))])
     
     def __init__(self,resolution = 13, alpha = 0.4):
         if resolution > 3:
@@ -21,6 +31,7 @@ class showCell:
         else:
             self.resolution = 3
             
+        self.make_spherical()
         self.alpha      = alpha
         # generate plot
         self.figure          = plt.figure()
@@ -35,13 +46,7 @@ class showCell:
         if 'alpha' not in kwargs:
             kwargs['alpha'] = 0.2
 
-        phi   = np.linspace(0, 2*np.pi, self.resolution) # spherical coordinates
-        theta = np.linspace(0,   np.pi, self.resolution)
-        pointsToBePloted = np.array([
-                              position[0]+radius*np.outer(np.cos(phi), np.sin(theta)),
-                              position[1]+radius*np.outer(np.sin(phi), np.sin(theta)),
-                              position[2]+radius*np.outer(np.ones(np.size(phi)), np.cos(theta))])
-        self.subplot.plot_surface(*pointsToBePloted, **kwargs)
+        self.subplot.plot_surface(*(self.make_points(position,radius)), **kwargs)
 
     def add_polygon(self,points,**kwargs):
         if 'color' not in kwargs:

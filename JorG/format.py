@@ -60,11 +60,17 @@ def print_vector(vector,**kwargs):
 def print_atom(atom,**kwargs):
     kwargs = standard.fix(**kwargs)
     kwargs = safe_update(kwargs,{'vectorStyle'  : color.END,
-                                 'elementStyle' : color.BF+color.DARKYELLOW})
+                                 'elementStyle' : color.BF+color.DARKYELLOW,
+                                 'center'       : False})
     output  = kwargs['elementStyle'] + str(atom[0]) + color.END
     output += ' [ ' + kwargs['vectorStyle']
     output += '{:= 10.5f} {:= 10.5f} {:= 10.5f}'.format(*atom[1],)
     output += color.END + ' ] '
+    if kwargs['center']:
+        offset = len(kwargs['elementStyle'] + color.END + kwargs['vectorStyle']+color.END)
+        output = output.center(kwargs['linewidth']+offset)
+        output = "|" + output
+        output += "|"
     kwargs['stream'].write(output+kwargs['end'])
 
 def print_case(caseID, atom, atomID,**kwargs):
@@ -190,7 +196,13 @@ def print_crystal(directions, cell, **kwargs):
 
     line(kwargs['linewidth'],kwargs['stream'])
 
-
+def check_line(sumOfChars,length,**kwargs):
+    if sumOfChars > kwargs['linewidth']-length-1:
+        kwargs['stream'].write(' '*(kwargs['linewidth']-sumOfChars))
+        kwargs['stream'].write('|'+'\n')
+        kwargs['stream'].write('| ')
+        sumOfChars = 1
+    return sumOfChars
 
 def print_moments(moments,cell=None,**kwargs):
     kwargs = standard.fix(**kwargs)
@@ -213,11 +225,7 @@ def print_moments(moments,cell=None,**kwargs):
             numberStr  = "({:3d}): ".format(i+1)
         momentStr = "{:=+3.1f} ".format(moment)
         length = len(elementStr)+len(numberStr)+len(momentStr)
-        if sumOfChars > kwargs['linewidth']-length-1:
-            kwargs['stream'].write(' '*(kwargs['linewidth']-sumOfChars))
-            kwargs['stream'].write('|'+'\n')
-            kwargs['stream'].write('| ')
-            sumOfChars = 1
+        sumOfChars = check_line(sumOfChars,length,**kwargs)
         kwargs['stream'].write(kwargs['elementStyle']
                               +elementStr + color.END
                               +kwargs['labelStyle']
@@ -231,40 +239,25 @@ def print_moments(moments,cell=None,**kwargs):
     line(kwargs['linewidth'],kwargs['stream'])
 
 
-def print_label(text,linewidth=88,labelStyle=color.BF+color.DARKYELLOW,
-                stream=stdout,atoms=None,
-                elementStyle=color.BF+color.DARKGREEN,
-                vectorStyle=color.END):
-    if len(text) > linewidth - 2:
-        label = text[:linewidth-5]+"..."
+def print_label(text,**kwargs):
+    kwargs = standard.fix(**kwargs)
+    kwargs = safe_update(kwargs,{'elementStyle' : color.BF+color.DARKGREEN,
+                                 'labelStyle'   : color.BF+color.DARKYELLOW,
+                                 'atoms'        : None,
+                                 'vectorStyle'  : color.END})
+                
+    if len(text) > kwargs['linewidth'] - 2:
+        label = text[:kwargs['linewidth']-5]+"..."
     else:
-        label = text.center(linewidth-2)
-    label = labelStyle+label+color.END
-    stream.write("+"+linewidth*'-'+"+"+'\n')
-    stream.write("| "+label+" |"+'\n')
+        label = text.center(kwargs['linewidth']-2)
+    label = kwargs['labelStyle']+label+color.END
 
-    vectorOffset = len(elementStyle+color.END+vectorStyle+color.END)
-    if atoms is not None:
-        try:
-            if(len(atoms[0])) > 1:
-                for atom in atoms:
-                    output  = elementStyle + str(atom[0]) + color.END
-                    output += ' [ ' + vectorStyle
-                    output += '{:= 10.5f} {:= 10.5f} {:= 10.5f}'.format(*atom[1],)
-                    output += color.END + ' ] '
-                    if len(output) > linewidth - 2 + vectorOffset:
-                        output = output[:linewidth-5 + vectorOffset]+"..."+color.END
-                    else:
-                        output = output.center(linewidth-2 + vectorOffset)
-                    stream.write("| "+output+" |"+'\n')
-        except TypeError:
-            output  = elementStyle + str(atoms[0]) + color.END
-            output += ' [ ' + vectorStyle
-            output += '{:= 9.5f} {:= 10.5f} {:= 10.5f}'.format(*atoms[1],)
-            output += color.END + ' ] '
-            if len(output) > linewidth - 2 + vectorOffset:
-                output = output[:linewidth-5 + vectorOffset]+"..."+color.END
-            else:
-                output = output.center(linewidth-2 + vectorOffset)
-            stream.write("| "+output+" |"+'\n')
-    stream.write("+"+linewidth*'-'+"+"+'\n')
+    line(kwargs['linewidth'],kwargs['stream'])
+
+    kwargs['stream'].write("| "+label+" |"+'\n')
+
+    vectorOffset = len(kwargs['elementStyle']+color.END+kwargs['vectorStyle']+color.END)
+    if kwargs['atoms'] is not None:
+        for atom in kwargs['atoms']:
+            print_atom(atom,center=True,**kwargs)
+    line(kwargs['linewidth'],kwargs['stream'])
