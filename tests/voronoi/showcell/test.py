@@ -4,8 +4,8 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../../../')
 import time
-from voronoi.showcell import showCell
 import numpy as np
+from JorG.showcell import showCell
 
 def main(**args):
     pass

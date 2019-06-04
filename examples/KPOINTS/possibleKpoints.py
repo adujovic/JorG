@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import maxsize,path
-path.insert(0,r'../')
+from sys import path
+path.insert(0,r'../../')
 import numpy as np
 from JorG.loadsave import POSCARloader
 

@@ -4,8 +4,8 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../../../')
 import time
-from voronoi.voronoi import Voronoi
 import numpy as np
+from JorG.voronoi import Voronoi
 from JorG.loadsave import POSCARloader
 from itertools import product
 
