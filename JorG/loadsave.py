@@ -184,6 +184,77 @@ import numpy as np
 from os import system
 import JorG.PeriodicTable as periodic
 import copy
+
+class CellReader:
+    def __init__(self,text):
+       self.text          = text 
+
+       self.read_atoms()
+       self.directions    = POSCARloader.read_directions(text)
+       self.volume        = np.linalg.det(self.directions)
+       self.center        = np.zeros(3)
+       self.cell          = []
+       self.ISDIRECT      = False
+       self.ISSELECTIVE   = False
+       self.cellSymmetry  = ([tuple(d) for d in self.directions],
+                             [],[]) # directions, direct units cell, atomic numbers
+       self.check_type(text[7][0])
+
+    def check_type(self,character):
+        if character in "DdSs":
+            self.ISDIRECT    = True
+        if character in "Ss":
+            self.ISSELECTIVE = True
+
+    def read_single_atom(self,line,atomRead,atomType):
+        if not self.ISSELECTIVE    \
+           and atomRead == 0  \
+           and self.atomNames[atomType] == atomType:
+            self.atomNames[atomType] = POSCARloader.parse_atomName(line)
+
+        atomCoordinates = POSCARloader.parse_atom(line)
+        if self.ISDIRECT:
+            self.cell.append((self.atomNames[atomType],
+                         np.dot(self.directions,atomCoordinates)))
+            self.center += np.dot(self.directions,atomCoordinates)
+            self.cellSymmetry[1].append(tuple(atomCoordinates))
+        else:
+            self.cell.append((self.atomNames[atomType],atomCoordinates))
+            self.cellSymmetry[1].append(tuple(
+                    np.dot(np.linalg.inv(self.directions),atomCoordinates)))
+            self.center += atomCoordinates
+
+        self.cellSymmetry[2].append(POSCARloader.fix_atomic_numbers[self.atomNames[atomType]])
+
+    def read_atoms(self):
+        if re.match("\d",self.text[5]):
+            self.text.insert(5,'')
+        self.atomNames = self.text[5].split()
+        self.cellAtoms = np.fromstring(self.text[6],sep=" ",dtype=np.int)
+        self.cellSize  = np.sum(self.cellAtoms)
+        if not self.atomNames:
+            self.atomNames = [i for i in range(len(self.cellAtoms))]
+
+    def read(self):
+       atomRead = 0
+       atomType = 0
+       for i in range(8,8+self.cellSize):
+           self.read_single_atom(self.text[i],atomRead,atomType)
+           atomRead += 1
+           if atomRead == self.cellAtoms[atomType]:
+               atomType += 1
+               atomRead  = 0
+       self.center /= self.cellSize
+       self.atomNames = [POSCARloader.fix_names[atom] for atom in self.atomNames]
+       return {'comment'     : POSCARloader.read_comment(self.text),
+               'directions'  : self.directions,
+               'cell'        : self.cell,
+               'cellSymmetry': self.cellSymmetry,
+               'cellVolume'  : self.volume,
+               'cellCenter'  : self.center,
+               'cellAtoms'   : self.cellAtoms,
+               'atomNames'   : self.atomNames}
+
 class POSCARloader:
     data = []
     rawTxt = []
@@ -223,11 +294,11 @@ class POSCARloader:
     fix_atomic_numbers = fix_atomic_numbers()
 
     @staticmethod
-    def find_comment(text):
+    def read_comment(text):
         return text[0]
 
     @staticmethod
-    def find_directions(text):
+    def read_directions(text):
         try:
             scale = np.float64(text[1])
         except TypeError:
@@ -243,72 +314,6 @@ class POSCARloader:
                 print("Crystal directions in %s has %d != 3 dimensions!"%(text[i],len(directions[-1])))
                 exit(error.unconvertable)
         return directions
-
-    def check_type(self,character):
-        self.ISDIRECT    = False
-        self.ISSELECTIVE = False
-        if character in "DdSs":
-            self.ISDIRECT   = True
-        if character in "Ss":
-            self.ISSELECTIVE = True
-
-    def find_single_atom(self,line,atomRead,atomType):
-        if not self.ISSELECTIVE    \
-           and atomRead == 0  \
-           and self.atomNames[atomType] == atomType:
-            self.atomNames[atomType] = POSCARloader.parse_atomName(line)
-
-        atomCoordinates = POSCARloader.parse_atom(line)
-        if self.ISDIRECT:
-            self.cell.append((self.atomNames[atomType],
-                         np.dot(self.directions,atomCoordinates)))
-            self.center += np.dot(self.directions,atomCoordinates)
-            self.cellSymmetry[1].append(tuple(atomCoordinates))
-        else:
-            self.cell.append((self.atomNames[atomType],atomCoordinates))
-            self.cellSymmetry[1].append(tuple(
-                    np.dot(np.linalg.inv(self.directions),atomCoordinates)))
-            self.center += atomCoordinates
-
-        self.cellSymmetry[2].append(self.fix_atomic_numbers[self.atomNames[atomType]])
-
-    def find_atom_names(self,line):
-        self.atomNames = line.split()
-
-    def find_cell_size(self,line):
-        self.cellAtoms = np.fromstring(line,sep=" ",dtype=np.int)
-        self.cellSize = np.sum(self.cellAtoms)
-
-    def find_cell(self,text):
-        if re.match("\d",text[5]):
-            text.insert(5,'')
-        self.find_atom_names(text[5])
-        self.find_cell_size (text[6])
-        if not self.atomNames:
-            self.atomNames = [i for i in range(len(self.cellAtoms))]
-
-        self.directions = POSCARloader.find_directions(text)
-        self.volume     = np.linalg.det(self.directions)
-
-        self.center = np.zeros(3)
-        self.cell = []
-        self.cellSymmetry = ([tuple(d) for d in self.directions],
-                             [],[]) # directions, direct units cell, atomic numbers
-
-        cellInputType = text[7][0]
-        self.check_type(cellInputType)
-
-        atomRead = 0
-        atomType = 0
-        for i in range(8,8+self.cellSize):
-            self.find_single_atom(text[i],atomRead,atomType)
-            atomRead += 1
-            if atomRead == self.cellAtoms[atomType]:
-                atomType += 1
-                atomRead = 0
-
-        self.center /= self.cellSize
-        self.atomNames = [POSCARloader.fix_names[atom] for atom in self.atomNames]
 
     @staticmethod
     def parse_atom(text):
@@ -346,14 +351,5 @@ class POSCARloader:
     def parse(self):
         self.data = []
         for text in self.rawTxt:
-            self.comment = POSCARloader.find_comment(text)
-            self.find_cell(text)
-            self.data.append({})
-            self.data[-1]['comment']       = self.comment
-            self.data[-1]['directions']    = self.directions
-            self.data[-1]['cell']          = self.cell
-            self.data[-1]['cellSymmetry']  = self.cellSymmetry
-            self.data[-1]['cellVolume']    = self.volume
-            self.data[-1]['cellCenter']    = self.center
-            self.data[-1]['cellAtoms']     = self.cellAtoms
-            self.data[-1]['atomNames']     = self.atomNames
+            read = CellReader(text)
+            self.data.append(read.read())
