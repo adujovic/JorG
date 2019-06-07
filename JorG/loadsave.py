@@ -40,6 +40,7 @@ def load_INCAR(cell,INCARname="INCAR",atomNames=periodic.periodicTableElement):
 #
 #
 
+from itertools import product
 import numpy as np
 def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
     """
@@ -54,16 +55,17 @@ def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
         xyzFile.write("\n\n")
         for i,atom in enumerate(crystal):
             xyzFile.write("%s"%atom[0])
-            for xyz in atom[1]:
-                xyzFile.write(" %.10f"%xyz)
-            if selectedAtoms is not None:
-                vector = 2*np.random.ranf(3)-1.0
-                vector = 0.2*vector/np.linalg.norm(vector)
+            xyzFile.write(" %.10f %.10f %.10f"%(*atom[1],))
+            vector = 2*np.random.ranf(3)-1.0
+            vector = 0.2*vector/np.linalg.norm(vector)
+            try:
                 if i == selectedAtoms[0]:
                     vector = 2.0*vector
                     xyzFile.write(" PatrialCharge(1.0) %f %f %f"%tuple(vector))
                 elif i in selectedAtoms[1:]:
                     xyzFile.write(" PatrialCharge(1.0) %f %f %f"%tuple(vector))
+            except TypeError:
+                print("Not selected!")
             xyzFile.write("\n")
         xyzFile.write("\n")
 
