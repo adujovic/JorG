@@ -128,56 +128,57 @@ def save_POSCAR(fileName,crystal,multiplyers,data):
                         vaspFile.write(" %.10f "%vasp)
                     vaspFile.write(" %s\n"%atom[0])
         vaspFile.write("\n")
+
 #
+#░▀█▀░█▀█░█▀▀░█▀█░█▀▄░░░█▀▀░█▀█░█░█░█▀▀░█▀▄
+#░░█░░█░█░█░░░█▀█░█▀▄░░░▀▀█░█▀█░▀▄▀░█▀▀░█▀▄
+#░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀░░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀
 #
-#
-#
-#
+
 import re
-def save_INCAR(fileName,oldINCAR,crystal,flips):
-    """
-        Saving data to POSCAR file
-                                    """
-    try:
-        mkdir("%s/noFlip"%fileName)
-    except OSError as err:
-        if err.errno != errno.EEXIST:
-            print("Creation of the directory %s/noFlip failed - does it exist?"%fileName)
-            exit(error.systemerror)
+class INCARsaver:
+    def __init__(self,oldINCAR,crystal):
+        self.oldINCAR = oldINCAR
+        self.crystal  = crystal
 
-    try:
-        shutil.copy2("%s/POSCAR"%fileName , "%s/noFlip/POSCAR"%fileName)
-    except OSError:
-        print("Copying POSCAR to noFlip didn't work out!")
-        exit(error.systemerror)
-
-    with open(fileName+"/noFlip/INCAR","w+") as vaspFile:
-        vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
-        vaspFile.write("MAGMOM = ")
-        for i,atom in enumerate(crystal):
-            vaspFile.write("%f "%atom[2])
-        vaspFile.write("\n")
-    for i,flip in enumerate(flips):
+    @staticmethod
+    def mkdir(fileName,flipName):
         try:
-            mkdir("%s/flip%d"%(fileName,i))
+            mkdir(fileName+"/"+flipName)
         except OSError as err:
             if err.errno != errno.EEXIST:
-                print("Creation of the directory %s/flip%d failed - does it exist?"%(fileName,i))
-            exit(error.systemerror)
+                print("Creation of the directory %s/%s failed - does it exist?"%(fileName,flipName))
+                exit(error.systemerror)
+
+    @staticmethod
+    def copy_POSCAR(fileName,flipName):
         try:
-            shutil.copy2("%s/POSCAR"%fileName , "%s/flip%d/POSCAR"%(fileName,i))
+            shutil.copy2("%s/POSCAR"%fileName , "%s/%s/POSCAR"%(fileName,flipName))
         except OSError:
-            print("Copying POSCAR to flip%i didn't work out!"%i)
+            print("Copying POSCAR to %s didn't work out!"%flipName)
             exit(error.systemerror)
-        with open(fileName+"/flip"+str(i)+"/INCAR","w+") as vaspFile:
-            vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',oldINCAR))
+
+    def write_INCAR(self,flipName,flip): 
+        with open(self.fileName+"/"+flipName+"/INCAR","w+") as vaspFile:
+            vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',self.oldINCAR))
             vaspFile.write("MAGMOM = ")
-            for bit,atom in zip(flip,crystal):
+            for bit,atom in zip(flip,self.crystal):
                 if bit:
                     vaspFile.write("%f "%-atom[2])
                 else:
                     vaspFile.write("%f "%atom[2])
             vaspFile.write("\n")
+
+    def save(self,fileName,flips):
+        self.fileName = fileName
+        INCARsaver.mkdir(fileName,"noFlip")
+        INCARsaver.copy_POSCAR(fileName,"noFlip")
+        self.write_INCAR("noFlip",np.ones(len(self.crystal)))
+        for i,flip in enumerate(flips):
+            self.fileName = fileName
+            INCARsaver.mkdir(fileName,"flip%05d"%i)
+            INCARsaver.copy_POSCAR(fileName,"flip%05d"%i)
+            self.write_INCAR("flip%05d"%i,flip)
 
 import re
 import numpy as np

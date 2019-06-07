@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import argv,maxsize,path
+from sys import argv,path
 path.insert(0,r'../../')
-from os import system,environ,mkdir,makedirs,rmdir
+from os import makedirs
 from subprocess import call
 import errno
 import re
@@ -16,8 +16,8 @@ from itertools import product
 
 import JorG.symmetry
 from JorG.argv import options
-from JorG.format import color,print_vector,print_atom,print_case
-from JorG.format import print_crystal,print_moments,print_label
+from JorG.format import color, print_case, print_vector
+from JorG.format import print_crystal, print_moments, print_label
 import JorG.loadsave as loadsave
 import JorG.generator as generator
 
@@ -320,7 +320,8 @@ if __name__ == '__main__':
                         break
 
     # removing 0 = 0 equations !
-    tautologies = np.argwhere(np.apply_along_axis(np.linalg.norm,1,systemOfEquations)<1e-5)[:,0]
+    scale = np.sum(np.abs(systemOfEquations))
+    tautologies = np.argwhere(np.apply_along_axis(np.linalg.norm,1,systemOfEquations)/scale<1e-3)[:,0]
     systemOfEquations = np.delete(systemOfEquations,tuple(tautologies),axis=0)
 
     # Based on https://stackoverflow.com/questions/28816627/how-to-find-linearly-independent-rows-from-a-matrix
@@ -339,7 +340,7 @@ if __name__ == '__main__':
             norm_i = np.linalg.norm(systemOfEquations[i])
             norm_j = np.linalg.norm(systemOfEquations[j])
 
-            if np.abs(inner_product - norm_j * norm_i) < 1E-5:
+            if np.abs(inner_product - norm_j * norm_i) < 1E-8:
                 remover.append(j)
 
     if remover:
@@ -356,13 +357,14 @@ if __name__ == '__main__':
         resultantFlippings     = np.array([flippingConfigurations[0]])
         flippingConfigurations = np.delete(flippingConfigurations, (0), axis=0)
         while len(resultantSystem) < nearestNeighbor:
+            print(systemOfEquations)
             if systemOfEquations.size == 0:
                 print("ERROR! Not enough equations! Please rerun.")
                 exit(-3)
             tmpVector = np.copy(systemOfEquations[0])
             for vector in gram_schmidt:
                 tmpVector -= np.inner(tmpVector,vector)*vector/np.inner(vector,vector)
-            if np.linalg.norm(tmpVector) > 1e-5:
+            if np.linalg.norm(tmpVector)/scale > 1e-4:
                 gram_schmidt           = np.vstack((gram_schmidt,tmpVector))
                 resultantSystem        = np.vstack((resultantSystem,systemOfEquations[0]))
                 systemOfEquations      = np.delete(systemOfEquations, (0), axis=0)
@@ -371,6 +373,7 @@ if __name__ == '__main__':
         systemOfEquations      = resultantSystem
         flippingConfigurations = resultantFlippings
 
+    print(systemOfEquations)
     print_label("System of equations:",labelStyle=color.BF)
     for eq in systemOfEquations:
         print_vector(eq)
@@ -383,5 +386,6 @@ if __name__ == '__main__':
 
 
     np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)
-    loadsave.save_INCAR(outDirName,incarData,crystal,flippingConfigurations)
+    saver = loadsave.INCARsaver(incarData,crystal)
+    saver.save(outDirName,flippingConfigurations)
     exit()
