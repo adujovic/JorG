@@ -139,7 +139,7 @@ from JorG.PeriodicTable import elementMagneticMoment
 from JorG.Masks         import maskFull
 from itertools import product
 
-class generate_from_NN:
+class NearestNeighborsGenerator:
     Wyckoffs='abcdefghijklmnopqrstuvwxyz'
     originalSymmetry    = None
     atomTypeMask        = maskFull
@@ -156,15 +156,19 @@ class generate_from_NN:
 
     def __init__(self,cell,
                  referenceAtom,
-                 directions,
-                 atomNames):
+                 directions):
         self.cell            = cell
         self.referenceAtom   = referenceAtom
         self.directions      = directions
         self.nearestNeighbor = 1
-        self.atomNames       = atomNames
 
-        originalSymmetryCell = generate_from_NN.get_symmetry(cell,directions)
+        # finding unique names with conserved order
+        # Using: stackoverflow.com/questions/15637336/numpy-unique-with-order-preserved
+        names = np.array([atom[0] for atom in cell],dtype=str)
+        _, idx = np.unique(names, return_index=True)
+        self.atomNames       = names[np.sort(idx)]
+
+        originalSymmetryCell = NearestNeighborsGenerator.get_symmetry(cell,directions)
         originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
 
         diagonal = np.sqrt(np.sum([np.dot(d-referenceAtom[1],d-referenceAtom[1]) for d in directions]))
@@ -235,7 +239,7 @@ class generate_from_NN:
                                                       self.cutOff,
                                                       self.referenceAtom)
             self.multipliers += self.extraMultiplier
-            extraDirections = generate_from_NN.get_extra_directions(self.multipliers,self.directions)
+            extraDirections = NearestNeighborsGenerator.get_extra_directions(self.multipliers,self.directions)
 
             self.crystal = []
             for (name,mul,(atom,moment)) in product(
@@ -258,7 +262,7 @@ class generate_from_NN:
                            self.newReferenceAtom,
                            extraDirections)
             if self.ISFOUND :
-                symmetryCell = generate_from_NN.get_symmetry(self.crystal,extraDirections)
+                symmetryCell = NearestNeighborsGenerator.get_symmetry(self.crystal,extraDirections)
                 self.crystalSymmetry = spglib.get_symmetry_dataset(symmetryCell)
                 self.cutOff = self.distances[self.nearestNeighbor]
                 return (self.cutOff,

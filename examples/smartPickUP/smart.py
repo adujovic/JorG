@@ -5,9 +5,9 @@ path.insert(0,r'../../')
 from JorG.loadsave import POSCARloader
 import numpy as np
 
-BRUTAL='Ni'
-CUTOFF=12.0
-NUMBER=3
+BRUTAL='Fe'
+CUTOFF=2.46
+NUMBER=1
 
 def read_moments(rawTxt):
     moments={}
@@ -86,11 +86,14 @@ for i,recordB in enumerate(data[1:]):
             flipped.append(a)
 
     for f,(j,atom) in product(flipped,enumerate(crystal)):
-        if atom[0] not in flipped and atom[1] in 'Ni':
+        if atom[0] not in flipped and atom[1] in BRUTAL:
             d = np.around(np.linalg.norm(atom[2]-recordB[2][f-1][1]),decimals=2)
             if d in distances:
                 systemOfEquations[i][np.argwhere(distances==d)] += recordA[0][atom[0]]*recordB[0][f]
 
+if len(systemOfEquations) == 1:
+    print(500*dE[0]/systemOfEquations[0]/13.6056980659)
+    exit()
 systemOfEquations = np.array(systemOfEquations)
 dE                = np.array(dE)
 

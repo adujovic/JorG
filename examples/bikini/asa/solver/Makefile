@@ -41,7 +41,7 @@ $(EXEC):  $(CPP_OBJECTS)
  
 # Other targets 
 %.o: %.cpp
-	$(CPP) $(COMPILER_SPECIFIC) $(CFLAGS) $(SITES) -c $< -o $@
+	$(CPP) $(COMPILER_SPECIFIC) $(CFLAGS) $(SITES) $(VERBOSE) -c $< -o $@
 
 # Cleaning
 clean:

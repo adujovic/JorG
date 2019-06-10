@@ -161,11 +161,11 @@ def print_angles(directions,**kwargs):
         data = "{:s} = {:= 5.3f}π = {:3d}°".format(n,angle,int(np.around(180.0*angle)))
         kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(n)-1)+"|"+'\n')
 
-def empty_line(linewidth,stream):
-    stream.write("|"+linewidth*' '+"|"+'\n')
+def empty_line(**kwargs):
+    kwargs['stream'].write("|"+kwargs['linewidth']*' '+"|"+'\n')
 
-def line(linewidth,stream):
-    stream.write("+"+linewidth*'-'+"+"+'\n')
+def line(**kwargs):
+    kwargs['stream'].write("+"+kwargs['linewidth']*'-'+"+"+'\n')
 
 from itertools import cycle
 def color_names(*args):
@@ -182,19 +182,19 @@ def print_crystal(directions, cell, **kwargs):
 
     print_composition(cell,**kwargs)
 
-    empty_line(kwargs['linewidth'],kwargs['stream'])
+    empty_line(**kwargs)
 
     print_axes(directions,**kwargs)
 
-    empty_line(kwargs['linewidth'],kwargs['stream'])
+    empty_line(**kwargs)
 
     print_directions(directions,**kwargs)
 
-    empty_line(kwargs['linewidth'],kwargs['stream'])
+    empty_line(**kwargs)
 
     print_angles(directions,**kwargs)
 
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
 
 def check_line(sumOfChars,length,**kwargs):
     if sumOfChars > kwargs['linewidth']-length-1:
@@ -212,7 +212,7 @@ def print_moments(moments,cell=None,**kwargs):
                                  'elementStyle' : color.BF+color.GRAY,
                                  'labelStyle'   : color.DARKGRAY})
 
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
 
     kwargs['stream'].write("|"+"Magnetic moments read:".center(kwargs['linewidth'])+"|"+'\n')
     kwargs['stream'].write('| ')
@@ -236,7 +236,7 @@ def print_moments(moments,cell=None,**kwargs):
     kwargs['stream'].write(' '*(kwargs['linewidth']-sumOfChars))
     kwargs['stream'].write('|'+'\n')
 
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
 
 
 def print_label(text,**kwargs):
@@ -252,7 +252,7 @@ def print_label(text,**kwargs):
         label = text.center(kwargs['linewidth']-2)
     label = kwargs['labelStyle']+label+color.END
 
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
 
     kwargs['stream'].write("| "+label+" |"+'\n')
 
@@ -260,4 +260,4 @@ def print_label(text,**kwargs):
     if kwargs['atoms'] is not None:
         for atom in kwargs['atoms']:
             print_atom(atom,center=True,**kwargs)
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)

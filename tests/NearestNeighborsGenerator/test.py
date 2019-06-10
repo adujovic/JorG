@@ -4,7 +4,7 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../../')
 import numpy as np
-from JorG.generator import generate_from_NN
+from JorG.generator import NearestNeighborsGenerator
 import time
 
 def main(**args):
@@ -22,10 +22,9 @@ if __name__ == '__main__':
     oldMoments      = [5.0, 5.0]
     extraMultiplier = [0, 0, 0]
 
-    generator = generate_from_NN(cell,
+    generator = NearestNeighborsGenerator(cell,
                                  referenceAtom,
-                                 directions,
-                                 atomNames)
+                                    directions)
     generator.wyckoffs         = wyckoffs
     generator.atomTypeMask     = atomTypeMask
     generator.moments          = oldMoments
@@ -34,18 +33,24 @@ if __name__ == '__main__':
     for i in range(1,5):
         print('Nearest Neighbor #%d\t'%i,end='')
         tracker  = -(time.time())
-        try:
-            (cutOff,
-             crystal,
-             symmetryFull,
-             newReference,
-             copiesInEachDirection,
-             wyckoffDict           ) = generator(i)
-            print("Test succeeded")
-            print("\t\tCrystal size: %d atoms"%len(crystal))
-        except Exception as e:
-            print(e)
-            print("Test failed")
+        (cutOff,
+         crystal,
+         symmetryFull,
+         newReference,
+         copiesInEachDirection,
+         wyckoffDict           ) = generator(i)
+#        try:
+#            (cutOff,
+#             crystal,
+#             symmetryFull,
+#             newReference,
+#             copiesInEachDirection,
+#             wyckoffDict           ) = generator(i)
+#            print("Test succeeded")
+#            print("\t\tCrystal size: %d atoms"%len(crystal))
+#        except Exception as e:
+#            print(e)
+#            print("Test failed")
         tracker += time.time()
         print("\t\tRuntime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))
 

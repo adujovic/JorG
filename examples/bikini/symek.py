@@ -171,10 +171,9 @@ if __name__ == '__main__':
         if nearestNeighbor is -1:
             nearestNeighbor = 2
 
-        generatorNN = generator.generate_from_NN(cell,
+        generatorNN = generator.NearestNeighborsGenerator(cell,
                                      referenceAtom,
-                                     directions,
-                                     atomNames)
+                                     directions)
         generatorNN.wyckoffs         = wyckoffs
         generatorNN.atomTypeMask     = atomTypeMask
         generatorNN.moments          = oldMoments

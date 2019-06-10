@@ -168,7 +168,8 @@ int main(int argc, char** argv){
 #else
     size_t upperlimit = 0.75*mask.count(); // doesn't allow more than 75% flipps
 #endif
-
+    upperlimit = upperlimit < 2          ? 2 : upperlimit;
+    lowerlimit = lowerlimit > upperlimit ? 0 : lowerlimit;
 
     std::unordered_set<std::bitset<SITESNUMBER>> solutions;
     size_t iteration = 0U;

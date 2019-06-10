@@ -27,7 +27,7 @@ from JorG.PeriodicTable import periodicTableElement
 import numpy as np
 def print_line(line,**kwargs):
     kwargs = standard.fix(**kwargs)
-    kwargs['stream'].write(3*"*"+(line).center(kwargs['linewidth']-6)+3*"*"+"\n")
+    kwargs['stream'].write("|"+(line).center(kwargs['linewidth'])+"|"+"\n")
 
 def get_equivalent_line(i,j,atom,wyck):
     output = "%s: "%(atom)
@@ -38,16 +38,12 @@ def get_equivalent_line(i,j,atom,wyck):
 
 def write_single(comment, record,
                  crystal, **kwargs):
-    uniqueWyckoffs = set(record['wyckoffs'])
-    wyckoffCount   = dict.fromkeys(uniqueWyckoffs,0)
-    print_line(comment,**kwargs)
-    line(kwargs['linewidth'],kwargs['stream'])
+    wyckoffCount   = dict.fromkeys(set(record['wyckoffs']),0)
 
-    kwargs['stream'].write(3*"*"+("Spacegroup: "
-                      +"%s "%(record['international'])
-                      +"(%d) "%(record['number'])
-                      ).center(kwargs['linewidth']-6)
-                      +3*"*"+'\n')
+    print_line(comment,**kwargs)
+    line(**kwargs)
+
+    print_line("Spacegroup: %s (%d) "%(record['international'],record['number']),**kwargs)
     print_line("Mapping to equivalent atoms with the Wyckoff positions:",**kwargs)
 
     for i,(j,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
@@ -55,23 +51,22 @@ def write_single(comment, record,
         print_line(output,**kwargs)
         wyckoffCount[wyck] += 1
 
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
 
     output = ""
-    for wyck in uniqueWyckoffs:
+    for wyck in wyckoffCount:
         output += " #%s "%(wyck)
         output += " = "+" %d "%(wyckoffCount[wyck])
-    kwargs['stream'].write(3*"*"+(output.center(kwargs['linewidth']-6)+3*"*"+"\n"))
+    print_line(output)
 
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
 
 def write_report(comments, data,
                  crystal, **kwargs):
     kwargs = standard.fix(**kwargs)
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
     print_label("Symmetry analysis",**kwargs)
-    kwargs['stream'].write(3*"*"+("Symmetry analysis").center(kwargs['linewidth']-6)+3*"*"+"\n")
-    line(kwargs['linewidth'],kwargs['stream'])
+    line(**kwargs)
 
     for i,(comment,record) in enumerate(zip(comments,data)):
         write_single(comment,record,
