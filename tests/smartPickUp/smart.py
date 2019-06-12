@@ -1,1 +1,0 @@
-../../examples/smartPickUP/smart.py
