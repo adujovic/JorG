@@ -10,10 +10,6 @@ from itertools import product
 class error:
     unexcepted = 12
 
-BRUTAL='Fe'
-CUTOFF=2.46
-NUMBER=1
-
 class MAGMOMloader:
     rawTxt = []
     data   = []
@@ -146,36 +142,44 @@ class SmartPickUp:
     def get_system_of_equations(self):
         self.solution = None
         self.map_distances()
-
         self.systemOfEquations = []
-        E0 = self.MAGMOMs(0)['energy']
         self.dE = []
         for i in range(1,len(self.MAGMOMs)):
             try:
-                self.dE.append(self.MAGMOMs(i)['energy']-E0)
+                self.dE.append(self.MAGMOMs(i)['energy']-self.MAGMOMs(0)['energy'])
             except TypeError:
                 print("VASP hasn't finished this run (%d/%d)"%(i,len(self.MAGMOMs)-1))
                 continue
-            self.systemOfEquations.append(np.zeros(self.numberOfNeighbors))
-            flipped = []
-            for idx,atom in enumerate(self.POSCARs(0)['cell']):
-                if atom[0] not in self.namesOfInteractingAtoms:
-                    continue
+            self.get_SOE_line(i)
 
-                momentA = self.MAGMOMs(0)['moments'][idx+1]
-                momentB = self.MAGMOMs(i)['moments'][idx+1]
-                scalar = momentA * momentB
-                if (abs(scalar) > 1e-5 and scalar < 0.0):
-                    flipped.append(idx)
-        
-            for f,(j,atom) in product(flipped,enumerate(self.crystal)):
-                if atom[1] not in self.namesOfInteractingAtoms:
-                    continue
-                elif atom[0] in flipped:
-                    continue
-                d = np.around(np.linalg.norm(atom[2]-self.POSCARs(0)['cell'][f][1]),decimals=2)
-                if d in self.distances:
-                    self.systemOfEquations[i-1][np.argwhere(self.distances==d)] -= 2*self.MAGMOMs(0)['moments'][atom[0]+1]*self.MAGMOMs(i)['moments'][f+1]
+    def get_SOE_line(self,i):
+        self.systemOfEquations.append(np.zeros(self.numberOfNeighbors))
+        self.flipped = []
+        for idx,atom in enumerate(self.POSCARs(0)['cell']):
+            self.get_flips(i,idx,atom)
+        self.get_SOE_elements(i)
+
+    def get_flips(self,i,idx,atom):
+        if atom[0] not in self.namesOfInteractingAtoms:
+           return
+        momentA = self.MAGMOMs(0)['moments'][idx+1]
+        momentB = self.MAGMOMs(i)['moments'][idx+1]
+        scalar = momentA * momentB
+        if (abs(scalar) > 1e-5 and scalar < 0.0):
+            self.flipped.append(idx)
+      
+    def get_SOE_elements(self,idx):
+        for flip,atom in product(self.flipped,self.crystal):
+            if atom[1] not in self.namesOfInteractingAtoms:
+                continue
+            elif atom[0] in self.flipped:
+                continue
+            self.get_SOE_element(idx,flip,atom)
+
+    def get_SOE_element(self,idx,flip,atom):
+        d = np.around(np.linalg.norm(atom[2]-self.POSCARs(0)['cell'][flip][1]),decimals=2)
+        if d in self.distances:
+            self.systemOfEquations[idx-1][np.argwhere(self.distances==d)] -= 2*self.MAGMOMs(0)['moments'][atom[0]+1]*self.MAGMOMs(idx)['moments'][flip+1]
 
     energyRatios = {'eV' :    1.0,
                     'meV':    1000.0,

@@ -5,9 +5,9 @@ path.insert(0,r'../../')
 from JorG.loadsave import POSCARloader
 import numpy as np
 
-BRUTAL='Fe'
-CUTOFF=2.46
-NUMBER=1
+BRUTAL='Ni'
+CUTOFF=6.99
+NUMBER=3
 
 def read_moments(rawTxt):
     moments={}
