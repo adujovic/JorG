@@ -229,10 +229,7 @@ class NearestNeighborsGenerator:
         self.nearestNeighbor = nearestNeighbor
         self.fix_moments()
         self.crystal = []
-        if len(self.distances) > 1:
-            minDirection = self.distances[-1]
-        else:
-            minDirection = 0.99*np.min([np.linalg.norm(d) for d in self.directions])
+        minDirection = 0.99*np.min([np.linalg.norm(d) for d in self.directions])
         for self.cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(self.nearestNeighbor+1,3),1.0)):
             self.multipliers = get_number_of_pictures(self.directions,self.cutOff,
                                                       self.referenceAtom)

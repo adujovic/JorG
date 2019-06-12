@@ -224,5 +224,3 @@ class EquationSolver:
             self.solution = np.linalg.solve(self.equations,self.vector,**kwargs)
         else:
             self.solution = np.linalg.lstsq(self.equations,self.vector,rcond=None,**kwargs)[0]
-
-

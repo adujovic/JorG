@@ -30,27 +30,16 @@ if __name__ == '__main__':
     generator.moments          = oldMoments
     generator.extraMultiplier  = extraMultiplier
 
-    for i in range(1,5):
+    for i in range(1,77):
         print('Nearest Neighbor #%d\t'%i,end='')
         tracker  = -(time.time())
-        (cutOff,
-         crystal,
-         symmetryFull,
-         newReference,
-         copiesInEachDirection,
-         wyckoffDict           ) = generator(i)
-#        try:
-#            (cutOff,
-#             crystal,
-#             symmetryFull,
-#             newReference,
-#             copiesInEachDirection,
-#             wyckoffDict           ) = generator(i)
-#            print("Test succeeded")
-#            print("\t\tCrystal size: %d atoms"%len(crystal))
-#        except Exception as e:
-#            print(e)
-#            print("Test failed")
+        try:
+            _,crystal,_,_,_,_ = generator(i)
+            print("Test succeeded")
+            print("\t\tCrystal size: %d atoms"%len(crystal))
+        except Exception as e:
+            print(e)
+            print("Test failed")
         tracker += time.time()
         print("\t\tRuntime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))
 
