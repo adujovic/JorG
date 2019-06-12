@@ -10,6 +10,22 @@ from itertools import product
 class error:
     unexcepted = 12
 
+class EnergyConverter:
+    energyRatios = {'eV' :    1.0,
+                    'meV':    1000.0,
+                    'Ry' :    np.reciprocal(13.6056980659),
+                    'mRy':    1000.0*np.reciprocal(13.6056980659),
+                    'He' :    0.5*np.reciprocal(13.6056980659),
+                    'mHe':    500.0*np.reciprocal(13.6056980659),
+                    'K'  :    11604.51812}
+    @staticmethod
+    def convert(*args,**kwargs):
+        try:
+            return [EnergyConverter.energyRatios[kwargs['units']]*arg for arg in args]
+        except KeyError:
+            print("No unit defined! Values will be in eV")
+            return args
+
 class MAGMOMloader:
     rawTxt = []
     data   = []
@@ -99,6 +115,7 @@ class SmartPickUp:
         self.numberOfNeighbors       = numberOfNeighbors
         self.namesOfInteractingAtoms = namesOfInteractingAtoms
         self.solution = None
+        self.solver   = None
 
     def read_POSCARs(self,*args):
         self.solution = None
@@ -134,9 +151,7 @@ class SmartPickUp:
             if atom[0] in self.namesOfInteractingAtoms:
                 self.distances.add(d)
 
-        self.distances = np.array([d for d in self.distances])
-        self.distances = np.sort(self.distances)
-        self.distances = self.distances[1:1+self.numberOfNeighbors]
+        self.distances = np.sort(np.array([d for d in self.distances]))[1:1+self.numberOfNeighbors]
 
     # for sorted!
     def get_system_of_equations(self):
@@ -151,6 +166,7 @@ class SmartPickUp:
                 print("VASP hasn't finished this run (%d/%d)"%(i,len(self.MAGMOMs)-1))
                 continue
             self.get_SOE_line(i)
+        self.solver = EquationSolver(self.systemOfEquations,self.dE)
 
     def get_SOE_line(self,i):
         self.systemOfEquations.append(np.zeros(self.numberOfNeighbors))
@@ -181,36 +197,30 @@ class SmartPickUp:
         if d in self.distances:
             self.systemOfEquations[idx-1][np.argwhere(self.distances==d)] -= 2*self.MAGMOMs(0)['moments'][atom[0]+1]*self.MAGMOMs(idx)['moments'][flip+1]
 
-    energyRatios = {'eV' :    1.0,
-                    'meV':    1000.0,
-                    'Ry' :    np.reciprocal(13.6056980659),
-                    'mRy':    1000.0*np.reciprocal(13.6056980659),
-                    'He' :    0.5*np.reciprocal(13.6056980659),
-                    'mHe':    500.0*np.reciprocal(13.6056980659),
-                    'K'  :    11604.51812}
 
-    @staticmethod
-    def convert(*args,**kwargs):
-        try:
-            return [SmartPickUp.energyRatios[kwargs['units']]*arg for arg in args]
-        except KeyError:
-            print("No unit defined! Values will be in eV")
-            return args
+    def solve(self,**kwargs):
+        if self.solver is None:
+            self.get_system_of_equations()
+        return EnergyConverter.convert(*(self.solver.solve()),**kwargs)
 
-    def solve_system_of_equations(self, ISREDUNDANT=False, **kwargs):
-        self.systemOfEquations = np.array(self.systemOfEquations)
-        self.dE                = np.array(self.dE)
-
-        if len(self.systemOfEquations) == 1:
-            self.solution = self.dE[0]/self.systemOfEquations[0]
-        elif self.systemOfEquations.shape[0] == self.systemOfEquations.shape[1]:
-            self.solution = np.linalg.solve(self.systemOfEquations,self.dE)
-        else:
-            self.solution = np.linalg.lstsq(self.systemOfEquations,self.dE,rcond=None)[0]
+class EquationSolver:
+    def __init__(self,equations,vector):
+        self.equations = np.array(equations)
+        self.vector    = np.array(vector)
+        self.solution  = None
 
     def solve(self,**kwargs):
         if self.solution is not None:
-            return SmartPickUp.convert(*self.solution,**kwargs)
-        self.get_system_of_equations()
+            return self.solution
         self.solve_system_of_equations(**kwargs)
-        return SmartPickUp.convert(*self.solution,**kwargs)
+        return self.solution
+
+    def solve_system_of_equations(self, **kwargs):
+        if len(self.equations) == 1:
+            self.solution = self.vector[0]/self.equations[0]
+        elif self.equations.shape[0] == self.equations.shape[1]:
+            self.solution = np.linalg.solve(self.equations,self.vector,**kwargs)
+        else:
+            self.solution = np.linalg.lstsq(self.equations,self.vector,rcond=None,**kwargs)[0]
+
+
