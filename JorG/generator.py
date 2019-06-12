@@ -233,46 +233,38 @@ class NearestNeighborsGenerator:
             minDirection = self.distances[-1]
         else:
             minDirection = 0.99*np.min([np.linalg.norm(d) for d in self.directions])
-        for cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(self.nearestNeighbor+1,3),1.0)):
-            self.cutOff = cutOff
-            self.multipliers = get_number_of_pictures(self.directions,
-                                                      self.cutOff,
+        for self.cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(self.nearestNeighbor+1,3),1.0)):
+            self.multipliers = get_number_of_pictures(self.directions,self.cutOff,
                                                       self.referenceAtom)
             self.multipliers += self.extraMultiplier
             extraDirections = NearestNeighborsGenerator.get_extra_directions(self.multipliers,self.directions)
-
-            self.crystal = []
-            for (name,mul,(atom,moment)) in product(
-                                              self.atomNames,
-                                              product(
-                                                range(self.multipliers[0]+1),
-                                                range(self.multipliers[1]+1),
-                                                range(self.multipliers[2]+1)),
-                                              zip(self.cell,self.moments)):
-                if atom[0] == name:
-                    position  = np.copy(atom[1])
-                    position += np.dot(mul,self.directions)
-                    self.crystal.append([atom[0],position,moment])
-
-
+            self.generate_crystal()
             self.find_new_refernce()
-
-            self.ISFOUND = self.check_in_cell(
-                           self.crystal,
-                           self.newReferenceAtom,
-                           extraDirections)
+            self.ISFOUND = self.check_in_cell(self.crystal,
+                           self.newReferenceAtom,extraDirections)
             if self.ISFOUND :
-                symmetryCell = NearestNeighborsGenerator.get_symmetry(self.crystal,extraDirections)
-                self.crystalSymmetry = spglib.get_symmetry_dataset(symmetryCell)
+                self.crystalSymmetry = spglib.get_symmetry_dataset(
+                        NearestNeighborsGenerator.get_symmetry(
+                            self.crystal,extraDirections))
                 self.cutOff = self.distances[self.nearestNeighbor]
-                return (self.cutOff,
-                        self.crystal,
-                        self.crystalSymmetry,
-                        self.newReference,
-                        self.multipliers,
-                        self.wyckoffPositionDict)
-
+                return (self.cutOff,       self.crystal,     self.crystalSymmetry,
+                        self.newReference, self.multipliers, self.wyckoffPositionDict)
         return None
+
+    def generate_crystal(self):
+        self.crystal = []
+        for (name,mul,(atom,moment)) in product(
+                                          self.atomNames,
+                                          product(
+                                            range(self.multipliers[0]+1),
+                                            range(self.multipliers[1]+1),
+                                            range(self.multipliers[2]+1)),
+                                          zip(self.cell,self.moments)):
+            if atom[0] != name:
+                continue
+            position  = np.copy(atom[1])
+            position += np.dot(mul,self.directions)
+            self.crystal.append([atom[0],position,moment])
 
 #
 #
