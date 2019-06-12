@@ -26,6 +26,48 @@ class EnergyConverter:
             print("No unit defined! Values will be in eV")
             return args
 
+class ReadMoments:
+    @staticmethod
+    def should_skip(line):
+        for regex in ['^\s+$','^\s*#','^-+$',
+                      '^\s*tot','magnetization \(x\)']:
+            if re.search(regex,line):
+                return True
+        return False
+
+    def should_stop__reading(self,line):
+        if re.search('^\s*tot',line):
+            self.ISTOBEREAD = False
+
+    def should_start_reading(self,line):
+        if re.search(' \(x\)',line):
+            self.ISTOBEREAD = True
+
+    @staticmethod
+    def read_energy(line):
+        if "energy  without entropy" in line:
+            return float(line.split()[-1])
+
+    def __init__(self):
+        self.moments    = {}
+        self.energy     = None
+        self.ISTOBEREAD = False
+
+    def __call__(self,text):
+        for line in text:
+            self.read_line(line)
+        return {'moments': self.moments, 'energy': self.energy}
+
+    def read_line(self,line):
+        self.should_start_reading(line)
+        self.should_stop__reading(line)
+        if self.should_skip(line):
+            return
+        elif self.ISTOBEREAD:
+            self.moments[int(line.split()[0])] = float(line.split()[4])
+        elif self.energy is None:
+            self.energy = self.read_energy(line)
+
 class MAGMOMloader:
     rawTxt = []
     data   = []
@@ -43,49 +85,9 @@ class MAGMOMloader:
     def __len__(self):
         return len(self.data)
 
-    @staticmethod
-    def should_skip(line):
-        for regex in ['^\s+$','^\s*#','^-+$',
-                      '^\s*tot','magnetization \(x\)']:
-            if re.search(regex,line):
-                return True
-        return False
-
-    @staticmethod
-    def should_stop__reading(line,ISTOBEREAD):
-        if re.search('^\s*tot',line):
-            return False
-        return ISTOBEREAD
-
-    @staticmethod
-    def should_start_reading(line,ISTOBEREAD):
-        if re.search(' \(x\)',line):
-            return True
-        return ISTOBEREAD
-
-    @staticmethod
-    def read_energy(line):
-        if "energy  without entropy" in line:
-            return float(line.split()[-1])
-
-    @staticmethod
-    def read_moments(text):
-        moments={}
-        energy = None
-        ISTOBEREAD=False
-        for line in text:
-            ISTOBEREAD = MAGMOMloader.should_start_reading(line,ISTOBEREAD)
-            ISTOBEREAD = MAGMOMloader.should_stop__reading(line,ISTOBEREAD)
-            if MAGMOMloader.should_skip(line):
-                continue
-            elif ISTOBEREAD:
-                moments[int(line.split()[0])] = float(line.split()[4])
-            elif energy is None:
-                energy = MAGMOMloader.read_energy(line)
-        return {'moments': moments, 'energy': energy}
-
     def parse_text(self,text):
-        self.data.append(MAGMOMloader.read_moments(text))
+        read_moments = ReadMoments()
+        self.data.append(read_moments(text))
 
     def parse(self):
         self.data   = []
