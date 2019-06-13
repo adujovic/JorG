@@ -152,3 +152,30 @@ else
     echo -e "$BF$DARKYELLOW Test failed $END"
 fi
 echo "------------------------------------------------------------------------------------------------------------------------------------------------------"
+echo -e "${IT}${DARKGREEN}  ./argv_test.py ${END}-i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --period 3d 5p:"
+./argv_test.py -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD -X "0 0 1" --period 3d 5p
+STATUS=$?
+if [ "$STATUS" == "0" ]; then
+    echo -e "$BF$DARKBLUE Test succeed $END"
+else
+    echo -e "$BF$DARKYELLOW Test failed $END"
+fi
+echo "------------------------------------------------------------------------------------------------------------------------------------------------------"
+echo -e "${IT}${DARKGREEN}  ./argv_test.py ${END}-i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --block D:"
+./argv_test.py -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD -X "0 0 1" --block D
+STATUS=$?
+if [ "$STATUS" == "0" ]; then
+    echo -e "$BF$DARKBLUE Test succeed $END"
+else
+    echo -e "$BF$DARKYELLOW Test failed $END"
+fi
+echo "------------------------------------------------------------------------------------------------------------------------------------------------------"
+echo -e "${IT}${DARKGREEN}  ./argv_test.py ${END}-i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --group 2 5:"
+./argv_test.py -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD -X "0 0 1" --group 2 5
+STATUS=$?
+if [ "$STATUS" == "0" ]; then
+    echo -e "$BF$DARKBLUE Test succeed $END"
+else
+    echo -e "$BF$DARKYELLOW Test failed $END"
+fi
+echo "------------------------------------------------------------------------------------------------------------------------------------------------------"
