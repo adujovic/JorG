@@ -1,0 +1,15 @@
+#    """
+#        Generating output
+#    """
+    if extraDimentions is not None:
+        for separator in [' ', ',', ';', '.', '/']:
+            extraMultiplier = np.fromstring(extraDimentions, dtype=int, sep=separator)
+            if len(extraMultiplier) >= 3:
+                extraMultiplier = extraMultiplier[:3]
+                break
+        if len(extraMultiplier) != 3:
+            print("Error with the extraDimentions given. Omitting this functionality!")
+            extraMultiplier = np.zeros(3,dtype=int)
+    else:
+        extraMultiplier = np.zeros(3,dtype=int)
+

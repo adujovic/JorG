@@ -24,6 +24,7 @@ class errors:
 
 from datetime import datetime
 from os import makedirs
+import JorG.loadsave as loadsave
 class StreamHandler:
     def __init__(self,*args,**kwargs):
         self.streams = []
@@ -54,6 +55,13 @@ class StreamHandler:
 
     def __call__(self, idx=0):
         return self.streams[idx]
+
+    def load_VASP(self,POSCARfile,INCARfile):
+        load_POSCAR          = loadsave.POSCARloader(POSCARfile)
+        load_POSCAR.parse()
+        readData             = load_POSCAR(0)
+        oldMoments,incarData = loadsave.load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
+        return readData,oldMoments,incarData
 
 from copy import copy
 class standard:
@@ -134,3 +142,12 @@ class TemporaryFiles:
                 remove(self.prefix+name+self.suffix+self.extension)
             except OSError:
                 print("No file %s"%(self.prefix+name+self.suffix+self.extension))
+
+from JorG.PeriodicTable import periodicTableElement
+def from_refined(refinedCell):
+    directions = np.array(refinedCell[0])
+    cell = []
+    for refinedAtom,atomType in zip(refinedCell[1],refinedCell[2]):
+        newPosition = np.dot(refinedAtom,refinedCell[0])
+        cell.append((periodicTableElement[atomType-1],newPosition))
+    return cell,directions

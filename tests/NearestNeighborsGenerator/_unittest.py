@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import spglib
 from JorG.generator import NearestNeighborsGenerator
 
 class TestNearestNeighborsGenerator(unittest.TestCase):
