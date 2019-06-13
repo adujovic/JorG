@@ -76,14 +76,24 @@ class options:
         output += '$'
         return output
 
+    @staticmethod
+    def concatenate(keys,values):
+        output = ''
+        for key in keys:
+            output += str(values[key])
+        return output
+
     def generate_mask(self):
         output = ''
         if self.opt.__dict__['period'] is not None:
-            output += period.periods[self.opt.__dict__['period']]
+            output += self.concatenate(self.opt.__dict__['period'],
+                                        periodic.periods)
         if self.opt.__dict__['group'] is not None:
-            output += period.groups[self.opt.__dict__['group']]
+             output += self.concatenate(self.opt.__dict__['group'],
+                                        periodic.groups)
         if self.opt.__dict__['block'] is not None:
-            output += period.blocks[self.opt.__dict__['block']]
+             output += self.concatenate(self.opt.__dict__['block'],
+                                        periodic.blocks)
         if self.opt.__dict__['elements'] is not None:
             output += self.generate_separate()
         if output == '':

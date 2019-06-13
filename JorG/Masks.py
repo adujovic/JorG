@@ -5,6 +5,8 @@ class MaskTemplate:
         self.mask = mask
     def __contains__(self,element):
         return element in self.mask
+    def __str__(self):
+        return str(self.mask)
     def __add__(self,other):
         return self.mask+other.mask
 
