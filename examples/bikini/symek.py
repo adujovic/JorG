@@ -21,7 +21,9 @@ from JorG.format import print_crystal, print_moments, print_label
 import JorG.loadsave as loadsave
 import JorG.generator as generator
 
-#from multiprocessing import Pool, TimeoutError
+from JorG.pickup import EquationSolver,NaiveHeisenberg
+
+from WiP.WiP import StreamHandler,JmolVisualization,TemporaryFiles
 
 class errors:
     failed_to_generate = -201
@@ -29,9 +31,6 @@ class errors:
 
 def main(**args):
     pass
-#    start = time.time()
-#    end = time.time()
-#    print(end - start)
 
 if __name__ == '__main__':
     currentOptions = options(*argv)
@@ -47,32 +46,17 @@ if __name__ == '__main__':
     outDirName     = currentOptions('output')
     extraDimentions= currentOptions('extra-dimentions')
 
-    if outDirName is None:
-      # if output directory is not given:
-      outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
-    else:
-      # remove multiple '/' and possible '/' at the end
-      outDirName = re.sub('/+','/',outDirName)
-      outDirName = re.sub('/$','',outDirName)
-
-    # creating output path
-    try:
-        makedirs("%s"%outDirName)
-    except OSError as err:
-        if err.errno != errno.EEXIST:
-            print("Creation of the directory %s failed - does it exist?"%outDirName)
-            exit(error.systemerror)
-        else:
-            print("%s exists: Data will be overwritten!"%outDirName)
+    handler    = StreamHandler(outDirName)
+    outDirName = handler()
 
 #    """ Reading POSCAR and INCAR files
 #                                       """
-#
+
     load_POSCAR          = loadsave.POSCARloader(POSCARfile)
     load_POSCAR.parse()
     readData             = load_POSCAR(0)
     oldMoments,incarData = loadsave.load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
-#
+
     cell          = readData['cell']
     cellSymmetry  = readData['cellSymmetry']
     atomNames     = readData['atomNames']
@@ -134,10 +118,7 @@ if __name__ == '__main__':
                     atom[1] = newPosition
                     continue
 #    """
-#
 #        Printing input data
-#
-#
 #    """
 
     print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=[referenceAtom],labelStyle=color.BF)
@@ -147,10 +128,7 @@ if __name__ == '__main__':
     print_moments(oldMoments,cell=cell)
 
 #    """
-#
 #        Generating output
-#
-#
 #    """
     if extraDimentions is not None:
         for separator in [' ', ',', ';', '.', '/']:
@@ -209,7 +187,6 @@ if __name__ == '__main__':
                                                       crystal,
                                                       directions,
                                                       extraDirections)
-#
 #    """ Checking the symmetry
 #                    of the output """
     with open(outDirName+"/output.txt",'w+') as raport:
@@ -224,7 +201,6 @@ if __name__ == '__main__':
     realCopies = [copy+1 for copy in copiesInEachDirection]
     print_label("OUTPUT: %dx%dx%d"%(*realCopies,),labelStyle=color.BF)
     print_crystal(extraDirections,crystal)
-
 
 #   """
 #        Searching for unique atoms for calculations
@@ -260,41 +236,24 @@ if __name__ == '__main__':
                                 reference=newReference)
     loadsave.save_xyz(outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
     loadsave.save_xyz(outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
-    call("sed  -e 's/XXXXX/%f/g' -e 's/YYYYY/%f/g' -e 's/ZZZZZ/%f/g' -e 's/RRRRR/%f/g' script.template> %s"%(*crystal[newReference][1],cutOff,outDirName+"/script.jmol"),shell=True)
-    try:
-        shutil.copy2("../pickUP/pickUP.py","%s/pickUP.py"%outDirName)
-    except OSError:
-        print("Copying pickUP.py to %s didn't work out!"%outDirName)
-        exit(error.systemerror)
-
-    numberOfConfigurations = int(2**len(allFlippable))
-
+    JmolVisualization.create_script(outDirName,radius=cutOff,center=crystal[newReference][1])
+    
     print("")
+    numberOfConfigurations = int(2**len(allFlippable))
     print_label("Checking total number of configurations: %d"%numberOfConfigurations,labelStyle=color.BF+color.DARKRED)
     print_label("Preparing solver...",labelStyle=color.BF+color.BLUE)
 
-    randomInteger = np.random.randint(10000000,99999999)
-
-    with open(".input%d.dat"%randomInteger,"w+") as isingFile:
-        for i in allFlippable:
-            isingFile.write("%d %.8f %.8f %.8f %.2f\n"%(
-            i,*crystal[i][1],crystal[i][2]))
-
-    with open(".supercell%d.dat"%randomInteger,"w+") as supercellFile:
-        for i,atom in enumerate(crystal):
-            supercellFile.write("%d %.8f %.8f %.8f %.2f\n"%(
-            i,*atom[1],atom[2]))
-
-    with open(".directions%d.dat"%randomInteger,"w+") as dirFile:
-        for d in extraDirections:
-            dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
+    tmpFiles = TemporaryFiles()
+    tmpFiles.write_input(allFlippable,crystal)
+    tmpFiles.write_supercell(crystal)
+    tmpFiles.write_directions(extraDirections)
 
     print("")
     call('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal), shell=True)
-    call('echo \"Running: ./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d\"'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8), shell=True)
-    call('./asa/solver/start .directions%d.dat .supercell%d.dat .input%d.dat %d %d'%(randomInteger,randomInteger,randomInteger,newReference,4*nearestNeighbor+8), shell=True)
-    call('rm .*%d.dat'%randomInteger, shell=True)
+    print('Running: ./asa/solver/start %s %d %d'%(str(tmpFiles),newReference,4*nearestNeighbor+8))
+    call('./asa/solver/start %s %d %d'%(str(tmpFiles),newReference,4*nearestNeighbor+8), shell=True)
     call('cd ./asa/solver; make clean; cd ../../', shell=True)
+    del tmpFiles
 
     flippingConfigurations = np.loadtxt('best.flips',bool)
     try:
@@ -302,77 +261,22 @@ if __name__ == '__main__':
     except IndexError:
         flippingConfigurations=[flippingConfigurations]
 
-    systemOfEquations = np.zeros((4*len(flipper)+8,len(flipper)))
-    for (i,config) in enumerate(flippingConfigurations):
-        for (atomI,isFlipped),atomJ in product(zip(crystal,config),
-                                                   crystal8):
-            if (atomI[2] != 0.0 and atomI[0] in atomTypeMask
-            and atomJ[2] != 0.0 and atomJ[0] in atomTypeMask):
-                if isFlipped == config[atomJ[3]]:
-                    continue
-                distance = np.linalg.norm(atomI[1]-atomJ[1])
-                if np.abs(distance) < 1e-2:
-                    continue
-                for j,uniqueFlip in enumerate(flipper):
-                    if np.abs(distance-uniqueFlip[2]) < 1e-2:
-                        systemOfEquations[i][j] -= atomI[2]*atomJ[2]
-                        break
 
-    # removing 0 = 0 equations !
-    scale = np.sum(np.abs(systemOfEquations))
-    tautologies = np.argwhere(np.apply_along_axis(np.linalg.norm,1,systemOfEquations)/scale<1e-3)[:,0]
-    systemOfEquations = np.delete(systemOfEquations,tuple(tautologies),axis=0)
+    gen = NaiveHeisenberg(flippingConfigurations,crystal,crystal8)
+    systemOfEquations = gen.generate(atomTypeMask,[flip[2] for flip in flipper])
 
-    # Based on https://stackoverflow.com/questions/28816627/how-to-find-linearly-independent-rows-from-a-matrix
-    # We remove lineary dependent rows
-    remover=[]
-    for i in range(systemOfEquations.shape[0]):
-        if i in remover:
-            continue
-        for j in range(systemOfEquations.shape[0]):
-            if j in remover or i == j:
-                continue
-            inner_product = np.inner(
-                systemOfEquations[i],
-                systemOfEquations[j]
-            )
-            norm_i = np.linalg.norm(systemOfEquations[i])
-            norm_j = np.linalg.norm(systemOfEquations[j])
-
-            if np.abs(inner_product - norm_j * norm_i) < 1E-8:
-                remover.append(j)
-
+    eqs = EquationSolver(systemOfEquations,np.zeros(len(systemOfEquations)))
+    systemOfEquations = eqs.remove_tautologies()
+    remover = eqs.remove_linears()
     if remover:
         flippingConfigurations = np.delete(flippingConfigurations, tuple(remover), axis=0)
-        systemOfEquations      = np.delete(systemOfEquations,      tuple(remover), axis=0)
-
+        systemOfEquations = eqs.equations
     if systemOfEquations.size == 0:
         print("ERROR! Not enough equations! Please rerun.")
         exit(-3)
     if not currentOptions('redundant'): # If the System of Equations is required to be consistent
-        resultantSystem        = np.array([systemOfEquations[0]])
-        gram_schmidt           = np.array([systemOfEquations[0]])
-        systemOfEquations      = np.delete(systemOfEquations, (0), axis=0)
-        resultantFlippings     = np.array([flippingConfigurations[0]])
-        flippingConfigurations = np.delete(flippingConfigurations, (0), axis=0)
-        while len(resultantSystem) < nearestNeighbor:
-            print(systemOfEquations)
-            if systemOfEquations.size == 0:
-                print("ERROR! Not enough equations! Please rerun.")
-                exit(-3)
-            tmpVector = np.copy(systemOfEquations[0])
-            for vector in gram_schmidt:
-                tmpVector -= np.inner(tmpVector,vector)*vector/np.inner(vector,vector)
-            if np.linalg.norm(tmpVector)/scale > 1e-4:
-                gram_schmidt           = np.vstack((gram_schmidt,tmpVector))
-                resultantSystem        = np.vstack((resultantSystem,systemOfEquations[0]))
-                systemOfEquations      = np.delete(systemOfEquations, (0), axis=0)
-                resultantFlippings     = np.vstack((resultantFlippings,flippingConfigurations[0]))
-                flippingConfigurations = np.delete(flippingConfigurations, (0), axis=0)
-        systemOfEquations      = resultantSystem
-        flippingConfigurations = resultantFlippings
+        systemOfEquations,flippingConfigurations = eqs.remove_linear_combinations(flippingConfigurations)
 
-    print(systemOfEquations)
     print_label("System of equations:",labelStyle=color.BF)
     for eq in systemOfEquations:
         print_vector(eq)
@@ -381,8 +285,7 @@ if __name__ == '__main__':
         print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=color.BF)
         print_label("It may be better. But it may also mess everything.",labelStyle=color.BF)
     else:
-        print_label("det SoE = %.1e"%np.linalg.det(resultantSystem),labelStyle=color.BF)
-
+        print_label("det SoE = %.1e"%np.linalg.det(systemOfEquations),labelStyle=color.BF)
 
     np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)
     saver = loadsave.INCARsaver(incarData,crystal)

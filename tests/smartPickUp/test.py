@@ -23,18 +23,12 @@ if __name__ == '__main__':
     loader   = POSCARloader(*POSCARs,spam=False)
     loader.parse()
 
-    print("Running for NN=3, \'Ni\':")
-    pickerUpper = SmartPickUp(3,'Ni')
+    print("Running for NN=1, \'Fe\':")
+    pickerUpper = SmartPickUp(1,'Fe')
     pickerUpper.read(*argv[1:])
     for unit in ['eV', 'meV', 'Ry', 'mRy', 'He', 'mHe', 'K']:
         print("Exchange interaction in %s:"%unit)
         Js = pickerUpper.solve(units=unit)
-        print((len(Js)*"% 11.7f ")%(*Js,))
-
-    for neighbor in range(1,6):
-        pickerUpper = SmartPickUp(neighbor,'Ni')
-        pickerUpper.read(*argv[1:])
-        Js = pickerUpper.solve(units='meV')
         print((len(Js)*"% 11.7f ")%(*Js,))
 
     tracker += time.time()

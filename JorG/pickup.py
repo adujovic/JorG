@@ -6,6 +6,7 @@ path.insert(0,r'../../')
 from JorG.loadsave import POSCARloader
 import numpy as np
 from itertools import product
+from copy import copy
 
 class error:
     unexcepted = 12
@@ -224,3 +225,93 @@ class EquationSolver:
             self.solution = np.linalg.solve(self.equations,self.vector,**kwargs)
         else:
             self.solution = np.linalg.lstsq(self.equations,self.vector,rcond=None,**kwargs)[0]
+
+    def remove_tautologies(self, **kwargs):
+        # removing 0 = 0 equations !
+        scale       = np.sum(
+                        np.abs(self.equations))
+        tautologies = np.argwhere(
+                        np.apply_along_axis(
+                          np.linalg.norm,1,self.equations)/scale<1e-3)[:,0]
+        self.equations = np.delete(self.equations,tuple(tautologies),axis=0)
+        return self.equations
+
+    @staticmethod
+    def is_to_be_removed(i,j,equations):
+        if i == j:
+            return False
+        scale = np.sum(np.abs(equations))
+        inner_product = np.inner(equations[i],equations[j])
+        norm_i = np.linalg.norm(equations[i])
+        norm_j = np.linalg.norm(equations[j])
+        if np.abs(inner_product - norm_j * norm_i)/scale < 1E-8:   
+            return True
+        return False
+
+    def remove_linears(self, **kwargs):
+        # Based on https://stackoverflow.com/questions/
+        #                  28816627/how-to-find-linearly-independent-rows-from-a-matrix
+        # We remove lineary dependent rows
+        remover=set([])
+        for i,j in product(range(self.equations.shape[0]),repeat=2):
+            if i in remover:
+                continue
+            if self.is_to_be_removed(i,j,self.equations):
+                remover.add(j)
+        if remover:
+            self.equations = np.delete(self.equations,tuple(remover),axis=0)
+            return remover
+
+    def remove_linear_combinations(self, secondSystem):
+        scale            = np.sum(np.abs(self.equations))
+        resultantSystem  = np.array([self.equations[0]])
+        gram_schmidt     = np.array([self.equations[0]])
+        self.equations   = np.delete(self.equations, (0), axis=0)
+        resultantSystem2 = np.array([secondSystem[0]])
+        secondSystem     = np.delete(secondSystem, (0), axis=0)
+        while len(resultantSystem) < self.equations.shape[1]:
+            if self.equations.size == 0:
+                print("ERROR! Not enough equations! Please rerun.")
+                exit(-3)
+            tmpVector = np.copy(self.equations[0])
+            for vector in gram_schmidt:
+                tmpVector -= np.inner(tmpVector,vector)*vector/np.inner(vector,vector)
+            if np.linalg.norm(tmpVector)/scale > 1e-4:
+                gram_schmidt     = np.vstack((gram_schmidt,tmpVector))
+                resultantSystem  = np.vstack((resultantSystem,self.equations[0]))
+                self.equations   = np.delete(self.equations, (0), axis=0)
+                resultantSystem2 = np.vstack((resultantSystem2,secondSystem[0]))
+                secondSystem     = np.delete(secondSystem, (0), axis=0)
+        self.equations = resultantSystem
+        return resultantSystem,resultantSystem2
+
+class NaiveHeisenberg:
+    def __init__(self,flippings,crystal,crystal8):
+        self.flippings = flippings
+        self.crystal   = crystal
+        self.crystal8  = crystal8
+
+    def generate(self,mask,flipper):
+        self.flipper = np.array(flipper)
+        self.mask    = mask
+        self.systemOfEquations = np.zeros((4*len(flipper)+8,len(flipper)))
+        for (i,config),(I,atomI),atomJ in product(enumerate(self.flippings),
+                                                  enumerate(self.crystal),
+                                                            self.crystal8):
+            if config[I] == config[atomJ[3]]:
+                continue
+            distance = self.check_if_contributes(config,atomI,atomJ)
+            if not distance: 
+                continue
+            j = np.where(np.abs(self.flipper - distance)<1e-2)
+            if j:
+                self.systemOfEquations[i][j[0]] -= atomI[2]*atomJ[2]
+        return self.systemOfEquations
+
+    def check_if_contributes(self,config,atomI,atomJ):
+        if (atomI[2] != 0.0 and atomI[0] in self.mask
+        and atomJ[2] != 0.0 and atomJ[0] in self.mask):
+            distance = np.linalg.norm(atomI[1]-atomJ[1])
+            if np.abs(distance) > 1e-2:
+                return distance
+        return False
