@@ -1,9 +1,11 @@
 language: python
+branches:
+  only:
+    - experimental
 before_install:
   - sudo apt-get update
 install:
-  - sudo apt-get install *numpy*
-  - sudo apt-get install *scipy*
-  - sudo pip install --user spglib
-script:
-  - ./run_all_tests.py
+  - sudo apt-get install python3-numpy
+  - sudo apt-get install python3 scipy
+  - pip install --user spglib
+script: ./run_all_tests.py
