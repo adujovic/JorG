@@ -9,6 +9,4 @@ install:
   - sudo apt-get install python3-scipy
   - sudo pip install --user spglib
 script:
-  - ls
-  - pwd
-  - ./run_all_tests.py
+  - ./run_all_tests.sh
