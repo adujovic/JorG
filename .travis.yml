@@ -1,0 +1,5 @@
+language: python
+install:
+  - apt-get install python3-numpy
+  - apt-get install python3-scipy
+  - pip install --user spglib
