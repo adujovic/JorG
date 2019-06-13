@@ -46,8 +46,6 @@ if __name__ == '__main__':
     print('Reading: redundant', end='\t')
     print(currentOptions('redundant'))
     print('Reading: spin-orbit', end='\t')
-    print(currentOptions('spin-orbit'))
-    print('Reading: refined', end='\t')
     print(currentOptions('refined'))
     print('Reading: extra-dimentions', end='\t')
     print(currentOptions('extra-dimentions'))

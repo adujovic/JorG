@@ -313,9 +313,6 @@ class POSCARloader:
             except ValueError: 
                 print("Can't convert crystal directions in \"%s\""%text[i])
                 exit(error.unconvertable)
-            if(len(directions[-1]) != 3):
-                print("Crystal directions in %s has %d != 3 dimensions!"%(text[i],len(directions[-1])))
-                exit(error.unconvertable)
         return directions
 
     @staticmethod

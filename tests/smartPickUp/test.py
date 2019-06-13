@@ -23,7 +23,6 @@ if __name__ == '__main__':
     loader   = POSCARloader(*POSCARs,spam=False)
     loader.parse()
 
-    #pickerUpper = SmartPickUp(1,2.46,'Fe')
     print("Running for NN=3, \'Ni\':")
     pickerUpper = SmartPickUp(3,'Ni')
     pickerUpper.read(*argv[1:])

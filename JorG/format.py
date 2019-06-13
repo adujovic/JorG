@@ -80,11 +80,8 @@ def print_case(caseID, atom, atomID,**kwargs):
                                  'caseStyle'       : color.IT+color.CYAN,
                                  'numberStyle'     : color.IT,
                                  'distanceStyle'   : color.END})
-
-    output  = "Case "
-    output += kwargs['caseStyle']+"{:3d}".format(caseID)+color.END
-    output += " atom No. "
-    output += kwargs['numberStyle']+"{:3d}".format(atomID)+color.END
+    output  = "Case " + kwargs['caseStyle']+"{:3d}".format(caseID)+color.END
+    output += " atom No. " + kwargs['numberStyle']+"{:3d}".format(atomID)+color.END
     output += kwargs['distanceStyle']
     output += " @ {:1s} & {:6.2f} Å | ".format(kwargs['wyckoffPosition'],kwargs['distance'])
     output += color.END

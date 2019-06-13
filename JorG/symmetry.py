@@ -42,7 +42,6 @@ def write_single(comment, record,
 
     print_line(comment,**kwargs)
     line(**kwargs)
-
     print_line("Spacegroup: %s (%d) "%(record['international'],record['number']),**kwargs)
     print_line("Mapping to equivalent atoms with the Wyckoff positions:",**kwargs)
 
@@ -52,13 +51,10 @@ def write_single(comment, record,
         wyckoffCount[wyck] += 1
 
     line(**kwargs)
-
     output = ""
     for wyck in wyckoffCount:
-        output += " #%s "%(wyck)
-        output += " = "+" %d "%(wyckoffCount[wyck])
+        output += " #%s  =  %d "%(wyck,wyckoffCount[wyck])
     print_line(output)
-
     line(**kwargs)
 
 def write_report(comments, data,

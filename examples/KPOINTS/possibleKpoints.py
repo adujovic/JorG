@@ -27,15 +27,12 @@ def check(treshold,multipliers,found):
         loc = mul*invdirections
         err = 0.0
         for l in loc:
-            test = np.linalg.norm(l)
-            err += np.abs(test - np.int(test))
+            err += np.abs(np.linalg.norm(l)- np.int(np.linalg.norm(l)))
         if err < treshold:
             newlyFound = []
             for l in loc:
                 newlyFound.append(np.int(np.linalg.norm(l)))
-            if 0 in newlyFound:
-                continue
-            if newlyFound not in found:
+            if newlyFound not in found and 0 not in newlyFound:
                 print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*newlyFound,err).center(display))
                 found.append(newlyFound)
     return found
