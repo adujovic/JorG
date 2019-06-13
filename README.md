@@ -7,3 +7,5 @@
 <br>
 <h3>General Scheme of JorG workflow</h3>
 <img src="doc/JorG-flowchart.png">
+
+by A.P.Kądzielawa
