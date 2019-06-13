@@ -7,12 +7,6 @@ class MaskTemplate:
         return element in self.mask
     def __add__(self,other):
         return self.mask+other.mask
-#
-#
-# MASKS
-#
-#
-
 
 maskFull = MaskTemplate("$H$He$Li$Be$B$C$N$O$F$Ne$Na$Mg$Al$Si$P$S$Cl$Ar$K$Ca$Sc$Ti$V$Cr$Mn$Fe$Co$Ni$Cu$Zn$Ga$Ge$As$Se$Br$Kr$Rb$Sr$Y$Zr$Nb$Mo$Tc$Ru$Rh$Pd$Ag$Cd$In$Sn$Sb$Te$I$Xe$Cs$Ba$La$Ce$Pr$Nd$Pm$Sm$Eu$Gd$Tb$Dy$Ho$Er$Tm$Yb$Lu$Hf$Ta$W$Re$Os$Ir$Pt$Au$Hg$Tl$Pb$Bi$Po$At$Rn$Fr$Ra$Ac$Th$Pa$U$Np$Pu$Am$Cm$Bk$Cf$Es$Fm$Md$No$Lr$Rf$Db$Sg$Bh$Hs$Mt$Ds$Rg$Cn$Nh$Fl$Mc$Lv$Ts$Og$")
 
@@ -53,9 +47,5 @@ maskG18 = MaskTemplate("$He$Ne$Ar$Kr$Xe$Rn$Og$")
 
 blockNames  = ["P","D","F"]
 periodNames = ["2p", "3p", "4p", "5p", "6p", "3d", "4d", "5d", "4f", "5f"]
-periods = [mask2p, mask3p, mask4p, mask5p, mask6p, maskP,
-           mask3d, mask4d, mask5d, maskD,
-           mask4f, mask5f, maskF]
-groups  = [maskG1,  maskG2,  maskG3,  maskG4,  maskG5,  maskG6,
-           maskG7,  maskG8,  maskG9,  maskG10, maskG11, maskG12,
-           maskG13, maskG14, maskG15, maskG16, maskG17, maskG18]
+periods = [mask2p, mask3p, mask4p, mask5p, mask6p, maskP, mask3d, mask4d, mask5d, maskD, mask4f, mask5f, maskF]
+groups  = [maskG1,  maskG2,  maskG3,  maskG4,  maskG5,  maskG6, maskG7,  maskG8,  maskG9,  maskG10, maskG11, maskG12, maskG13, maskG14, maskG15, maskG16, maskG17, maskG18]
