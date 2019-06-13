@@ -52,10 +52,10 @@ class options:
                                  help='string of all elements taken into account (eg. \'CuO\')')
         self.parser.add_argument('--group',choices=range(1,19), type=int, nargs='+',
                                  help='group number (eg. 1 <=> \'HLiNaKRbCsFr\')')
-        self.parser.add_argument('--period',choices=periodic.periodNames, nargs='+',
-                                 help='period name (eg. 2d <=> \'%s\')'%periodic.mask3d)
-        self.parser.add_argument('--block',choices=periodic.blockNames, nargs='+',
-                                 help='block name (eg. P <=> \'%s\')'%periodic.maskP)
+        self.parser.add_argument('--period',choices=periodic.periods, nargs='+',
+                                 help='period name (eg. 3d <=> \'%s\')'%periodic.periods['3d'])
+        self.parser.add_argument('--block',choices=periodic.blocks, nargs='+',
+                                 help='block name (eg. P <=> \'%s\')'%periodic.blocks['P'])
 
     def add_arguments_optional(self):
         self.parser.add_argument('--symmetry', '-S', action='store_true',
@@ -69,12 +69,6 @@ class options:
         self.parser.add_argument('--extra-dimentions','-X', default=None, action='store',dest='extra-dimentions',
                                  help='string \"X Y Z\" of extra cell copies in each directions (eg. \"0 0 1\")')
 
-    def generate_part(self,MendeleyevSet,extraChar=''):
-        output=''
-        for el in self.opt.__dict__[MendeleyevSet]:
-            output += eval("periodic.mask%s%s"%(extraChar,str(el)))
-        return output
-
     def generate_separate(self):
         output=''
         for element in re.findall('[A-Z][a-z]?',self.opt.__dict__['elements']):
@@ -85,11 +79,11 @@ class options:
     def generate_mask(self):
         output = ''
         if self.opt.__dict__['period'] is not None:
-            output += self.generate_part('period')
+            output += period.periods[self.opt.__dict__['period']]
         if self.opt.__dict__['group'] is not None:
-            output += self.generate_part('group','G')
+            output += period.groups[self.opt.__dict__['group']]
         if self.opt.__dict__['block'] is not None:
-            output += self.generate_part('block')
+            output += period.blocks[self.opt.__dict__['block']]
         if self.opt.__dict__['elements'] is not None:
             output += self.generate_separate()
         if output == '':
