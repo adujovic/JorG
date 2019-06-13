@@ -1,7 +1,10 @@
 language: python
+before_install:
+  - sudo apt-get update
+  - sudo apt-get upgrade
 install:
-  - apt-get install python-numpy*
-  - apt-get install python-scipy*
-  - pip install --user spglib
+  - sudo apt-get install python-numpy*
+  - sudo apt-get install python-scipy*
+  - sudo pip install --user spglib
 script:
   - ./run_all_tests.py
