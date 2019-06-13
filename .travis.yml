@@ -9,6 +9,7 @@ before_install:
   - sudo apt-get install python3-dev
   - git clone https://github.com/atztogo/spglib.git
   - cd spglib/python
-  - python3 setup.py install --user
+  - sudo python3 setup.py install --user
+  - cd ../..
 script:
   - ./run_all_tests.sh
