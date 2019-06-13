@@ -4,12 +4,12 @@ branches:
     - experimental
 before_install:
   - sudo apt-get update
-  - sudo apt-get install python3-numpy
-  - sudo apt-get install python3-scipy
-  - sudo apt-get install python3-dev
+  - sudo apt-get install -y python3-numpy
+  - sudo apt-get install -y python3-scipy
+  - sudo apt-get install -y python3-dev
   - git clone https://github.com/atztogo/spglib.git
   - cd spglib/python
-  - sudo python3 setup.py install --user
+  - sudo python3 setup.py install
   - cd ../..
 script:
   - ./run_all_tests.sh
