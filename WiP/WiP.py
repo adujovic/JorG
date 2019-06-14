@@ -4,22 +4,9 @@ from sys import argv,path
 path.insert(0,r'../')
 import numpy as np
 
-#from subprocess import call
-#import errno
-#import re
-#import spglib
-#import shutil
-#from itertools import product
-#
-#import JorG.symmetry
-#from JorG.argv import options
-#from JorG.format import color, print_case, print_vector
-#from JorG.format import print_crystal, print_moments, print_label
-#import JorG.loadsave as loadsave
-#import JorG.generator as generator
-
 class errors:
     failed_to_generate = -201
+    no_reference  = 22
     systemerror = -1
 
 from datetime import datetime
@@ -144,10 +131,42 @@ class TemporaryFiles:
                 print("No file %s"%(self.prefix+name+self.suffix+self.extension))
 
 from JorG.PeriodicTable import periodicTableElement
-def from_refined(refinedCell):
-    directions = np.array(refinedCell[0])
-    cell = []
-    for refinedAtom,atomType in zip(refinedCell[1],refinedCell[2]):
-        newPosition = np.dot(refinedAtom,refinedCell[0])
-        cell.append((periodicTableElement[atomType-1],newPosition))
-    return cell,directions
+
+import re
+import spglib
+class VariableFixer:
+    @staticmethod
+    def fix_reference(reference,cell,mask):
+        if reference >= 0:
+            return cell[reference],reference
+        for i,atom in enumerate(cell):
+            if "$"+atom[0]+"$" in mask:
+              return atom,i
+        print("Error:\n%s\nare not in input file!"%re.sub('\$',' ',mask))
+        exit(errors.no_reference)
+
+    @staticmethod
+    def from_refined(refinedCell):
+        directions = np.array(refinedCell[0])
+        cell = []
+        for refinedAtom,atomType in zip(refinedCell[1],refinedCell[2]):
+            newPosition = np.dot(refinedAtom,refinedCell[0])
+            cell.append((periodicTableElement[atomType-1],newPosition))
+        return cell,directions
+
+    @staticmethod
+    def fix_neighbor(nearestNeighbor,cutOff):
+        # by defauld: second NN
+        if nearestNeighbor is None:
+            if cutOff is None:
+                return 2,None
+            return -1,cutOff
+        return nearestNeighbor,None
+
+    @staticmethod
+    def fix_directions(copiesInEachDirection,directions):
+        return [(mul+1)*d for mul,d in zip(copiesInEachDirection, directions)]
+
+    @staticmethod
+    def add_to_all(arr,x=1):
+        return [ a+x for a in arr]

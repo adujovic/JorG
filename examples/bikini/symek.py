@@ -24,11 +24,9 @@ from JorG.equivalent import findFlips
 
 from JorG.pickup import EquationSolver,NaiveHeisenberg
 
-from WiP.WiP import StreamHandler,JmolVisualization,TemporaryFiles,from_refined
-
-class errors:
-    failed_to_generate = -201
-    systemerror = -1
+from WiP.WiP import StreamHandler,JmolVisualization
+from WiP.WiP import TemporaryFiles,errors
+from WiP.WiP import VariableFixer
 
 def main(**args):
     pass
@@ -53,20 +51,8 @@ if __name__ == '__main__':
     atomNames     = readData['atomNames']
     comment       = readData['comment']
     directions    = readData['directions']
-
-    referenceAtom = None
-    if reference >= 0:
-      referenceAtom = cell[reference]
-    else:
-      for i,atom in enumerate(cell):
-        if "$"+atom[0]+"$" in currentOptions('mask'):
-          referenceAtom = atom
-          reference = i
-          break
-    if referenceAtom is None:
-      print("Error: can not find any atoms (%s) in input file!"%re.sub('\$','',currentOptions('mask')))
-      exit(-7)
-
+    referenceAtom,reference = VariableFixer.fix_reference(reference,cell,
+                                                          currentOptions('mask'))
 #    """ Checking the symmetry
 #                    of the input """
     symmetryCrude   = spglib.get_symmetry_dataset(cellSymmetry)
@@ -93,7 +79,7 @@ if __name__ == '__main__':
 
     if currentOptions('refined'):
         refinedCell = (spglib.standardize_cell(cellSymmetry, to_primitive=0, no_idealize=0, symprec=1e-1))
-        cell,directions  = from_refined(refinedCell) 
+        cell,directions = VariableFixer.from_refined(refinedCell) 
 #    """
 #        Printing input data
 #    """
@@ -102,13 +88,9 @@ if __name__ == '__main__':
     print_crystal(directions,cell)
     print_moments(oldMoments,cell=cell)
 
-    if nearestNeighbor is None:
-        nearestNeighbor = -1
+    nearestNeighbor,cutOff = VariableFixer.fix_neighbor(nearestNeighbor,cutOff)
 
     if cutOff is None:
-        if nearestNeighbor is -1:
-            nearestNeighbor = 2
-
         generatorNN = generator.NearestNeighborsGenerator(cell,
                                      referenceAtom,
                                      directions)
@@ -123,25 +105,25 @@ if __name__ == '__main__':
         except Exception:
             print("Failed to generate crystal")
             exit(errors.failed_to_generate)
-
-        extraDirections = [(mul+1)*d for mul,d in zip(copiesInEachDirection, directions)]
+        extraDirections = VariableFixer.fix_directions(copiesInEachDirection,directions)
     else:
         copiesInEachDirection = generator.get_number_of_pictures(directions,cutOff,referenceAtom)
-        extraDirections = [(mul+extra+1)*d for mul,extra,d in zip(copiesInEachDirection, extraMultiplier, directions)]
         localGenerator = generator.CrystalGenerator(cell,directions, atomNames,reference=reference)
         localGenerator.moments = oldMoments
         crystal, newReference = localGenerator(copiesInEachDirection)
+        extraDirections = VariableFixer.fix_directions(copiesInEachDirection,directions)
         wyckoffDict, symmetryFull, symmetryOriginal =\
                 generator.wyckoffs_dict(cell, crystal, directions, extraDirections)
+
 #    """ Checking the symmetry
 #                    of the output """
     with open(outDirName+"/output.txt",'w+') as raport:
         JorG.symmetry.write_report(["Analysis of symmetry in the generated cell"],
                      [symmetryFull], crystal, stream=raport)
     loadsave.save_POSCAR(outDirName+"/POSCAR", crystal,
-                copiesInEachDirection+extraMultiplier, readData)
-    realCopies = [copy+1 for copy in copiesInEachDirection]
-    print_label("OUTPUT: %dx%dx%d"%(*realCopies,),labelStyle=color.BF)
+                copiesInEachDirection, readData)
+
+    print_label("OUTPUT: %dx%dx%d"%(*VariableFixer.add_to_all(copiesInEachDirection),),labelStyle=color.BF)
     print_crystal(extraDirections,crystal)
 
 #   """
@@ -149,15 +131,15 @@ if __name__ == '__main__':
 #                                                    """
     logAccuracy  = 2     #  accuracy of distance is 10^(-logAccuracy)
 
-    flipSearch = findFlips()
+    flipSearch              = findFlips()
     flipSearch.symmetry     = symmetryFull
     flipSearch.crystal      = crystal
     flipSearch.atomTypeMask = currentOptions('mask')
     flipSearch.Wyckoffs     = currentOptions('Wyckoffs')
     flipSearch.wyckoffDict  = wyckoffDict
     flipSearch.logAccuracy  = logAccuracy
-    flipper      = flipSearch.unique(crystal[newReference],cutOff)
-    allFlippable = flipSearch.all(crystal[newReference],cutOff)
+    flipper                 = flipSearch.unique(crystal[newReference],cutOff)
+    allFlippable            = flipSearch.all(crystal[newReference],cutOff)
 
     selected = [newReference]
 
@@ -174,8 +156,8 @@ if __name__ == '__main__':
     JmolVisualization.create_script(outDirName,radius=cutOff,center=crystal[newReference][1])
     
     print("")
-    numberOfConfigurations = int(2**len(allFlippable))
-    print_label("Checking total number of configurations: %d"%numberOfConfigurations,labelStyle=color.BF+color.DARKRED)
+    
+    print_label("Checking total number of configurations: %d"%(int(2**len(allFlippable))),labelStyle=color.BF+color.DARKRED)
     print_label("Preparing solver...",labelStyle=color.BF+color.BLUE)
 
     tmpFiles = TemporaryFiles()
