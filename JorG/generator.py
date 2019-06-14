@@ -40,7 +40,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
         else:
             multipliers.append(0)
 
-    return multipliers
+    return np.array(multipliers)
 
 #
 #
@@ -50,7 +50,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 
 import numpy as np
 from JorG.PeriodicTable import elementMagneticMoment
-from itertools import product
+from itertools import product,chain
 
 class CrystalGenerator:
 #    multipliers
@@ -182,7 +182,7 @@ class NearestNeighborsGenerator:
             distance = np.around(np.linalg.norm(atom[1]-referenceAtom[1]),2)
             if (distance                   not in self.distances  and
                 self.wyckoffPositionDict[wyck] in self.Wyckoffs   and
-                "$"+atom[0]+"$"                in self.atomTypeMask ):
+                "$%s$"%atom[0]                 in self.atomTypeMask ):
                 self.distances.append(distance)
         self.distances.sort()
         if np.ma.masked_greater(self.distances,self.cutOff).count() <= self.nearestNeighbor:
@@ -231,6 +231,7 @@ class NearestNeighborsGenerator:
                     get_number_of_pictures(self.directions,
                                            self.cutOff,
                                            self.referenceAtom) + self.extraMultiplier
+      
             extraDirections  =\
                     NearestNeighborsGenerator.get_extra_directions(self.multipliers,self.directions)
             self.generate_crystal()
@@ -248,12 +249,10 @@ class NearestNeighborsGenerator:
 
     def generate_crystal(self):
         self.crystal = []
+        multipliers  = [range(m+1) for m in self.multipliers]
         for (name,mul,(atom,moment)) in product(
                                           self.atomNames,
-                                          product(
-                                            range(self.multipliers[0]+1),
-                                            range(self.multipliers[1]+1),
-                                            range(self.multipliers[2]+1)),
+                                          product(*multipliers),
                                           zip(self.cell,self.moments)):
             if atom[0] != name:
                 continue
