@@ -48,7 +48,6 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 #
 #
 
-import numpy as np
 from JorG.PeriodicTable import elementMagneticMoment
 from itertools import product,chain
 
@@ -99,7 +98,6 @@ class CrystalGenerator:
 #
 #
 
-import numpy as np
 import spglib
 from JorG.PeriodicTable import periodicTableNumber
 def wyckoffs_dict(originalCell,      cell,
@@ -133,12 +131,7 @@ def wyckoffs_dict(originalCell,      cell,
 #
 #
 
-import numpy as np
-import spglib
-from JorG.PeriodicTable import elementMagneticMoment
 from JorG.Masks         import maskFull
-from itertools import product
-
 class NearestNeighborsGenerator:
     Wyckoffs='abcdefghijklmnopqrstuvwxyz'
     originalSymmetry    = None
@@ -264,7 +257,6 @@ class NearestNeighborsGenerator:
 #
 #
 
-from itertools import product
 def apply_mirrorsXYZ(dimensions,cell, cutOff=-1.0, reference=0):
     outputCell = []
     for p in product([0,-1],repeat=3):
