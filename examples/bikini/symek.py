@@ -16,8 +16,7 @@ from itertools import product
 
 import JorG.symmetry
 from JorG.argv import options
-from JorG.format import color, print_case, print_vector
-from JorG.format import print_crystal, print_moments, print_label
+from JorG.format import print_case
 import JorG.loadsave as loadsave
 import JorG.generator as generator
 from JorG.equivalent import findFlips
@@ -25,8 +24,8 @@ from JorG.equivalent import findFlips
 from JorG.pickup import EquationSolver,NaiveHeisenberg
 
 from WiP.WiP import StreamHandler,JmolVisualization
-from WiP.WiP import TemporaryFiles,errors
-from WiP.WiP import VariableFixer
+from WiP.WiP import TemporaryFiles,errors,Msg
+from WiP.WiP import VariableFixer,Symmetry
 
 def main(**args):
     pass
@@ -47,7 +46,6 @@ if __name__ == '__main__':
     readData,oldMoments,incarData =\
             handler.load_VASP(currentOptions('input'),currentOptions('incar'))
     cell          = readData['cell']
-    cellSymmetry  = readData['cellSymmetry']
     atomNames     = readData['atomNames']
     comment       = readData['comment']
     directions    = readData['directions']
@@ -55,45 +53,32 @@ if __name__ == '__main__':
                                                           currentOptions('mask'))
 #    """ Checking the symmetry
 #                    of the input """
-    symmetryCrude   = spglib.get_symmetry_dataset(cellSymmetry)
-
+    symmetry      = Symmetry(readData['cellSymmetry'])
     if(currentOptions('symmetry')):
-        standarizedCell  = (spglib.standardize_cell(cellSymmetry,
-                                               to_primitive=1,
-                                               no_idealize=0,
-                                               symprec=1e-1))
-        symmetryStandard = spglib.get_symmetry_dataset(standarizedCell)
-        refinedCell      = (spglib.refine_cell(cellSymmetry,
-                                               symprec=1e-1))
-        symmetryRefined = spglib.get_symmetry_dataset(refinedCell)
+        symmetryStandard,symmetryRefined = symmetry.get_standarized()
         JorG.symmetry.write_report(["(1) the crude input cell",
                       "(2) the standarized cell",
-                      "(3) the refined primitive cell"],
-                [symmetryCrude,symmetryStandard,symmetryRefined],
-                cell)
+                      "(3) the refined cell"],
+                [symmetry.symmetry,symmetryStandard,symmetryRefined],cell)
         exit(0)
     else:
         with open(outDirName+"/input_report.txt",'w+') as raport:
-            JorG.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetryCrude], cell,stream=raport)
+            JorG.symmetry.write_report(["Analysis of symmetry in the input cell"], [symmetry.symmetry], cell,stream=raport)
                      
-
     if currentOptions('refined'):
-        refinedCell = (spglib.standardize_cell(cellSymmetry, to_primitive=0, no_idealize=0, symprec=1e-1))
+        refinedCell = symmetry.standarize()
         cell,directions = VariableFixer.from_refined(refinedCell) 
+
 #    """
 #        Printing input data
 #    """
-    print_label("The reference was chosen to be atom No. %d:"%(reference+1),atoms=[referenceAtom],labelStyle=color.BF)
-    print_label("INPUT",labelStyle=color.BF)
-    print_crystal(directions,cell)
-    print_moments(oldMoments,cell=cell)
+    Msg.print_crystal_info(title="INPUT",crystal=cell,directions=directions,
+                           reference=reference,moments=oldMoments)
 
     nearestNeighbor,cutOff = VariableFixer.fix_neighbor(nearestNeighbor,cutOff)
 
     if cutOff is None:
-        generatorNN = generator.NearestNeighborsGenerator(cell,
-                                     referenceAtom,
-                                     directions)
+        generatorNN = generator.NearestNeighborsGenerator(cell,referenceAtom,directions)
         generatorNN.wyckoffs         = currentOptions('Wyckoffs')
         generatorNN.atomTypeMask     = currentOptions('mask')
         generatorNN.moments          = oldMoments
@@ -123,9 +108,6 @@ if __name__ == '__main__':
     loadsave.save_POSCAR(outDirName+"/POSCAR", crystal,
                 copiesInEachDirection, readData)
 
-    print_label("OUTPUT: %dx%dx%d"%(*VariableFixer.add_to_all(copiesInEachDirection),),labelStyle=color.BF)
-    print_crystal(extraDirections,crystal)
-
 #   """
 #        Searching for unique atoms for calculations
 #                                                    """
@@ -141,33 +123,27 @@ if __name__ == '__main__':
     flipper                 = flipSearch.unique(crystal[newReference],cutOff)
     allFlippable            = flipSearch.all(crystal[newReference],cutOff)
 
+    Msg.print_crystal_info(title="OUTPUT",crystal=crystal,directions=extraDirections,
+                           copies=(*VariableFixer.add_to_all(copiesInEachDirection),),
+                           reference=newReference)
+
     selected = [newReference]
-
-    print_label("Reference atom in the new system is No. %d:"%(newReference+1),atoms=[crystal[newReference]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
-
     for caseID,(i,atom,distance,wyck) in enumerate(flipper):
         print_case(caseID+1,atom,i+1,wyckoffPosition=wyck,distance=distance)
         selected.append(i)
-
     crystal8 = generator.apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff, reference=newReference)
     loadsave.save_xyz(outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
     loadsave.save_xyz(outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
     JmolVisualization.create_script(outDirName,radius=cutOff,center=crystal[newReference][1])
     
-    print("")
-    
-    print_label("Checking total number of configurations: %d"%(int(2**len(allFlippable))),labelStyle=color.BF+color.DARKRED)
-    print_label("Preparing solver...",labelStyle=color.BF+color.BLUE)
-
     tmpFiles = TemporaryFiles()
     tmpFiles.write_input(allFlippable,crystal)
     tmpFiles.write_supercell(crystal)
     tmpFiles.write_directions(extraDirections)
 
-    print("")
+    Msg.print_solver_status(int(2**len(allFlippable)),tmpFiles)
     call('cd asa/solver; make clean; make SITES=-D_SITESNUMBER=%d; cd ../../'%len(crystal), shell=True)
-    print('Running: ./asa/solver/start %s %d %d'%(str(tmpFiles),newReference,4*nearestNeighbor+8))
     call('./asa/solver/start %s %d %d'%(str(tmpFiles),newReference,4*nearestNeighbor+8), shell=True)
     call('cd ./asa/solver; make clean; cd ../../', shell=True)
     del tmpFiles
@@ -193,16 +169,7 @@ if __name__ == '__main__':
     if not currentOptions('redundant'): # If the System of Equations is required to be consistent
         systemOfEquations,flippingConfigurations = eqs.remove_linear_combinations(flippingConfigurations)
 
-    print_label("System of equations:",labelStyle=color.BF)
-    for eq in systemOfEquations:
-        print_vector(eq)
-    if currentOptions('redundant'):
-        print_label("Redundant system of equations.",labelStyle=color.BF)
-        print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=color.BF)
-        print_label("It may be better. But it may also mess everything.",labelStyle=color.BF)
-    else:
-        print_label("det SoE = %.1e"%np.linalg.det(systemOfEquations),labelStyle=color.BF)
-
+    Msg.print_equations(systemOfEquations,currentOptions('redundant'))
     np.savetxt(outDirName+'/systemOfEquations.txt',systemOfEquations)
     saver = loadsave.INCARsaver(incarData,crystal)
     saver.save(outDirName,flippingConfigurations)

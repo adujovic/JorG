@@ -90,12 +90,9 @@ from os import remove
 class TemporaryFiles:
     names     = [".input",".supercell",".directions"]
     extension = ".dat"
-    def __init__(self, suffix=str(np.random.randint(10000000,99999999)), prefix=''):
+    def __init__(self, suffix=str(np.random.randint(1000,9999)), prefix=''):
         self.suffix = suffix
         self.prefix = prefix
-        for name in self.names:
-            with open(self.prefix+name+self.suffix+self.extension,"w+") as w:
-                w.write('hello')
 
     def write_input(self,allFlippable,crystal):
         name = self.prefix+self.names[0]+self.suffix+self.extension
@@ -170,3 +167,71 @@ class VariableFixer:
     @staticmethod
     def add_to_all(arr,x=1):
         return [ a+x for a in arr]
+
+class Symmetry:
+    def __init__(self,cellSymmetry):
+        self.cellSymmetry = cellSymmetry
+        self.symmetry     = self.get_symmetry(self.cellSymmetry)
+
+    @staticmethod
+    def get_symmetry(cell):
+        return spglib.get_symmetry_dataset(cell)
+
+    def standarize(self):
+        return (spglib.standardize_cell(self.cellSymmetry, to_primitive=1,
+                                        no_idealize=0, symprec=1e-1))
+
+    def get_standarized(self):
+        refinedCell = (spglib.refine_cell(self.cellSymmetry,
+                                              symprec=1e-1))
+        return spglib.get_symmetry_dataset(self.standarize()),\
+               spglib.get_symmetry_dataset(refinedCell)
+
+from JorG.format import color, print_vector, print_label
+from JorG.format import print_crystal, print_moments
+class Msg:
+    @staticmethod
+    def print_equations(eqs,isRedundant=False):
+        print_label("System of equations:",labelStyle=color.BF)
+        for eq in eqs:
+            print_vector(eq)
+        if isRedundant:
+            print_label("Redundant system of equations.",labelStyle=color.BF)
+            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=color.BF)
+            print_label("It may be better. But it may also mess everything.",labelStyle=color.BF)
+        else:
+            print_label("det SoE = %.1e"%np.linalg.det(eqs),labelStyle=color.BF)
+
+    @staticmethod
+    def print_solver_status(configs,tmpFiles):
+        print_label("Checking total number of configurations: %d"%configs,
+                        labelStyle=color.BF+color.DARKRED)
+        print_label("Preparing solver...",
+                      labelStyle=color.BF+color.BLUE)
+        print_label('Running: ./asa/solver/start %s'%str(tmpFiles))
+
+    @staticmethod
+    def print_crystal_info(**kwargs):
+        try:
+            print_label(kwargs['title'])
+        except KeyError:
+            pass
+        try:
+            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=color.BF)
+        except KeyError:
+            pass
+        try:
+            print_crystal(kwargs['directions'],kwargs['crystal'])
+        except KeyError:
+            pass
+        try:
+            print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),atoms=[kwargs['crystal'][kwargs['reference']]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
+        except KeyError:
+            pass
+        try:
+            print_moments(kwargs['moments'],cell=kwargs['crystal'])
+        except KeyError:
+            pass
+
+#    @staticmethod
+#    def print_equations():
