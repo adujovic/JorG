@@ -154,24 +154,21 @@ class NearestNeighborsGenerator:
     multipliers         = None
     ISFOUND             = False
 
-    def __init__(self,cell,
-                 referenceAtom,
-                 directions):
+    def __init__(self,cell,referenceAtom,directions):
         self.cell            = cell
         self.referenceAtom   = referenceAtom
         self.directions      = directions
         self.nearestNeighbor = 1
+        self.fix_names()
+        originalSymmetryCell = NearestNeighborsGenerator.get_symmetry(cell,directions)
+        originalSymmetry     = spglib.get_symmetry_dataset(originalSymmetryCell)
 
+    def fix_names(self):
         # finding unique names with conserved order
         # Using: stackoverflow.com/questions/15637336/numpy-unique-with-order-preserved
-        names = np.array([atom[0] for atom in cell],dtype=str)
+        names  = np.array([atom[0] for atom in self.cell],dtype=str)
         _, idx = np.unique(names, return_index=True)
-        self.atomNames       = names[np.sort(idx)]
-
-        originalSymmetryCell = NearestNeighborsGenerator.get_symmetry(cell,directions)
-        originalSymmetry = spglib.get_symmetry_dataset(originalSymmetryCell)
-
-        diagonal = np.sqrt(np.sum([np.dot(d-referenceAtom[1],d-referenceAtom[1]) for d in directions]))
+        self.atomNames = names[np.sort(idx)]
 
     def check_in_cell(self,cell,referenceAtom,directions):
         (self.wyckoffPositionDict,
@@ -181,17 +178,12 @@ class NearestNeighborsGenerator:
                                            self.directions,
                                            directions)
         self.distances = []
-        for i,(atom,wyck) in enumerate(
-                             zip(cell,
-                                 symmetry['wyckoffs'])):
-            wyckoff = self.wyckoffPositionDict[wyck]
-            atomType = atom[0]
-            distance = np.around(np.linalg.norm(atom[1] - referenceAtom[1]),2)
-            if ( distance     not in self.distances    and
-                 wyckoff          in self.Wyckoffs     and
-                 "$"+atomType+"$" in self.atomTypeMask    ):
+        for i,(atom,wyck) in enumerate(zip(cell,symmetry['wyckoffs'])):
+            distance = np.around(np.linalg.norm(atom[1]-referenceAtom[1]),2)
+            if (distance                   not in self.distances  and
+                self.wyckoffPositionDict[wyck] in self.Wyckoffs   and
+                "$"+atom[0]+"$"                in self.atomTypeMask ):
                 self.distances.append(distance)
-
         self.distances.sort()
         if np.ma.masked_greater(self.distances,self.cutOff).count() <= self.nearestNeighbor:
             return False
@@ -225,16 +217,22 @@ class NearestNeighborsGenerator:
                 self.newReference = i
                 self.newReferenceAtom = atom
 
+    @staticmethod
+    def get_cutOffs(directions,nearestNeighbor):
+        minDirection = 0.99*np.min([np.linalg.norm(d) for d in directions])
+        return minDirection*np.sqrt(np.arange(1.0,np.power(nearestNeighbor+1,3),1.0))
+
     def __call__(self,nearestNeighbor):
         self.nearestNeighbor = nearestNeighbor
         self.fix_moments()
         self.crystal = []
-        minDirection = 0.99*np.min([np.linalg.norm(d) for d in self.directions])
-        for self.cutOff in minDirection*np.sqrt(np.arange(1.0,np.power(self.nearestNeighbor+1,3),1.0)):
-            self.multipliers = get_number_of_pictures(self.directions,self.cutOff,
-                                                      self.referenceAtom)
-            self.multipliers += self.extraMultiplier
-            extraDirections = NearestNeighborsGenerator.get_extra_directions(self.multipliers,self.directions)
+        for self.cutOff in self.get_cutOffs(self.directions,self.nearestNeighbor):
+            self.multipliers =\
+                    get_number_of_pictures(self.directions,
+                                           self.cutOff,
+                                           self.referenceAtom) + self.extraMultiplier
+            extraDirections  =\
+                    NearestNeighborsGenerator.get_extra_directions(self.multipliers,self.directions)
             self.generate_crystal()
             self.find_new_refernce()
             self.ISFOUND = self.check_in_cell(self.crystal,
@@ -259,9 +257,7 @@ class NearestNeighborsGenerator:
                                           zip(self.cell,self.moments)):
             if atom[0] != name:
                 continue
-            position  = np.copy(atom[1])
-            position += np.dot(mul,self.directions)
-            self.crystal.append([atom[0],position,moment])
+            self.crystal.append([atom[0],np.copy(atom[1]) + np.dot(mul,self.directions),moment])
 
 #
 #
