@@ -16,6 +16,11 @@ class TestArgv(unittest.TestCase):
         for arg in args:
             self.assertIsInstance(arg,isType)
 
+    def check_bools(self):
+        self.check_type(self.currentOptions('symmetry'),
+                        self.currentOptions('redundant'),
+                        self.currentOptions('refined'),isType=bool)
+
     def check_in(self,where,*args):
         for arg in args:
             self.assertIn(arg,where)
@@ -24,9 +29,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --incar INCAR --input POSCAR -N 3 -E Fe"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,3)
@@ -38,9 +41,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --incar INCAR --input POSCAR -N 13 -E Ni"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,13)
@@ -52,9 +53,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --incar INCAR --input POSCAR -N 3 -E Ni"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,3)
@@ -67,9 +66,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --incar INCAR_tst1 --input POSCAR_tst1 -N 3 -E Fe"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,3)
@@ -82,9 +79,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --symmetry -i POSCAR_Cs2F6Ni2 "
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
         self.assertIsNone(self.NEIGHBOR)
         self.assertEqual(self.POSCAR,'POSCAR_Cs2F6Ni2')
@@ -94,9 +89,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i POSCAR_tst1 "
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
         self.assertIsNone(self.NEIGHBOR)
         self.assertEqual(self.POSCAR,'POSCAR_tst1')
@@ -107,9 +100,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --incar INCAR_tst1 --input POSCAR_tst1 -N 2 -E Fe1"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,2)
@@ -121,9 +112,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --incar _INCARs/INCAR_tst1 --input _POSCARs/POSCAR_tst1 -N 1 -E Fe1"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,1)
@@ -135,9 +124,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --incar _INCARs/INCAR_CsNiF --input _POSCARs/POSCAR_CsNiF -N 1 -E Ni -o output/J1"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,1)
@@ -150,9 +137,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo --symmetry -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF "
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
         self.assertIsNone(self.NEIGHBOR)
         self.assertEqual(self.POSCAR,'_POSCARs/POSCAR_CsNiF')
@@ -164,9 +149,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 6 -E Ni -o output/ASD --redundant"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,6)
@@ -180,9 +163,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD "
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,2)
@@ -195,9 +176,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --reference 21"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,2)
@@ -211,9 +190,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -E Ni -o output/ASD -R 123.0"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
         self.check_type(self.currentOptions('cutOff'),isType=float)
         self.assertIsNone(self.NEIGHBOR)
@@ -227,9 +204,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --refined"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,2)
@@ -243,9 +218,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --period 3d 5p"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,2)
@@ -258,9 +231,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --block D"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,2)
@@ -273,9 +244,7 @@ class TestArgv(unittest.TestCase):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --group 2 5"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
-                        self.currentOptions('refined'),isType=bool)
+        self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
         self.assertGreater(self.NEIGHBOR,0)
         self.assertEqual(self.NEIGHBOR,2)
