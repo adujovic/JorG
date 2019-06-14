@@ -64,7 +64,7 @@ class ReadMoments:
         self.should_stop__reading(line)
         if self.should_skip(line):
             return
-        elif self.ISTOBEREAD:
+        if self.ISTOBEREAD:
             self.moments[int(line.split()[0])] = float(line.split()[4])
         elif self.energy is None:
             self.energy = self.read_energy(line)

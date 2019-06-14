@@ -41,7 +41,6 @@ def load_INCAR(cell,INCARname="INCAR",atomNames=periodic.periodicTableElement):
 #
 
 from itertools import product
-import numpy as np
 def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
     """
         Saving data to xyz-style file
@@ -137,7 +136,6 @@ def save_POSCAR(fileName,crystal,multiplyers,data):
 #░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀░░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀
 #
 
-import re
 class INCARsaver:
     def __init__(self,oldINCAR,crystal):
         self.oldINCAR = oldINCAR
@@ -182,12 +180,8 @@ class INCARsaver:
             INCARsaver.copy_POSCAR(fileName,"flip%05d"%i)
             self.write_INCAR("flip%05d"%i,flip)
 
-import re
-import numpy as np
 from os import system
-import JorG.PeriodicTable as periodic
 import copy
-
 class CellReader:
     def __init__(self,text):
        self.text          = text 
