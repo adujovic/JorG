@@ -212,26 +212,16 @@ class Msg:
 
     @staticmethod
     def print_crystal_info(**kwargs):
-        try:
-            print_label(kwargs['title'])
-        except KeyError:
-            pass
-        try:
-            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=color.BF)
-        except KeyError:
-            pass
-        try:
-            print_crystal(kwargs['directions'],kwargs['crystal'])
-        except KeyError:
-            pass
-        try:
-            print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),atoms=[kwargs['crystal'][kwargs['reference']]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
-        except KeyError:
-            pass
-        try:
-            print_moments(kwargs['moments'],cell=kwargs['crystal'])
-        except KeyError:
-            pass
+        try: print_label(kwargs['title'])
+        except KeyError: pass
+        try: print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=color.BF)
+        except KeyError: pass
+        try: print_crystal(kwargs['directions'],kwargs['crystal'])
+        except KeyError: pass
+        try: print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),atoms=[kwargs['crystal'][kwargs['reference']]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
+        except KeyError: pass
+        try: print_moments(kwargs['moments'],cell=kwargs['crystal'])
+        except KeyError: pass
 
 #    @staticmethod
 #    def print_equations():
