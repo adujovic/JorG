@@ -108,8 +108,8 @@ if __name__ == '__main__':
     with open(outDirName+"/output.txt",'w+') as raport:
         JorG.symmetry.write_report(["Analysis of symmetry in the generated cell"],
                      [symmetryFull], crystal, stream=raport)
-    loadsave.save_POSCAR(outDirName+"/POSCAR", crystal,
-                copiesInEachDirection, readData)
+    loadsave.save_POSCAR(readData, fileName=outDirName+"/POSCAR",
+                         crystal=crystal, multiplyers=copiesInEachDirection)
 
 #   """
 #        Searching for unique atoms for calculations

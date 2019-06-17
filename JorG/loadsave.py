@@ -113,31 +113,59 @@ def save_vanilla_POSCAR(fileName,data):
 #
 #
 #
-#
-def save_POSCAR(fileName,crystal,multiplyers,data):
-    """
-        Saving data to POSCAR file
-                                    """
-    with open(fileName,"w+") as vaspFile:
-        vaspFile.write(data['comment'])
-        vaspFile.write("\n1.0\n")
-        for m,d in zip(multiplyers,data['directions']):
-            for field in d:
-                vaspFile.write("  %.10f"%((m+1)*field))
-            vaspFile.write("\n")
-        for atomName in data['atomNames']:
-            vaspFile.write("%s "%atomName)
-        vaspFile.write("\n")
-        for atomNumber in data['cellAtoms']:
-            vaspFile.write("%d "%(np.prod(np.array(multiplyers)+1)*atomNumber))
-        vaspFile.write("\nCarthesian\n")
-        for atomName in data['atomNames']:
-            for atom in crystal:
-                if atom[0]==atomName:
-                    for vasp in atom[1]:
-                        vaspFile.write(" %.10f "%vasp)
-                    vaspFile.write(" %s\n"%atom[0])
-        vaspFile.write("\n")
+from itertools import product
+class save_POSCAR:
+    settings = {'fileName'    : 'POSCAR',
+                'multiplyers' : [1, 1, 1],
+                'crystal'     : None}
+
+    def __init__(self,data,**kwargs):
+#    """
+#        Saving data to POSCAR file
+#                                    """
+        self.settings.update(kwargs)
+        if self.settings['crystal'] is None:
+            self.settings['crystal'] = data['cell']
+
+        self.multiplyers = np.array(self.settings['multiplyers']) + 1
+        self.vaspFile = open(self.settings['fileName'],"w+")
+
+        self.vaspFile.write(data['comment'])
+        self.vaspFile.write("\n")
+
+        self.write_directions(data['directions'])
+        self.write_elements(data['atomNames'])
+        self.write_populations(data['cellAtoms'])
+
+        self.vaspFile.write("Carthesian\n")
+
+        self.write_atoms(data['atomNames'])
+
+    def write_directions(self,directions):
+        self.vaspFile.write("1.0\n")
+        for d in self.multiplyers*directions:
+            self.vaspFile.write("  %.10f  %.10f  %.10f\n"%(*d,))
+
+    def write_elements(self,atomNames):
+        for atomName in atomNames:
+            self.vaspFile.write("%s "%atomName)
+        self.vaspFile.write("\n")
+
+    def write_populations(self,cellAtoms):
+        for atomNumber in cellAtoms:
+            self.vaspFile.write("%d "%(np.prod(self.multiplyers*atomNumber)))
+        self.vaspFile.write("\n")
+
+    def write_atoms(self,atomNames):
+        for atomName,atom in product(atomNames,
+                       self.settings['crystal']):
+            if atom[0] != atomName:
+                continue
+            self.vaspFile.write("  %.10f  %.10f  %.10f  %s\n"%(*atom[1],atom[0]))
+        self.vaspFile.write("\n")
+
+    def __del__(self):
+        self.vaspFile.close()
 
 #
 #░▀█▀░█▀█░█▀▀░█▀█░█▀▄░░░█▀▀░█▀█░█░█░█▀▀░█▀▄
@@ -212,25 +240,25 @@ class CellReader:
         if character in "Ss":
             self.ISSELECTIVE = True
 
-    def read_single_atom(self,line,atomRead,atomType):
+    def read_single_atom(self,line):
         if not self.ISSELECTIVE    \
-           and atomRead == 0  \
-           and self.atomNames[atomType] == atomType:
-            self.atomNames[atomType] = POSCARloader.parse_atomName(line)
+           and self.atomRead == 0  \
+           and self.atomNames[self.atomType] == self.atomType:
+            self.atomNames[self.atomType] = POSCARloader.parse_atomName(line)
 
         atomCoordinates = POSCARloader.parse_atom(line)
         if self.ISDIRECT:
-            self.cell.append((self.atomNames[atomType],
+            self.cell.append((self.atomNames[self.atomType],
                          np.dot(self.directions,atomCoordinates)))
             self.center += np.dot(self.directions,atomCoordinates)
             self.cellSymmetry[1].append(tuple(atomCoordinates))
         else:
-            self.cell.append((self.atomNames[atomType],atomCoordinates))
+            self.cell.append((self.atomNames[self.atomType],atomCoordinates))
             self.cellSymmetry[1].append(tuple(
                     np.dot(np.linalg.inv(self.directions),atomCoordinates)))
             self.center += atomCoordinates
 
-        self.cellSymmetry[2].append(POSCARloader.fix_atomic_numbers[self.atomNames[atomType]])
+        self.cellSymmetry[2].append(POSCARloader.fix_atomic_numbers[self.atomNames[self.atomType]])
 
     def read_atoms(self):
         if re.match("\d",self.text[5]):
@@ -242,14 +270,14 @@ class CellReader:
             self.atomNames = [i for i in range(len(self.cellAtoms))]
 
     def read(self):
-       atomRead = 0
-       atomType = 0
+       self.atomRead = 0
+       self.atomType = 0
        for i in range(8,8+self.cellSize):
-           self.read_single_atom(self.text[i],atomRead,atomType)
-           atomRead += 1
-           if atomRead == self.cellAtoms[atomType]:
-               atomType += 1
-               atomRead  = 0
+           self.read_single_atom(self.text[i])
+           self.atomRead += 1
+           if self.atomRead == self.cellAtoms[self.atomType]:
+               self.atomType += 1
+               self.atomRead  = 0
        self.center /= self.cellSize
        self.atomNames = [POSCARloader.fix_names[atom] for atom in self.atomNames]
        return {'comment'     : POSCARloader.read_comment(self.text),

@@ -161,15 +161,15 @@ class NearestNeighborsGenerator:
         _, idx = np.unique(names, return_index=True)
         self.atomNames = names[np.sort(idx)]
 
-    def check_in_cell(self,cell,referenceAtom,directions):
-        originalCell = self.get_symmetry(self.cell,self.directions)
-        neotericCell = self.get_symmetry(     cell,     directions)
+    def check_in_cell(self,directions):
+        originalCell = self.get_symmetry(self.cell   , self.directions)
+        neotericCell = self.get_symmetry(self.crystal,      directions)
         (self.wyckoffPositionDict,
          symmetry,
          self.originalSymmetry) = wyckoffs_dict(originalCell,neotericCell)
         self.distances = []
-        for i,(atom,wyck) in enumerate(zip(cell,symmetry['wyckoffs'])):
-            distance = np.around(np.linalg.norm(atom[1]-referenceAtom[1]),2)
+        for i,(atom,wyck) in enumerate(zip(self.crystal,symmetry['wyckoffs'])):
+            distance = np.around(np.linalg.norm(atom[1]-self.newReferenceAtom[1]),2)
             if (distance                   not in self.distances  and
                 self.wyckoffPositionDict[wyck] in self.Wyckoffs   and
                 "$%s$"%atom[0]                 in self.atomTypeMask ):
@@ -226,8 +226,7 @@ class NearestNeighborsGenerator:
                     NearestNeighborsGenerator.get_extra_directions(self.multipliers,self.directions)
             self.generate_crystal()
             self.find_new_refernce()
-            self.ISFOUND = self.check_in_cell(self.crystal,
-                           self.newReferenceAtom,extraDirections)
+            self.ISFOUND = self.check_in_cell(extraDirections)
             if self.ISFOUND :
                 self.crystalSymmetry = spglib.get_symmetry_dataset(
                         NearestNeighborsGenerator.get_symmetry(
