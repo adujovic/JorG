@@ -14,7 +14,7 @@ from itertools import product
 
 import JorG.symmetry
 from JorG.argv import options
-from JorG.format import print_case
+from JorG.aux.format import print_case
 import JorG.loadsave as loadsave
 import JorG.generator as generator
 from JorG.equivalent import findFlips
@@ -75,6 +75,7 @@ class JorGpi:
                                reference=self.reference,moments=self.oldMoments)
                  
     def initialize_new_cell(self):
+        self.write_input_raport()
         self.nearestNeighbor,\
                 self.cutOff = VariableFixer.fix_neighbor(self.nearestNeighbor,self.cutOff)
         if self.cutOff is None:

@@ -7,7 +7,7 @@ import numpy as np
 from os import makedirs,mkdir,rmdir
 import errno
 import shutil
-import JorG.PeriodicTable as periodic
+import JorG.aux.PeriodicTable as periodic
 
 class error:
     systemerror = -1

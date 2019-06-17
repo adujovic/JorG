@@ -6,11 +6,11 @@ path.insert(0,r'../../')
 import time
 import numpy as np
 
-from JorG.format import standard,color
-from JorG.format import print_vector
-from JorG.format import print_atom
-from JorG.format import print_case
-from JorG.format import print_moments
+from JorG.aux.format import standard,color
+from JorG.aux.format import print_vector
+from JorG.aux.format import print_atom
+from JorG.aux.format import print_case
+from JorG.aux.format import print_moments
 
 def main(**args):
     pass

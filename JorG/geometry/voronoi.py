@@ -3,10 +3,10 @@
 import numpy as np
 import scipy.spatial #Voronoi, ConvexHull
 from sys import argv,path
-path.insert(0,'../')
+path.insert(0,'../../')
 from matplotlib import colors as mplColors
 from itertools import product
-from JorG.showcell import showCell
+from JorG.geometry.showcell import showCell
 
 class Geometry:
     @staticmethod

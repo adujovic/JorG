@@ -5,7 +5,7 @@ from sys import argv,maxsize,path
 path.insert(0,r'../../../')
 import time
 import numpy as np
-from JorG.showcell import showCell
+from JorG.geometry.showcell import showCell
 
 def main(**args):
     pass

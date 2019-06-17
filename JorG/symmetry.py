@@ -1,5 +1,5 @@
-from JorG.format import print_label
-from JorG.format import standard,line
+from JorG.aux.format import print_label
+from JorG.aux.format import standard,line
 
 def show_symmetry(symmetry):
     for i in range(symmetry['rotations'].shape[0]):
@@ -23,7 +23,7 @@ def show_cell(lattice, positions, numbers):
     for p, s in zip(positions, numbers):
         print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
 
-from JorG.PeriodicTable import periodicTableElement
+from JorG.aux.PeriodicTable import periodicTableElement
 import numpy as np
 def print_line(line,**kwargs):
     kwargs = standard.fix(**kwargs)

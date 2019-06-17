@@ -128,7 +128,7 @@ class TemporaryFiles:
             except OSError:
                 print("No file %s"%(self.prefix+name+self.suffix+self.extension))
 
-from JorG.PeriodicTable import periodicTableElement
+from JorG.aux.PeriodicTable import periodicTableElement
 
 import re
 import spglib
@@ -188,8 +188,8 @@ class Symmetry:
         return spglib.get_symmetry_dataset(self.standarize()),\
                spglib.get_symmetry_dataset(refinedCell)
 
-from JorG.format import color, print_vector, print_label
-from JorG.format import print_crystal, print_moments
+from JorG.aux.format import color, print_vector, print_label
+from JorG.aux.format import print_crystal, print_moments
 class Msg:
     @staticmethod
     def print_equations(eqs,isRedundant=False):
