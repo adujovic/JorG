@@ -47,7 +47,8 @@ class StreamHandler:
         load_POSCAR          = loadsave.POSCARloader(POSCARfile)
         load_POSCAR.parse()
         readData             = load_POSCAR(0)
-        oldMoments,incarData = loadsave.load_INCAR (readData['cell'],INCARfile,atomNames=readData['atomNames'])
+        load_INCAR           = loadsave.INCARloader(readData['cell'],fileName=INCARfile,atomNames=readData['atomNames'])
+        oldMoments,incarData = load_INCAR()
         return readData,oldMoments,incarData
 
 from copy import copy

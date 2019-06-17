@@ -16,24 +16,37 @@ class error:
     vaspError      = 99
 
 
-def load_INCAR(cell,INCARname="INCAR",atomNames=periodic.periodicTableElement):
-    oldMoments = []
-    with open(INCARname,"r") as INCARfile:
-        incarData = INCARfile.read()
+class INCARloader:
+    settings = {'fileName'  : "INCAR"}
 
-        oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",incarData)
+    def __init__(self,cell,**kwargs):
+#    """
+#        Loading INCAR
+#                                        """
+        self.settings.update(kwargs)
+        self.INCARfile = open(self.settings['fileName'],"r")
+        self.oldMoments = []
+        self.incarData = self.INCARfile.read()
+        self.cell      = cell
 
-        if oldMomentsText is None:
-            for atom in cell:
-                oldMoments.append(periodic.elementMagneticMoment[atom[0]])
-        else:
-            magmomLine = oldMomentsText.group(1)
-            for record in re.findall("\s*([0-9]+)\s*\*\s*([\-0-9\.]+)",magmomLine):
-                magmomLine = re.sub("{:s}\s*\*\s*{:s}".format(record[0],record[1]),(record[1]+" ")*int(record[0]),magmomLine)
-            for moment in magmomLine.split():
-                oldMoments.append(np.float(moment))
+        self.oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",self.incarData)
+        self.oldMoments = []
+        if self.oldMomentsText is None:
+            self.oldMoments = [periodic.elementMagneticMoment[atom[0]] for atom in self.cell]
 
-    return oldMoments,incarData
+    def __call__(self):
+        if self.oldMoments:
+            return self.oldMoments,self.incarData
+
+        magmomLine = self.oldMomentsText.group(1)
+        for record in re.findall("\s*([0-9]+)\s*\*\s*([\-0-9\.]+)",magmomLine):
+            magmomLine = re.sub("{:s}\s*\*\s*{:s}".format(record[0],record[1]),(record[1]+" ")*int(record[0]),magmomLine)
+        for moment in magmomLine.split():
+            self.oldMoments.append(np.float(moment))
+        return self.oldMoments,self.incarData
+
+    def __del__(self):
+        self.INCARfile.close()
 #
 #
 #
