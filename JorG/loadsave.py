@@ -41,33 +41,42 @@ def load_INCAR(cell,INCARname="INCAR",atomNames=periodic.periodicTableElement):
 #
 
 from itertools import product
-def save_xyz(fileName,crystal,numberOfAtoms = -1, selectedAtoms = None):
-    """
-        Saving data to xyz-style file
-                                        """
-    if numberOfAtoms < 0:
-        numberOfAtoms = len(crystal)
+class save_xyz:
+    settings = {'fileName'     : 'data4jmol.xyz',
+                'numberOfAtoms': -1,
+                'selectedAtoms': None}
 
+    def __init__(self,crystal,**kwargs):
+#    """
+#        Saving data to xyz-style file
+#                                        """
+        self.settings.update(kwargs)
+        if self.settings['numberOfAtoms'] < 0:
+            self.settings['numberOfAtoms'] = len(crystal)
 
-    with open(fileName,"w+") as xyzFile:
-        xyzFile.write(str(numberOfAtoms))
-        xyzFile.write("\n\n")
+        self.xyzFile = open(self.settings['fileName'],"w+")
+        self.xyzFile.write(str(self.settings['numberOfAtoms']))
+        self.xyzFile.write("\n\n")
         for i,atom in enumerate(crystal):
-            xyzFile.write("%s"%atom[0])
-            xyzFile.write(" %.10f %.10f %.10f"%(*atom[1],))
-            vector = 2*np.random.ranf(3)-1.0
-            vector = 0.2*vector/np.linalg.norm(vector)
-            try:
-                if i == selectedAtoms[0]:
-                    vector = 2.0*vector
-                    xyzFile.write(" PatrialCharge(1.0) %f %f %f"%tuple(vector))
-                elif i in selectedAtoms[1:]:
-                    xyzFile.write(" PatrialCharge(1.0) %f %f %f"%tuple(vector))
-            except TypeError:
-                print("Not selected!")
-            xyzFile.write("\n")
-        xyzFile.write("\n")
+            self.write_line(i,atom)
+        self.xyzFile.write("\n")
 
+    def write_line(self,i,atom):
+        self.xyzFile.write("%s"%atom[0])
+        self.xyzFile.write(" %.10f %.10f %.10f"%(*atom[1],))
+        vector = 2*np.random.ranf(3)-1.0
+        vector = 0.2*vector/np.linalg.norm(vector)
+        try:
+            if i == self.settings['selectedAtoms'][0]:
+                vector = 2.0*vector
+            elif i in self.settings['selectedAtoms']:
+                self.xyzFile.write(" PatrialCharge(1.0) %f %f %f"%tuple(vector))
+        except TypeError:
+            print("Not selected!")
+        self.xyzFile.write("\n")
+
+    def __del__(self):
+        self.xyzFile.close()
 #
 #
 #

@@ -98,7 +98,10 @@ if __name__ == '__main__':
         crystal, newReference = localGenerator(copiesInEachDirection)
         extraDirections = VariableFixer.fix_directions(copiesInEachDirection,directions)
         wyckoffDict, symmetryFull, symmetryOriginal =\
-                generator.wyckoffs_dict(cell, crystal, directions, extraDirections)
+           generator.wyckoffs_dict(generator.NearestNeighborsGenerator.get_symmetry(cell,
+                                                                             directions), 
+                                   generator.NearestNeighborsGenerator.get_symmetry(crystal,
+                                                                           extraDirections))
 
 #    """ Checking the symmetry
 #                    of the output """
@@ -133,8 +136,8 @@ if __name__ == '__main__':
         selected.append(i)
     crystal8 = generator.apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff, reference=newReference)
-    loadsave.save_xyz(outDirName+"/crystal.xyz",crystal,selectedAtoms = selected)
-    loadsave.save_xyz(outDirName+"/crystalFull.xyz",crystal8,selectedAtoms = selected)
+    loadsave.save_xyz(crystal, fileName=outDirName+"/crystal.xyz",    selectedAtoms = selected)
+    loadsave.save_xyz(crystal8,fileName=outDirName+"/crystalFull.xyz",selectedAtoms = selected)
     JmolVisualization.create_script(outDirName,radius=cutOff,center=crystal[newReference][1])
     
     tmpFiles = TemporaryFiles()

@@ -201,7 +201,7 @@ def check_line(sumOfChars,length,**kwargs):
         sumOfChars = 1
     return sumOfChars
 
-def print_moments(moments,cell=None,**kwargs):
+def print_moments(moments,**kwargs):
     kwargs = standard.fix(**kwargs)
     kwargs = safe_update(kwargs,{'colors' : cycle([color.DARKGREEN,
                                                    color.DARKBLUE,
@@ -217,8 +217,8 @@ def print_moments(moments,cell=None,**kwargs):
     for i,moment in enumerate(moments):
         elementStr = ''
         numberStr  = ''
-        if cell is not None:
-            elementStr = "{:2s}".format(cell[i][0])
+        if 'cell' in kwargs: 
+            elementStr = "{:2s}".format(kwargs['cell'][i][0])
             numberStr  = "({:3d}): ".format(i+1)
         momentStr = "{:=+3.1f} ".format(moment)
         length = len(elementStr)+len(numberStr)+len(momentStr)

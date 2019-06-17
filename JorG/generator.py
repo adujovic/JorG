@@ -99,32 +99,29 @@ class CrystalGenerator:
 #
 
 import spglib
-from JorG.PeriodicTable import periodicTableNumber
-def wyckoffs_dict(originalCell,      cell,
-                  originalDirections,directions):
-    symmetryCell = None
-    symmetryCell = (directions,
-                  [np.dot(row[1],np.linalg.inv(directions))
-                      for row in cell],
-                  [periodicTableNumber[row[0]]
-                      for row in cell])
-    symmetry = spglib.get_symmetry_dataset(symmetryCell)
-
-    originalSymCell = None
-    originalSymCell = (originalDirections,
-                     [np.dot(row[1],np.linalg.inv(originalDirections))
-                         for row in originalCell],
-                     [periodicTableNumber[row[0]]
-                         for row in originalCell])
-    originalSym = spglib.get_symmetry_dataset(originalSymCell)
+def wyckoffs_dict(originalCell, neotericCell): 
+#   """
+#      originalCell= (originalDirections,
+#                     originalCell, 
+#                     originalAtoms)
+#      neotericCell= (neotericDirections,
+#                     neotericCell,
+#                     neotericAtoms)
+#                                                   """
+    neotericSymmetry = spglib.get_symmetry_dataset(neotericCell)
+    originalSymmetry = spglib.get_symmetry_dataset(originalCell)
 
     wyckoffPositionDict = {}
-    for (i,atom),(j,originalAtom) in product(enumerate(cell),
-                                             enumerate(originalCell)):
-        if np.linalg.norm(atom[1]-originalAtom[1]) < 1e-3:
-            wyckoffPositionDict[symmetry['wyckoffs'][i]] = originalSym['wyckoffs'][j]
+    for (i,neotericAtom),\
+        (j,originalAtom) in product(enumerate(neotericCell[1]),
+                                    enumerate(originalCell[1])):
+        if np.linalg.norm(np.array(neotericAtom)\
+                         -np.array(originalAtom)) < 1e-3:
+            wyckoffPositionDict[\
+                 neotericSymmetry['wyckoffs'][i]] =\
+                         originalSymmetry['wyckoffs'][j]
 
-    return wyckoffPositionDict,symmetry,originalSym
+    return wyckoffPositionDict,neotericSymmetry,originalSymmetry
 #
 #
 #
@@ -132,6 +129,7 @@ def wyckoffs_dict(originalCell,      cell,
 #
 
 from JorG.Masks         import maskFull
+from JorG.PeriodicTable import periodicTableNumber
 class NearestNeighborsGenerator:
     Wyckoffs='abcdefghijklmnopqrstuvwxyz'
     originalSymmetry    = None
@@ -164,12 +162,11 @@ class NearestNeighborsGenerator:
         self.atomNames = names[np.sort(idx)]
 
     def check_in_cell(self,cell,referenceAtom,directions):
+        originalCell = self.get_symmetry(self.cell,self.directions)
+        neotericCell = self.get_symmetry(     cell,     directions)
         (self.wyckoffPositionDict,
          symmetry,
-         self.originalSymmetry) = wyckoffs_dict(self.cell,
-                                           cell,
-                                           self.directions,
-                                           directions)
+         self.originalSymmetry) = wyckoffs_dict(originalCell,neotericCell)
         self.distances = []
         for i,(atom,wyck) in enumerate(zip(cell,symmetry['wyckoffs'])):
             distance = np.around(np.linalg.norm(atom[1]-referenceAtom[1]),2)

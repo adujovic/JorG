@@ -10,6 +10,7 @@ from JorG.format import standard,color
 from JorG.format import print_vector
 from JorG.format import print_atom
 from JorG.format import print_case
+from JorG.format import print_moments
 
 def main(**args):
     pass
@@ -64,14 +65,36 @@ if __name__ == '__main__':
     print_case(*case,numberStyle=color.BF)
     print("\twith distanceStyle=color.BF:")
     print_case(*case,distanceStyle=color.BF)
-    print("\twith wyckoffPostion=\'a\':")
-    print_case(*case,wyckoffPostion='a')
+    print("\twith wyckoffPosition=\'a\':")
+    print_case(*case,wyckoffPosition='a')
     print("\twith distance=1.23")
     print_case(*case,distance=1.23)
     print("\twith end=\'\\nSTOP\\n\':")
     print_case(*case,end='\nSTOP\n')
     line()
-    
+
+    print("\tTest print_moments(",end="")
+    moments = [0.011,0.880,0.011,0.011,1.900,
+               4.800,0.011,0.011,0.011,0.011,
+               0.011,0.011,0.011]
+    cell    = [('C',  np.array([0.0, 0.0, 0.0])),
+               ('Ce', np.array([1.0, 0.0, 0.0])),
+               ('Cs', np.array([0.0, 1.0, 0.0])),
+               ('In', np.array([0.0, 0.0, 1.0])),
+               ('Co', np.array([0.0, 1.0, 1.0])),
+               ('Cr', np.array([1.0, 0.0, 1.0])),
+               ('W',  np.array([1.0, 1.0, 0.0])),
+               ('Re', np.array([1.0, 1.0, 1.0])),
+               ('K',  np.array([0.5, 0.0, 0.0])),
+               ('V',  np.array([0.0, 0.5, 0.0])),
+               ('B',  np.array([0.0, 0.0, 0.5])),
+               ('Te', np.array([0.5, 0.5, 0.5])),
+               ('Cu', np.array([0.7, 0.7, 0.7]))]
+    print(moments,", cell =",cell,")",sep="")
+    print("\twit     cell:")
+    print_moments(moments,cell=cell)
+    print("\twithout cell:")
+    print_moments(moments)
 
     tracker += time.time()
     print("Runtime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))
