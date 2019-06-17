@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     selected = [newReference]
     for caseID,(i,atom,distance,wyck) in enumerate(flipper):
-        print_case(caseID+1,atom,i+1,wyckoffPosition=wyck,distance=distance)
+        print_case(atom,atomID=i+1,caseID=caseID+1,wyckoffPosition=wyck,distance=distance)
         selected.append(i)
     crystal8 = generator.apply_mirrorsXYZ(extraDirections,crystal,
                                 cutOff=cutOff, reference=newReference)

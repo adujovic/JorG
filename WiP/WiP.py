@@ -222,7 +222,7 @@ class Msg:
         except KeyError:
             pass
         try:
-            print_crystal(kwargs['directions'],kwargs['crystal'])
+            print_crystal(kwargs['crystal'],directions=kwargs['directions'])
         except KeyError:
             pass
         try:

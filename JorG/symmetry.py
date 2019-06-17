@@ -1,5 +1,5 @@
-from JorG.format import print_vector,print_atom,print_case,print_crystal,print_moments,print_label
-from JorG.format import standard,empty_line,line
+from JorG.format import print_label
+from JorG.format import standard,line
 
 def show_symmetry(symmetry):
     for i in range(symmetry['rotations'].shape[0]):

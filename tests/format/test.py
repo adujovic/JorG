@@ -55,22 +55,23 @@ if __name__ == '__main__':
     line()
 
     print("Test of print_case(",end="")
-    case = [1, ["Cu",np.zeros(3)], 12]
-    print(*case,end=")\n")
+    case = ["Cu",np.zeros(3)]
+    settings = {'atomID': 12, 'caseID': 1}
+    print(case,', **',settings,end=")\n",sep="")
     print("\tplain:")
-    print_case(*case)
+    print_case(case,**settings)
     print("\twith caseStyle=color.BF:")
-    print_case(*case,caseStyle=color.BF)
+    print_case(case,**settings,caseStyle=color.BF)
     print("\twith numberStyle=color.BF:")
-    print_case(*case,numberStyle=color.BF)
+    print_case(case,**settings,numberStyle=color.BF)
     print("\twith distanceStyle=color.BF:")
-    print_case(*case,distanceStyle=color.BF)
+    print_case(case,**settings,distanceStyle=color.BF)
     print("\twith wyckoffPosition=\'a\':")
-    print_case(*case,wyckoffPosition='a')
+    print_case(case,**settings,wyckoffPosition='a')
     print("\twith distance=1.23")
-    print_case(*case,distance=1.23)
+    print_case(case,**settings,distance=1.23)
     print("\twith end=\'\\nSTOP\\n\':")
-    print_case(*case,end='\nSTOP\n')
+    print_case(case,**settings,end='\nSTOP\n')
     line()
 
     print("\tTest print_moments(",end="")

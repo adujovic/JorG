@@ -73,24 +73,28 @@ def print_atom(atom,**kwargs):
         output += "|"
     kwargs['stream'].write(output+kwargs['end'])
 
-def print_case(caseID, atom, atomID,**kwargs):
+def print_case(atom,**kwargs):
     kwargs = standard.fix(**kwargs)
     kwargs = safe_update(kwargs,{'wyckoffPosition' : " ", 
                                  'distance'        : -1.0,
                                  'caseStyle'       : color.IT+color.CYAN,
                                  'numberStyle'     : color.IT,
+                                 'caseID'          : 1,
+                                 'atomID'          : 1,
                                  'distanceStyle'   : color.END})
-    output  = "Case " + kwargs['caseStyle']+"{:3d}".format(caseID)+color.END
-    output += " atom No. " + kwargs['numberStyle']+"{:3d}".format(atomID)+color.END
+    output  = "Case " + kwargs['caseStyle']+"{:3d}".format(kwargs['caseID'])+color.END
+    output += " atom No. " + kwargs['numberStyle']+"{:3d}".format(kwargs['atomID'])+color.END
     output += kwargs['distanceStyle']
     output += " @ {:1s} & {:6.2f} Å | ".format(kwargs['wyckoffPosition'],kwargs['distance'])
     output += color.END
     kwargs['stream'].write(output)
     print_atom(atom,end=kwargs['end'])
 
-def format_record(record,number,**kwargs):
+def format_record(record,**kwargs):
+    kwargs = standard.fix(**kwargs)
+    kwargs = safe_update(kwargs,{'number' : 0})
     name   = "{:4s}:   ".format(record)
-    num    = "#{:4d}".format(number)
+    num    = "#{:4d}".format(kwargs['number'])
     label  = kwargs['delimiter']    \
            + kwargs['elementStyle'] \
            + name                   \
@@ -115,11 +119,11 @@ def print_composition(cell,**kwargs):
                               +color.END+"|"+'\n')
     sumOfAtoms = 0
     for record in report:
-        label,offset = format_record(record,report[record],**kwargs)
+        label,offset = format_record(record,number=report[record],**kwargs)
         kwargs['stream'].write('|'+label.center(kwargs['linewidth']+offset)+'|'+'\n')
         sumOfAtoms += report[record]
 
-    label,offset = format_record("cell: ",sumOfAtoms,**kwargs)
+    label,offset = format_record("cell: ",number=sumOfAtoms,**kwargs)
     kwargs['stream'].write("|"+((kwargs['linewidth']//4)*'-').center(kwargs['linewidth'])+"|"+'\n')
     kwargs['stream'].write('|'+label.center(kwargs['linewidth']+offset)+'|'+'\n')
 
@@ -170,27 +174,24 @@ def color_names(*args):
     return [color.BF+next(colors)+str(arg)+color.END for arg in args]
 
 import numpy as np
-def print_crystal(directions, cell, **kwargs):
+def print_crystal(cell, **kwargs):
     kwargs = standard.fix(**kwargs)
-    kwargs = safe_update(kwargs,{'labelStyle'   : color.BF,
+    kwargs = safe_update(kwargs,{'directions'   : np.eye(3),
+                                 'labelStyle'   : color.BF,
                                  'elementStyle' : color.BF+color.DARKYELLOW,
                                  'numberStyle'  : color.IT,
                                  'delimiter'    : ' | '})
 
     print_composition(cell,**kwargs)
-
     empty_line(**kwargs)
 
-    print_axes(directions,**kwargs)
-
+    print_axes(**kwargs)
     empty_line(**kwargs)
 
-    print_directions(directions,**kwargs)
-
+    print_directions(**kwargs)
     empty_line(**kwargs)
 
-    print_angles(directions,**kwargs)
-
+    print_angles(**kwargs)
     line(**kwargs)
 
 def check_line(sumOfChars,length,**kwargs):

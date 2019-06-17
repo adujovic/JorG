@@ -126,7 +126,6 @@ def save_vanilla_POSCAR(fileName,data):
 #
 #
 #
-from itertools import product
 class save_POSCAR:
     settings = {'fileName'    : 'POSCAR',
                 'multiplyers' : [1, 1, 1],
