@@ -1,25 +1,5 @@
-#include <iostream>
-#include <iomanip>
-#include <fstream>
+#include "solver.h"
 
-#include <vector>
-#include <array>
-#include <unordered_set>
-#include <numeric>
-#include <random>
-#include <regex>
-
-#include <cmath>
-#include <cstring>
-#include <string>
-
-#include "../asa.h"
-#include "../ising.h"
-#include "../arithmeticvector.h"
-
-#include "aux.h"
-
-extern "C"
 int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, size_t unique_flips){
 #ifdef _SITESNUMBER
     constexpr size_t SITESNUMBER = _SITESNUMBER;

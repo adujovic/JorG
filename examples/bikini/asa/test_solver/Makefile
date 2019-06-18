@@ -28,7 +28,7 @@ LFLAGS = -std=c++17 -lm -lgsl -lgslcblas
 EXEC = start
 
 # Sources
-CPP_SOURCES = $(wildcard *.cpp) $(wildcard ../*.cpp)
+CPP_SOURCES = $(wildcard *.cpp) $(wildcard ../*.cpp) $(wildcard ../solver/*.cpp)
 CPP_OBJECTS = $(CPP_SOURCES:.cpp=.o)
  
 #+++++++++++++++++++#
