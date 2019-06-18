@@ -2,7 +2,7 @@
 
 from os import scandir,mkdir
 import re
-from ctypes import CDLL
+from ctypes import CDLL,c_char_p
 import importlib
 import setuptools
 
@@ -53,8 +53,14 @@ class Crun:
             exit(-1)
 
     def __call__(self,function,*args):
-        argStr = [str(arg) for arg in args]
-        return eval("self.library.%s(%s)"%(function,','.join(argStr)))
+        argStr = []
+        for arg in args:
+            if isinstance(arg,str):
+                argStr.append(c_char_p(arg.encode('utf-8')))
+            else:
+                argStr.append(arg)
+        f = eval("self.library.%s"%function)
+        return f(*argStr)
 
     def __del__(self):
         setuptools.setup(script_args=['clean','--all','--build-lib=%s-lib'%(self.name)],

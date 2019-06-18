@@ -2,7 +2,6 @@
 from sys import path
 path.insert(0,r'../../')
 from os import makedirs
-from subprocess import call
 import errno
 import re
 from datetime import datetime
@@ -24,6 +23,8 @@ from JorG.pickup import EquationSolver,NaiveHeisenberg
 from WiP.WiP import StreamHandler,JmolVisualization
 from WiP.WiP import TemporaryFiles,errors,Msg
 from WiP.WiP import VariableFixer,Symmetry
+
+from crun.crun import Crun
 
 class JorGpi:
     def __init__(self,*args):
@@ -163,21 +164,25 @@ class JorGpi:
     class AdaptiveSimulatedAnnealing:
         solverDirectory = './asa/solver'
         myDirectory     = '../../'
+        options = {'extra_compile_args': ['-std=c++17','-O3','-Wall','-Wextra','-pedantic','-fopenmp'],
+                   'extra_link_args'   : ['-std=c++17','-lm','-lgsl','-lgslcblas']}
+
         def __init__(self,JorGpiObject):
+            self.options['define_macros'] = [('_SITESNUMBER', str(len(JorGpiObject.crystal)))]
+            self.builder = Crun('asa/asa.cpp', 'asa/ising.cpp', 'asa/solver/solver.cpp', 'asa/solver/aux.cpp',**self.options)
             self.tmpFiles = TemporaryFiles()
             self.tmpFiles.write_input(JorGpiObject.allFlippable,JorGpiObject.crystal)
             self.tmpFiles.write_supercell(JorGpiObject.crystal)
             self.tmpFiles.write_directions(JorGpiObject.extraDirections)
             Msg.print_solver_status(int(2**len(JorGpiObject.allFlippable)),self.tmpFiles)
-            call('cd %s; make clean; make SITES=-D_SITESNUMBER=%d; cd %s'%(self.solverDirectory,len(JorGpiObject.crystal),self.myDirectory), shell=True)
 
         def __call__(self,JorGpiObject):
-            call('%s/start %s %d %d'%(self.solverDirectory,str(self.tmpFiles),JorGpiObject.newReference,4*JorGpiObject.nearestNeighbor+8), shell=True)
-            call('cd %s; make clean; cd %s'%(self.solverDirectory,self.myDirectory), shell=True)
+            self.builder('solver',*self.tmpFiles.get_files(),JorGpiObject.newReference,4*JorGpiObject.nearestNeighbor+8)
 
         def __del__(self):
             Msg.print_solver_status(len(np.loadtxt('best.flips',bool)),self.tmpFiles)
             del self.tmpFiles
+            del self.builder
 
     def load_from_annealing(self):
         self.flippingConfigurations = np.loadtxt('best.flips',bool)

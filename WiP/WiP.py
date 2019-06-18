@@ -121,6 +121,12 @@ class TemporaryFiles:
         dName = self.prefix+self.names[2]+self.suffix+self.extension
         return "%s %s %s"%(dName,sName,iName)
 
+    def get_files(self):
+        iName = self.prefix+self.names[0]+self.suffix+self.extension
+        sName = self.prefix+self.names[1]+self.suffix+self.extension
+        dName = self.prefix+self.names[2]+self.suffix+self.extension
+        return dName,sName,iName
+
     def __del__(self):
         for name in self.names:
             try:
