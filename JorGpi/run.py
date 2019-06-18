@@ -217,5 +217,3 @@ class JorGpi:
         self.systemOfEquations,self.flippingConfigurations = \
                 self.build_system_of_equations(self.flippingConfigurations)
         self.save_result()
-
-
