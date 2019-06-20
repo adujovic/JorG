@@ -8,6 +8,22 @@ class TestPOSCARloader(unittest.TestCase):
     atom_proper = np.array([0.0000000000,0.0000000000,4.3870399043])
     atom_input_constr = "-0.00000000000000 0.00000000000000 0.36270017366243 True False False"
     atom_constr_proper = np.array([-0.00000000000000,0.00000000000000,0.36270017366243])
+    directions = [(3.87753641405488, -0.0, -0.0),
+                 (-0.0, 3.87753641405488, 0.0),
+                 (0.0, 0.0, 12.09549987244948)]
+    cell       = [(0.5, 0.5, 0.19398936278918),
+                  (0.5, 0.5, 0.80601063721082),
+                  (0.0, 0.0, 0.0),
+                  (-0.0, 0.0, 0.36270017366243),
+                  (0.0, -0.0, 0.63729982633757),
+                  (0.0, -0.0, 0.15023942974438),
+                  (-0.0, 0.0, 0.84976057025562),
+                  (0.0, 0.5, 0.37983766131592),
+                  (0.5, 0.0, 0.37983766131592),
+                  (-0.0, 0.5, 0.62016233868408),
+                  (0.5, -0.0, 0.62016233868408),
+                  (0.5, 0.5, 0.5)]
+    atoms      = [56, 56, 29, 29, 29, 8, 8, 8, 8, 8, 8, 39]
 
     def setUp(self):
         self.loader   = POSCARloader('tests/POSCARloader/POSCAR_exp1','tests/POSCARloader/POSCAR_exp2','tests/POSCARloader/POSCAR_exp3')
@@ -100,7 +116,7 @@ class TestPOSCARloader(unittest.TestCase):
         for atomSet,atomRead in zip (cell,self.loader(0)[ 'cell']):
             self.assertEqual(atomSet[0],atomRead[0])
             self.assertAlmostEqual(np.linalg.norm(atomSet[1]-atomRead[1]),0.0,
-                                   msg="[%f %f %f] != [%f %f %f]"%(*(atomSet[1]),*(atomRead[1])))
+                                   msg="%s != %s"%(str(atomSet[1]),str(atomRead[1])))
 
     def test_loader_cell_1(self):
         self.loader.parse()
@@ -119,7 +135,7 @@ class TestPOSCARloader(unittest.TestCase):
         for atomSet,atomRead in zip (cell,self.loader(1)['cell']):
             self.assertEqual(atomSet[0],atomRead[0])
             self.assertAlmostEqual(np.linalg.norm(atomSet[1]-atomRead[1]),0.0,
-                                   msg="[%f %f %f] != [%f %f %f]"%(*(atomSet[1]),*(atomRead[1])))
+                                   msg="%s != %s"%(str(atomSet[1]),str(atomRead[1])))
 
     def test_loader_cell_2(self):
         self.loader.parse()
@@ -138,13 +154,10 @@ class TestPOSCARloader(unittest.TestCase):
         for atomSet,atomRead in zip (cell,self.loader(2)['cell']):
             self.assertEqual(atomSet[0],atomRead[0])
             self.assertAlmostEqual(np.linalg.norm(atomSet[1]-atomRead[1]),0.0,
-                                   msg="[%f %f %f] != [%f %f %f]"%(*(atomSet[1]),*(atomRead[1])))
+                                   msg="%s != %s"%(str(atomSet[1]),str(atomRead[1])))
         
     def test_loader_cellSymmetry_0(self):
         self.loader.parse()
-        directions = [(3.8775364141, -0.0, 0.0),
-                      (-0.0, 3.8775364141, 0.0),
-                      (-0.0, 0.0, 12.0954998724)]
         cell       = [(0.5025789570959635, 0.4999999999871052, 0.19398936279219897),
                       (0.49994842084544383, 0.4999999999871052, 0.8060106372160686),
                       (0.0012894785415343496, 0.0, 0.0),
@@ -157,8 +170,7 @@ class TestPOSCARloader(unittest.TestCase):
                       (0.0, 0.4999999999871052, 0.6201623386906465),
                       (0.4999999999871052, 0.0, 0.6201623386906465),
                       (0.4999999999871052, 0.4999999999871052, 0.5)]
-        atoms      = [56, 56, 29, 29, 29, 8, 8, 8, 8, 8, 8, 39]
-        for directionSet,directionRead in zip(directions,
+        for directionSet,directionRead in zip(self.directions,
                                               self.loader(0)['cellSymmetry'][0]):
             self.assertAlmostEqual(np.linalg.norm(directionSet),
                                    np.linalg.norm(directionRead))
@@ -166,63 +178,32 @@ class TestPOSCARloader(unittest.TestCase):
                                     self.loader(0)['cellSymmetry'][1]):
             self.assertAlmostEqual(np.linalg.norm(atomSet),
                                    np.linalg.norm(atomRead))
-        for nameSet,nameRead in zip(atoms,
+        for nameSet,nameRead in zip(self.atoms,
                                     self.loader(0)['cellSymmetry'][2]):
             self.assertEqual(nameSet,nameRead)
 
     def test_loader_cellSymmetry_1(self):
         self.loader.parse()
-        directions = [(3.87753641405488, -0.0, -0.0),
-                     (-0.0, 3.87753641405488, 0.0),
-                     (0.0, 0.0, 12.09549987244948)]
-        cell       = [(0.5, 0.5, 0.19398936278918),
-                      (0.5, 0.5, 0.80601063721082),
-                      (0.0, 0.0, 0.0),
-                      (-0.0, 0.0, 0.36270017366243),
-                      (0.0, -0.0, 0.63729982633757),
-                      (0.0, -0.0, 0.15023942974438),
-                      (-0.0, 0.0, 0.84976057025562),
-                      (0.0, 0.5, 0.37983766131592),
-                      (0.5, 0.0, 0.37983766131592),
-                      (-0.0, 0.5, 0.62016233868408),
-                      (0.5, -0.0, 0.62016233868408),
-                      (0.5, 0.5, 0.5)]
-        atoms      = [56, 56, 29, 29, 29, 8, 8, 8, 8, 8, 8, 39]
-        for directionSet,directionRead in zip(directions,
+        for directionSet,directionRead in zip(self.directions,
                                               self.loader(1)['cellSymmetry'][0]):
             self.assertAlmostEqual(np.linalg.norm(directionSet),
                                    np.linalg.norm(directionRead))
-        for atomSet,atomRead in zip(cell,
+        for atomSet,atomRead in zip(self.cell,
                                     self.loader(1)['cellSymmetry'][1]):
             self.assertAlmostEqual(np.linalg.norm(atomSet),
                                    np.linalg.norm(atomRead))
-        for nameSet,nameRead in zip(atoms,
+        for nameSet,nameRead in zip(self.atoms,
                                     self.loader(1)['cellSymmetry'][2]):
             self.assertEqual(nameSet,nameRead)
         
     def test_loader_cellSymmetry_2(self):
         self.loader.parse()
-        directions = [(3.87753641405488, -0.0, -0.0),
-                     (-0.0, 3.87753641405488, 0.0),
-                     (0.0, 0.0, 12.09549987244948)]
-        cell       = [(0.5, 0.5, 0.19398936278918),
-                      (0.5, 0.5, 0.80601063721082),
-                      (0.0, 0.0, 0.0),
-                      (-0.0, 0.0, 0.36270017366243),
-                      (0.0, -0.0, 0.63729982633757),
-                      (0.0, -0.0, 0.15023942974438),
-                      (-0.0, 0.0, 0.84976057025562),
-                      (0.0, 0.5, 0.37983766131592),
-                      (0.5, 0.0, 0.37983766131592),
-                      (-0.0, 0.5, 0.62016233868408),
-                      (0.5, -0.0, 0.62016233868408),
-                      (0.5, 0.5, 0.5)] 
         atoms      = [0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3]
-        for directionSet,directionRead in zip(directions,
+        for directionSet,directionRead in zip(self.directions,
                                               self.loader(2)['cellSymmetry'][0]):
             self.assertAlmostEqual(np.linalg.norm(directionSet),
                                    np.linalg.norm(directionRead))
-        for atomSet,atomRead in zip(cell,
+        for atomSet,atomRead in zip(self.cell,
                                     self.loader(2)['cellSymmetry'][1]):
             self.assertAlmostEqual(np.linalg.norm(atomSet),
                                    np.linalg.norm(atomRead))

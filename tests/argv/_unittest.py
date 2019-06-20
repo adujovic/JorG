@@ -160,47 +160,20 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.currentOptions('redundant'),True)
 
     def test_input_012(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD "
+        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -E Ni -o output/ASD --reference 21 -R 123.0"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
-        self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
-        self.assertGreater(self.NEIGHBOR,0)
-        self.assertEqual(self.NEIGHBOR,2)
-        self.assertEqual(self.POSCAR,'_POSCARs/POSCAR_CsNiF')
-        self.assertEqual(self.INCAR,'_INCARs/INCAR_CsNiF')
-        self.assertEqual(self.OUTPUT,'output/ASD')
-        self.check_in(self.MASK,"Ni")
-
-    def test_input_013(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --reference 21"
-        self.set_up(INPUT)
-        self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_bools()
-        self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
-        self.assertGreater(self.NEIGHBOR,0)
-        self.assertEqual(self.NEIGHBOR,2)
+        self.check_type(self.currentOptions('reference'),isType=int)
         self.assertEqual(self.POSCAR,'_POSCARs/POSCAR_CsNiF')
         self.assertEqual(self.INCAR,'_INCARs/INCAR_CsNiF')
         self.assertEqual(self.OUTPUT,'output/ASD')
         self.check_in(self.MASK,"Ni")
         self.assertEqual(self.currentOptions('reference'),21-1)
-
-    def test_input_014(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -E Ni -o output/ASD -R 123.0"
-        self.set_up(INPUT)
-        self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
-        self.check_bools()
-        self.check_type(self.currentOptions('reference'),isType=int)
         self.check_type(self.currentOptions('cutOff'),isType=float)
-        self.assertIsNone(self.NEIGHBOR)
         self.assertAlmostEqual(self.currentOptions('cutOff'),123.0)
-        self.assertEqual(self.POSCAR,'_POSCARs/POSCAR_CsNiF')
-        self.assertEqual(self.INCAR,'_INCARs/INCAR_CsNiF')
-        self.assertEqual(self.OUTPUT,'output/ASD')
-        self.check_in(self.MASK,"Ni")
 
-    def test_input_015(self):
+    def test_input_013(self):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --refined"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
@@ -214,7 +187,7 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Ni")
         self.assertEqual(self.currentOptions('refined'),True)
 
-    def test_input_016(self):
+    def test_input_014(self):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --period 3d 5p"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
@@ -227,7 +200,7 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.OUTPUT,'output/ASD')
         self.check_in(self.MASK,"Ni","Ti","Mn","Te","In")
 
-    def test_input_017(self):
+    def test_input_015(self):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --block D"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
@@ -240,7 +213,7 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.OUTPUT,'output/ASD')
         self.check_in(self.MASK,"Ni","Fe","Au","Hg","Cr","Hf")
 
-    def test_input_018(self):
+    def test_input_016(self):
         INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --group 2 5"
         self.set_up(INPUT)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
