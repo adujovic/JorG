@@ -117,8 +117,9 @@ class SmartPickUp:
                  namesOfInteractingAtoms):
         self.numberOfNeighbors       = numberOfNeighbors
         self.namesOfInteractingAtoms = namesOfInteractingAtoms
-        self.solution = None
-        self.solver   = None
+        self.solution  = None
+        self.solver    = None
+        self.reference = None
 
     def read_POSCARs(self,*args):
         self.solution = None
@@ -132,10 +133,15 @@ class SmartPickUp:
         self.MAGMOMs = MAGMOMloader(*OUTCARs,spam=False)
         self.MAGMOMs.parse()
 
-    def read(self,*args):
+    def read(self,*args,**kwargs):
         self.solution = None
-        self.read_POSCARs(*args)
         self.read_MAGMOMs(*args)
+        self.read_POSCARs(*args)
+        if 'reference' in kwargs:
+            self.reference = self.POSCARs(0)['cell'][kwargs['reference']][1]
+        else:
+            print("Warning: reference in (0,0,0). Is that ok?")
+            self.reference = np.zeros(3) 
 
     def make_crystal(self,idx=0):
         self.solution = None
@@ -150,7 +156,7 @@ class SmartPickUp:
         self.distances = set([])
         self.make_crystal(idx)
         for atom in self.POSCARs(idx)['cell']:
-            d = np.around(np.linalg.norm(atom[1]),decimals=2)
+            d = np.around(np.linalg.norm(atom[1]-self.reference),decimals=2)
             if atom[0] in self.namesOfInteractingAtoms:
                 self.distances.add(d)
 
@@ -315,3 +321,26 @@ class NaiveHeisenberg:
             if np.abs(distance) > 1e-2:
                 return distance
         return False
+
+class Reference:
+    def __init__(self,POSCAR):
+        loader = POSCARloader(POSCAR)
+        loader.parse()
+        firstLine = loader()['comment']
+        try:
+            self.reference = int(re.search('NewRef:\s*([0-9]+),',firstLine).group(1))
+        except AttributeError as err:
+            print("Reference not found in POSCAR comment! Taking 0!")
+            print(err)
+            self.reference = 0
+        except ValueError as err:
+            print("Reference cannot be converted to int! Taking 0!")
+            print(err)
+            self.reference = 0
+        if self.reference < 0:
+            print("Wrong reference (%d < 0)! Taking 0!"%self.reference)
+            self.reference = 0
+    def __str__(self):
+        return str(self.reference)
+    def __call__(self):
+        return self.reference

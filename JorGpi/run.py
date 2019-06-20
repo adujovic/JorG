@@ -93,12 +93,13 @@ class JorGpi:
         generatorNN.moments          = self.oldMoments
         generatorNN.extraMultiplier  = self.extraMultiplier
 
+        generatorNN(self.nearestNeighbor)
         try:
             (self.cutOff, self.crystal,
              self.symmetryFull, self.newReference,
              self.copiesInEachDirection, self.wyckoffDict) = generatorNN(self.nearestNeighbor)
         except Exception:
-            print("Failed to generate crystal")
+            print("Failed to generate crystal:")
             exit(errors.failed_to_generate)
         self.extraDirections =\
                 VariableFixer.fix_directions(self.copiesInEachDirection,self.directions)
@@ -144,6 +145,7 @@ class JorGpi:
         with open(self.outDirName+"/output.txt",'w+') as raport:
             JorG.symmetry.write_report(["Analysis of symmetry in the generated cell"],
                          [self.symmetryFull], self.crystal, stream=raport)
+        self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,self.crystal[self.newReference])
         loadsave.save_POSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
                              crystal=self.crystal, multiplyers=self.copiesInEachDirection)
     

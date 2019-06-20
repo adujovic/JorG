@@ -108,19 +108,20 @@ def wyckoffs_dict(originalCell, neotericCell):
 #                     neotericCell,
 #                     neotericAtoms)
 #                                                   """
-    neotericSymmetry = spglib.get_symmetry_dataset(neotericCell)
     originalSymmetry = spglib.get_symmetry_dataset(originalCell)
-
+    neotericSymmetry = spglib.get_symmetry_dataset(neotericCell)
     wyckoffPositionDict = {}
     for (i,neotericAtom),\
-        (j,originalAtom) in product(enumerate(neotericCell[1]),
-                                    enumerate(originalCell[1])):
-        if np.linalg.norm(np.array(neotericAtom)\
-                         -np.array(originalAtom)) < 1e-3:
+        (j,originalAtom) \
+          in product(enumerate(neotericCell[1]),
+                     enumerate(originalCell[1])):
+        if np.linalg.norm(np.dot(np.array(neotericCell[0]),np.array(neotericAtom))\
+                         -np.dot(np.array(originalCell[0]),np.array(originalAtom))) < 1e-3:
             wyckoffPositionDict[\
                  neotericSymmetry['wyckoffs'][i]] =\
                          originalSymmetry['wyckoffs'][j]
 
+    print(wyckoffPositionDict)
     return wyckoffPositionDict,neotericSymmetry,originalSymmetry
 #
 #

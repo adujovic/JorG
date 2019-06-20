@@ -6,7 +6,8 @@ path.insert(0,r'../../')
 import time
 import argparse as ap
 import numpy as np
-from JorG.pickup import SmartPickUp
+import re
+from JorG.pickup import SmartPickUp,Reference
 
 def main(**args):
     pass
@@ -34,6 +35,7 @@ class CommandLineOptions:
         except KeyError:
             exit(-1)
 
+
 if __name__ == '__main__':
     tracker  = -(time.time())
     options = CommandLineOptions(*argv)
@@ -41,11 +43,12 @@ if __name__ == '__main__':
     elements = ''
     for e in options('elements'):
         elements += e
-        
+    ref = Reference(options('reference')+"/POSCAR")
+
     numOfJs = options('number_of_interactions')
-    print("Running for NN=%d, \'%s\':"%(numOfJs,elements))
+    print("Running for NN=%d, \'%s\' from atom No %d:"%(numOfJs,elements,ref()))
     pickerUpper = SmartPickUp(numOfJs,elements)
-    pickerUpper.read(options('reference'),*options('directories'))
+    pickerUpper.read(options('reference'),*options('directories'),reference=ref())
     print("Exchange interaction magnitude(s) in %s:"%options('units'))
     Js = pickerUpper.solve(units=options('units'))
     print((len(Js)*"% 11.7f ")%(*Js,))

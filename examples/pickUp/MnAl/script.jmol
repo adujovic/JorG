@@ -1,0 +1,8 @@
+vibration ON
+vector ON 
+vector SCALE 5.00
+vector 0.10
+set bondRadiusMilliAngstroms 0 
+background [253,246,227]
+isoSurface SURF center {1.37502 1.37502 1.73832} sphere 7.06000
+color $SURF translucent [176,255,176]

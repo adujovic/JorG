@@ -3,6 +3,7 @@
 from sys import argv,path
 path.insert(0,r'../')
 import numpy as np
+import errno
 
 class errors:
     failed_to_generate = -201
