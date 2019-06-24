@@ -125,8 +125,7 @@ class MAGMOMloader:
     def get_average_magnitude(self,idx=0,indices=None):
         if indices is not None:
             return np.average(np.abs(np.take(list(self.data[idx]['moments'].values()),indices)))
-        else:
-            return np.average(np.abs(np.array(list(self.data[idx]['moments'].values()))))
+        return np.average(np.abs(np.array(list(self.data[idx]['moments'].values()))))
 
     def __call__(self,idx=0):
         return self.data[idx]
@@ -207,6 +206,7 @@ class SmartPickUp:
                 continue
             self.set_flipps(i)
         self.model             = NaiveHeisenberg(self.flippingConfigurations,self.crystal,self.crystal8)
+        self.model.MAGMOMs     = self.MAGMOMs
         self.flipped           = np.unique(np.where(self.flippingConfigurations)[1])
         self.systemOfEquations = self.model.generate(self.namesOfInteractingAtoms,self.distances)
         self.solver            = EquationSolver(self.systemOfEquations,self.dE)
@@ -315,8 +315,17 @@ class EquationSolver:
         self.equations = resultantSystem
         return resultantSystem,resultantSystem2
 
+class DefaultMoments:
+    def __init__(self,crystal):
+        self.moments = [ atom[2] for atom in crystal ]
+        self.moments.insert(0,0.0)
+    def __call__(self,idx=0):
+        return {'energy': 0.0, 'moments': self.moments}
+
 class NaiveHeisenberg:
-    def __init__(self,flippings,crystal,crystal8):
+    def __init__(self,flippings,
+                 crystal,crystal8):
+        self.MAGMOMs   = DefaultMoments(crystal)
         self.flippings = flippings
         self.crystal   = crystal
         self.crystal8  = crystal8
@@ -324,6 +333,7 @@ class NaiveHeisenberg:
     def generate(self,mask,flipper):
         self.flipper = np.array(flipper)
         self.mask    = mask
+        print((len(flipper),len(self.flippings)))
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)))
         for (i,config),(I,atomI),atomJ in product(enumerate(self.flippings),
                                                   enumerate(self.crystal),
@@ -333,9 +343,9 @@ class NaiveHeisenberg:
             distance = self.check_if_contributes(config,atomI,atomJ)
             if not distance: 
                 continue
-            j = np.where(np.abs(self.flipper - distance)<1e-2)
-            if j:
-                self.systemOfEquations[i][j[0]] += 2*atomI[2]*atomJ[2]
+            j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
+            if j.size:
+                self.systemOfEquations[i][j[0][0]] -= 2.0*atomI[2]*self.MAGMOMs(i)['moments'][atomJ[3]+1]
         return self.systemOfEquations
 
     def check_if_contributes(self,config,atomI,atomJ):

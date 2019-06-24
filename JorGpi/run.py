@@ -196,9 +196,6 @@ class JorGpi:
     def build_system_of_equations(self,flippingConfigurations):
         gen = NaiveHeisenberg(flippingConfigurations,self.crystal,self.crystal8)
 
-        print(self.flipper)
-        print([flip[2] for flip in self.flipper])
-        exit()
         systemOfEquations = gen.generate(self.currentOptions('mask'),[flip[2] for flip in self.flipper])
 
         eqs = EquationSolver(systemOfEquations,np.zeros(len(systemOfEquations)))
