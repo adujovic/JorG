@@ -302,10 +302,9 @@ class CellReader:
                'atomNames'   : self.atomNames}
 
 class POSCARloader:
-    data = []
-    rawTxt = []
-
     def __init__(self,*args,**kwargs):
+        self.data = []
+        self.rawTxt = []
         for inputName in args:
             try:
                 with open(inputName,"r+") as inFile:

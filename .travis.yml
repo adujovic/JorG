@@ -7,10 +7,5 @@ before_install:
   - sudo apt-get install -y python3-numpy
   - sudo apt-get install -y python3-scipy
   - sudo apt-get install -y python3-dev
-  - git clone https://github.com/atztogo/spglib.git
-  - cd spglib/python
-  - sudo python setup.py install --user
-  - sudo find / -name spglib
-  - cd ../..
 script:
   - ./run_all_tests.sh

@@ -155,7 +155,7 @@ class JorGpi:
             self.selected.append(i)
         self.crystal8 =\
                 generator.apply_mirrorsXYZ(self.extraDirections,self.crystal,
-                                           cutOff=self.cutOff, reference=self.newReference)
+                                           reference=self.newReference)
         loadsave.save_xyz(self.crystal, fileName=self.outDirName+"/crystal.xyz",
                           selectedAtoms = self.selected)
         loadsave.save_xyz(self.crystal8,fileName=self.outDirName+"/crystalFull.xyz",
@@ -195,6 +195,10 @@ class JorGpi:
 
     def build_system_of_equations(self,flippingConfigurations):
         gen = NaiveHeisenberg(flippingConfigurations,self.crystal,self.crystal8)
+
+        print(self.flipper)
+        print([flip[2] for flip in self.flipper])
+        exit()
         systemOfEquations = gen.generate(self.currentOptions('mask'),[flip[2] for flip in self.flipper])
 
         eqs = EquationSolver(systemOfEquations,np.zeros(len(systemOfEquations)))

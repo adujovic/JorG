@@ -121,7 +121,6 @@ def wyckoffs_dict(originalCell, neotericCell):
                  neotericSymmetry['wyckoffs'][i]] =\
                          originalSymmetry['wyckoffs'][j]
 
-    print(wyckoffPositionDict)
     return wyckoffPositionDict,neotericSymmetry,originalSymmetry
 #
 #
@@ -254,14 +253,11 @@ class NearestNeighborsGenerator:
 #
 #
 
-def apply_mirrorsXYZ(dimensions,cell, cutOff=-1.0, reference=0):
+def apply_mirrorsXYZ(dimensions,cell,reference=0):
     outputCell = []
-    for p in product([0,-1],repeat=3):
+    for p in product([-1,0,1],repeat=3):
         projection = np.array([p])
         translation = np.dot(projection,dimensions)[0]
         for i,atom in enumerate(cell):
-#            if cutOff > 0:
-#                if np.linalg.norm(atom[1]+translation - cell[reference][1]) > cutOff:
-#                    continue
             outputCell.append([atom[0],atom[1]+translation,atom[2],i])
     return outputCell
