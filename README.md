@@ -1,7 +1,7 @@
 <p align="center"><img src="doc/JorG.png"></p>
-<p>JorGπ (<em>Georgie Pie</em>) is an automatic scheme of mapping the ab-initio system (so far using VASP only) onto Heisenberg model:</p>
-<p align="center"><img src="doc/Heisenberg.png"></p>
-<p align="center"><img src="doc/Jdef.png"></p>
+<p>JorGπ (<em>Georgie Pie</em>) is an automatic scheme of mapping an ab-initio system (so far using VASP) onto Heisenberg model:</p>
+<p align="center"><img src="doc/Heisenberg.png" height="48px"></p>
+<p align="center"><img src="doc/Jdef.png" height="24px"></p>
 <h3 align="center">General Scheme of JorG workflow</h3>
 <p align="center"><img src="doc/JorG-flowchart.png" width="50%"></p>
 <p>by A.P. Kądzielawa</p>
