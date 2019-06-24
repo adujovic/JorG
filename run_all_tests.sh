@@ -12,3 +12,5 @@ echo "                 ...done"
 echo "python3 -m unittest tests.argv._unittest -v"
 python3 -m unittest tests.argv._unittest -v
 echo "                 ...done"
+
+exit -1
