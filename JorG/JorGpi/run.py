@@ -11,10 +11,10 @@ import time
 import shutil
 from itertools import product
 
-import symmetry
+import JorGpi.symmetry as symmetry
 from argv import options
 from aux.format import print_case
-import loadsave as loadsave
+import JorGpi.loadsave as loadsave
 import JorGpi.generator as generator
 from JorGpi.equivalent import findFlips
 

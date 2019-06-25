@@ -12,7 +12,7 @@ class errors:
 
 from datetime import datetime
 from os import makedirs
-import loadsave as loadsave
+import JorGpi.loadsave as loadsave
 from POSCARloader import POSCARloader
 class StreamHandler:
     def __init__(self,*args,**kwargs):
