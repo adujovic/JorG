@@ -6,47 +6,53 @@ path.insert(0,r'../../')
 import numpy as np
 from loadsave import POSCARloader
 
-display    = 42
-resolution = 0.001
+class KPOINTS:
+    def __init__(self,POSCAR="POSCAR",resolution=0.001):
+        self.multipliers = np.arange(1.0,100,resolution)
+        loader = POSCARloader("POSCAR")
+        loader.parse()
+        self.directions = loader()['directions'] 
+        self.found      = []
+        self.volume = np.linalg.det(self.directions)
+        self.invert_directions()
 
-loader = POSCARloader("POSCAR")
-loader.parse()
-directions = loader()['directions'] 
-volume = np.linalg.det(directions)
+    def invert_directions(self):
+        self.invdirections = []
+        for i in range(3):
+            j = (i+1)%3
+            k = (i+2)%3
+            self.invdirections.append(np.cross(self.directions[j],self.directions[k])/self.volume)
+        self.invdirections = np.array(self.invdirections)
+        self.invdirections /= np.max([np.linalg.norm(b) for b in self.invdirections])
 
-invdirections = []
-for i in range(3):
-    j = (i+1)%3
-    k = (i+2)%3
-    invdirections.append(np.cross(directions[j],directions[k])/volume)
-invdirections = np.array(invdirections)
-invdirections /= np.max([np.linalg.norm(b) for b in invdirections])
+    def __call__(self,treshold):
+        newlyFound = []
+        for mul in self.multipliers:
+            local = mul*self.invdirections
+            err = np.sum(np.abs([np.linalg.norm(l)- np.int(np.linalg.norm(l)) for l in local]))
+            if err >= treshold:
+                continue
+            justFound = [ np.int(np.linalg.norm(l)) for l in local ]
+            if justFound not in self.found and 0 not in justFound:
+                self.found.append(justFound)
+                newlyFound.append([justFound,err])
+        return newlyFound
 
-def check(treshold,multipliers,found):
-    for mul in multipliers:
-        loc = mul*invdirections
-        err = 0.0
-        for l in loc:
-            err += np.abs(np.linalg.norm(l)- np.int(np.linalg.norm(l)))
-        if err < treshold:
-            newlyFound = []
-            for l in loc:
-                newlyFound.append(np.int(np.linalg.norm(l)))
-            if newlyFound not in found and 0 not in newlyFound:
-                print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*newlyFound,err).center(display))
-                found.append(newlyFound)
-    return found
+def print_all(records,display):
+    for record,error in records:
+        print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*record,error).center(display))
 
-print("KPOINT multiplier proposition:".center(display))
-found = []
-multipliers = np.arange(1.0,100,resolution)
-print("Good:".center(display))
-found = check(np.sqrt(1e-3),multipliers,found)
-print("Decent:".center(display))
-found = check(0.1,multipliers,found)
-print("Plausible:".center(display))
-found = check(np.sqrt(1e-1),multipliers,found)
-print("Borderline terrible:".center(display))
-found = check(0.5,multipliers,found)
-print("Just don't:".center(display))
-found = check(1.0,multipliers,found)
+if __name__ == '__main__':
+    display = 42
+    points  = KPOINTS()
+    print("KPOINT multiplier proposition:".center(display))
+    print("Good:".center(display))
+    print_all(points(np.sqrt(1e-3)),display)
+    print("Decent:".center(display))
+    print_all(points(np.sqrt(1e-2)),display)
+    print("Plausible:".center(display))
+    print_all(points(np.sqrt(1e-1)),display)
+    print("Borderline terrible:".center(display))
+    print_all(points(np.sqrt(0.5)),display)
+    print("Just don't:".center(display))
+    print_all(points(np.sqrt(1.0)),display)
