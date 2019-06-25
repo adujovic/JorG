@@ -6,7 +6,7 @@ path.insert(0,r'../../')
 import time
 import numpy as np
 from JorG.loadsave import POSCARloader
-from JorG.pickup import SmartPickUp
+from pickup.pickup import SmartPickUp
 from itertools import product
 
 def main(**args):
@@ -18,7 +18,9 @@ if __name__ == '__main__':
     POSCARs = [ "%s/POSCAR"%arg for arg in argv[1:] ]
     if not POSCARs:
         print("No files provided")
-        exit(-1)
+        argv.append("../../_VASP/Fe/noFlip")
+        argv.append("../../_VASP/Fe/flip00000")
+        POSCARs = [ "%s/POSCAR"%arg for arg in argv[1:] ]
 
     print(*POSCARs)
     loader   = POSCARloader(*POSCARs,spam=False)
