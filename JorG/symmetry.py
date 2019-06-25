@@ -57,16 +57,16 @@ class WriteReport:
                           record['std_types'][
                               mapping]-1]
                           for mapping in record['mapping_to_primitive']])
-    def write_single(self,i,**kwargs):
-        wyckoffCount   = dict.fromkeys(set(self.data[i]['wyckoffs']),0)
-        print_line(self.comments[i],**self.kwargs)
+    def write_single(self,index,**kwargs):
+        wyckoffCount   = dict.fromkeys(set(self.data[index]['wyckoffs']),0)
+        print_line(self.comments[index],**self.kwargs)
         line(**self.kwargs)
-        print_line("Spacegroup: %s (%d) "%(self.data[i]['international'],self.data[i]['number']),**self.kwargs)
+        print_line("Spacegroup: %s (%d) "%(self.data[index]['international'],self.data[index]['number']),**self.kwargs)
         print_line("Mapping to equivalent atoms with the Wyckoff positions:",**self.kwargs)
 
-        for i,(j,atom,wyck) in enumerate(zip(self.data[i]['equivalent_atoms'],
+        for i,(j,atom,wyck) in enumerate(zip(self.data[index]['equivalent_atoms'],
                                              kwargs['crystal'],
-                                             self.data[i]['wyckoffs'])):
+                                             self.data[index]['wyckoffs'])):
            output = get_equivalent_line(i,j,atom,wyck)
            print_line(output,**self.kwargs)
            wyckoffCount[wyck] += 1
@@ -76,4 +76,3 @@ class WriteReport:
             output += " #%s  =  %d "%(wyck,wyckoffCount[wyck])
         print_line(output,**self.kwargs)
         line(**self.kwargs)
-
