@@ -40,9 +40,9 @@ class options:
                                  help='number of reference atom in inputFile')
 
     def add_arguments_io(self):
-        self.parser.add_argument('--input', '-i', default='POSCAR',
+        self.parser.add_argument('--input', '-i', default='_INPUT/POSCAR',
                                  help='input POSCAR file')
-        self.parser.add_argument('--incar', '--INCAR', '-I', default='INCAR',
+        self.parser.add_argument('--incar', '--INCAR', '-I', default='_INPUT/INCAR',
                                  help='input INCAR file')
         self.parser.add_argument('--output', '-o', default=None,
                                  help='output directory')

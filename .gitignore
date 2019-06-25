@@ -118,8 +118,7 @@ out
 *.dat
 *.xyz
 *.png
-_POSCARs/
-_INCARs/
+_INPUT/
 _VASP/
 best.flips
 .*.swp

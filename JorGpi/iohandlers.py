@@ -136,7 +136,6 @@ class TemporaryFiles:
                 print("No file %s"%(self.prefix+name+self.suffix+self.extension))
 
 from JorG.aux.PeriodicTable import periodicTableElement
-
 import re
 import spglib
 class VariableFixer:
@@ -241,5 +240,11 @@ class Msg:
         except KeyError:
             pass
 
-#    @staticmethod
-#    def print_equations():
+def read_flips(name='best.flips'):
+    try:
+        read = np.loadtxt(name,bool)
+        remove(name)
+        return read
+    except OSError:
+        print("No %s here..."%name)
+        return

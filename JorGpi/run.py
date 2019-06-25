@@ -20,11 +20,10 @@ from JorG.equivalent import findFlips
 
 from JorG.pickup import EquationSolver,NaiveHeisenberg
 
-from WiP.WiP import StreamHandler,JmolVisualization
-from WiP.WiP import TemporaryFiles,errors,Msg
-from WiP.WiP import VariableFixer,Symmetry
-
-from crun.crun import Crun
+from JorGpi.iohandlers import StreamHandler,JmolVisualization
+from JorGpi.iohandlers import TemporaryFiles,errors,Msg
+from JorGpi.iohandlers import VariableFixer,Symmetry,read_flips
+from JorGpi.crun import Crun
 
 class JorGpi:
     def __init__(self,*args):
@@ -186,7 +185,7 @@ class JorGpi:
             del self.builder
 
     def load_from_annealing(self):
-        self.flippingConfigurations = np.loadtxt('best.flips',bool)
+        self.flippingConfigurations = read_flips()
         try:
             np.shape(self.flippingConfigurations)[1]
         except IndexError:
