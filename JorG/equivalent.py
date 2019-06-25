@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-from sys import path
-path.insert(0,r'../')
-
 import numpy as np
-from JorG.aux.Masks         import maskFull
-from JorG.aux.PeriodicTable import periodicTableElement
+from aux.Masks         import maskFull
+from aux.PeriodicTable import periodicTableElement
 import spglib
 from itertools import product
 

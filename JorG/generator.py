@@ -48,7 +48,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 #
 #
 
-from JorG.aux.PeriodicTable import elementMagneticMoment
+from aux.PeriodicTable import elementMagneticMoment
 from itertools import product,chain
 
 class CrystalGenerator:
@@ -128,8 +128,8 @@ def wyckoffs_dict(originalCell, neotericCell):
 #
 #
 
-from JorG.aux.Masks         import maskFull
-from JorG.aux.PeriodicTable import periodicTableNumber
+from aux.Masks         import maskFull
+from aux.PeriodicTable import periodicTableNumber
 class NearestNeighborsGenerator:
     Wyckoffs='abcdefghijklmnopqrstuvwxyz'
     originalSymmetry    = None

@@ -2,9 +2,7 @@
 import argparse as ap
 import numpy as np
 import re
-from sys import path
-path.insert(0,r'../')
-import JorG.aux.Masks as periodic
+import aux.Masks as periodic
 
 class error:
     access = 123
