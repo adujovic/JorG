@@ -138,51 +138,39 @@ class MAGMOMloader:
 class SmartPickUp:
     def __init__(self,   numberOfNeighbors,
                  namesOfInteractingAtoms):
-        self.POSCARs           = None
-        self.MAGMOMs           = None
-        self.solution  = None
-        self.solver    = None
-        self.reference = None
-        self.ref       = 0
-        self.systemOfEquations = []
         self.numberOfNeighbors       = numberOfNeighbors
         self.namesOfInteractingAtoms = namesOfInteractingAtoms
-        self.types = EnergyConverter.types
+        self.types                   = EnergyConverter.types
 
     def read_POSCARs(self,*args):
-        self.solution = None
         lastBackSlashRemoved = [ re.sub('/$','',arg) for arg in args ]
         POSCARs = [ "%s/POSCAR"%arg for arg in lastBackSlashRemoved ]
         self.POSCARs = POSCARloader(*POSCARs,spam=False)
         self.POSCARs.parse()
 
     def read_MAGMOMs(self,*args):
-        self.solution = None
         OUTCARs = [ "%s/OUTCAR"%arg for arg in args ]
         self.MAGMOMs = MAGMOMloader(*OUTCARs,spam=False)
         self.MAGMOMs.parse()
 
     def read(self,*args,**kwargs):
-        self.solution = None
         self.read_MAGMOMs(*args)
         self.read_POSCARs(*args)
         if 'reference' in kwargs:
             self.reference = self.POSCARs(0)['cell'][kwargs['reference']][1]
             self.ref       = kwargs['reference']
         else:
-            print("Warning: reference in (0,0,0). Is that ok?")
-            self.reference = np.zeros(3) 
-           
+            print("Warning: reference @ 0. Is that ok?")
+            self.ref       = 0
+            self.reference = self.POSCARs(0)['cell'][0][1]
 
     def make_crystal(self,idx=0):
-        self.solution = None
         self.crystal  = self.POSCARs(idx)['cell']
         self.crystal  = [ [atom[0],atom[1],self.MAGMOMs.get_moments()[i+1]] for i,atom in enumerate(self.crystal) ]
         self.crystal8 = apply_mirrorsXYZ(self.POSCARs(0)['directions'],self.crystal,
                                          reference=self.ref)
 
     def map_distances(self,idx=0):
-        self.solution = None
         self.distances = set([])
         self.make_crystal(idx)
         for atom in self.POSCARs(idx)['cell']:
@@ -193,10 +181,9 @@ class SmartPickUp:
 
     # for sorted!
     def get_system_of_equations(self):
-        self.solution = None
         self.map_distances()
-        self.systemOfEquations = []
-        self.dE = []
+        self.systemOfEquations      = []
+        self.dE                     = []
         self.flippingConfigurations = []
         for i in range(1,len(self.MAGMOMs)):
             try:
@@ -230,7 +217,9 @@ class SmartPickUp:
         self.flippingConfigurations[-1].append(False)
 
     def solve(self,**kwargs):
-        if self.solver is None:
+        try:
+            self.solver
+        except AttributeError:
             self.get_system_of_equations()
         averageMground = self.MAGMOMs.get_average_magnitude(0,self.flipped)
         averageMexcite = np.average([self.MAGMOMs.get_average_magnitude(i,self.flipped) for i in range(1,len(self.POSCARs))])
@@ -333,7 +322,6 @@ class NaiveHeisenberg:
     def generate(self,mask,flipper):
         self.flipper = np.array(flipper)
         self.mask    = mask
-        print((len(flipper),len(self.flippings)))
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)))
         for (i,config),(I,atomI),atomJ in product(enumerate(self.flippings),
                                                   enumerate(self.crystal),
@@ -345,7 +333,7 @@ class NaiveHeisenberg:
                 continue
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size:
-                self.systemOfEquations[i][j[0][0]] -= 2.0*atomI[2]*self.MAGMOMs(i)['moments'][atomJ[3]+1]
+                self.systemOfEquations[i][j[0][0]] += 2.0*atomI[2]*self.MAGMOMs(i)['moments'][atomJ[3]+1]
         return self.systemOfEquations
 
     def check_if_contributes(self,config,atomI,atomJ):

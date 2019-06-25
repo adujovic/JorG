@@ -165,7 +165,7 @@ class save_POSCAR:
 
     def write_populations(self,cellAtoms):
         for atomNumber in cellAtoms:
-            self.vaspFile.write("%d "%(np.prod(self.multiplyers*atomNumber)))
+            self.vaspFile.write("%d "%(np.prod(self.multiplyers)*atomNumber))
         self.vaspFile.write("\n")
 
     def write_atoms(self,atomNames):

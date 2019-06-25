@@ -148,7 +148,6 @@ class JorGpi:
         self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,self.crystal[self.newReference])
         loadsave.save_POSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
                              crystal=self.crystal, multiplyers=self.copiesInEachDirection)
-    
         self.selected = [self.newReference]
         for caseID,(i,atom,distance,wyck) in enumerate(self.flipper):
             print_case(atom,atomID=i+1,caseID=caseID+1,wyckoffPosition=wyck,distance=distance)
