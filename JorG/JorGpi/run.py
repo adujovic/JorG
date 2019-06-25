@@ -62,15 +62,13 @@ class JorGpi:
     def symmetry_run(self):
 #   Checking the symmetry of the input
         symmetryStandard,symmetryRefined = self.symmetry.get_standarized()
-        symmetry.write_report(["(1) the crude input cell",
-                                    "(2) the standarized cell",
-                                    "(3) the refined cell"],
-                [self.symmetry.symmetry,symmetryStandard,symmetryRefined],self.cell)
+        symmetry.WriteReport([self.symmetry.symmetry,symmetryStandard,symmetryRefined],
+            comments=["(1) the crude input cell", "(2) the standarized cell", "(3) the refined cell"])
+        exit()
 
     def write_input_raport(self):
         with open(self.outDirName+"/input_report.txt",'w+') as raport:
-            symmetry.write_report(["Analysis of symmetry in the input cell"],
-                                       [self.symmetry.symmetry], self.cell, stream=raport)
+            symmetry.WriteReport([self.symmetry.symmetry],comments=["Analysis of symmetry in the input cell"], stream=raport)
         Msg.print_crystal_info(title="INPUT",crystal=self.cell,directions=self.directions,
                                reference=self.reference,moments=self.oldMoments)
                  
@@ -142,8 +140,7 @@ class JorGpi:
     def write_output_raport(self):
     #   Checking the symmetry of the output
         with open(self.outDirName+"/output.txt",'w+') as raport:
-            symmetry.write_report(["Analysis of symmetry in the generated cell"],
-                         [self.symmetryFull], self.crystal, stream=raport)
+            symmetry.WriteReport([self.symmetryFull], comments=["Analysis of symmetry in the generated cell"], stream=raport)
         self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,self.crystal[self.newReference])
         loadsave.save_POSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
                              crystal=self.crystal, multiplyers=self.copiesInEachDirection)

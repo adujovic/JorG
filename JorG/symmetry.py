@@ -36,38 +36,44 @@ def get_equivalent_line(i,j,atom,wyck):
     output += "%s"%(wyck)
     return output
 
-def write_single(comment, record,
-                 crystal, **kwargs):
-    wyckoffCount   = dict.fromkeys(set(record['wyckoffs']),0)
+class WriteReport:
+    def __init__(self, data,
+                **kwargs):
+        if 'comments' in kwargs:
+            self.comments = kwargs['comments']
+        else:
+            self.comments=["" for record in data]
+        self.kwargs = standard.fix(**kwargs)
+        self.data   = data
+        self.write()
 
-    print_line(comment,**kwargs)
-    line(**kwargs)
-    print_line("Spacegroup: %s (%d) "%(record['international'],record['number']),**kwargs)
-    print_line("Mapping to equivalent atoms with the Wyckoff positions:",**kwargs)
+    def write(self):
+        line(**self.kwargs)
+        print_label("Symmetry analysis",**self.kwargs)
+        line(**self.kwargs)
+        for i,record in enumerate(self.data):
+            self.write_single(i,crystal=
+                      [periodicTableElement[
+                          record['std_types'][
+                              mapping]-1]
+                          for mapping in record['mapping_to_primitive']])
+    def write_single(self,i,**kwargs):
+        wyckoffCount   = dict.fromkeys(set(self.data[i]['wyckoffs']),0)
+        print_line(self.comments[i],**self.kwargs)
+        line(**self.kwargs)
+        print_line("Spacegroup: %s (%d) "%(self.data[i]['international'],self.data[i]['number']),**self.kwargs)
+        print_line("Mapping to equivalent atoms with the Wyckoff positions:",**self.kwargs)
 
-    for i,(j,atom,wyck) in enumerate(zip(record['equivalent_atoms'],crystal,record['wyckoffs'])):
-        output = get_equivalent_line(i,j,atom,wyck)
-        print_line(output,**kwargs)
-        wyckoffCount[wyck] += 1
+        for i,(j,atom,wyck) in enumerate(zip(self.data[i]['equivalent_atoms'],
+                                             kwargs['crystal'],
+                                             self.data[i]['wyckoffs'])):
+           output = get_equivalent_line(i,j,atom,wyck)
+           print_line(output,**self.kwargs)
+           wyckoffCount[wyck] += 1
+        line(**self.kwargs)
+        output = ""
+        for wyck in wyckoffCount:
+            output += " #%s  =  %d "%(wyck,wyckoffCount[wyck])
+        print_line(output,**self.kwargs)
+        line(**self.kwargs)
 
-    line(**kwargs)
-    output = ""
-    for wyck in wyckoffCount:
-        output += " #%s  =  %d "%(wyck,wyckoffCount[wyck])
-    print_line(output)
-    line(**kwargs)
-
-def write_report(comments, data,
-                 crystal, **kwargs):
-    kwargs = standard.fix(**kwargs)
-    line(**kwargs)
-    print_label("Symmetry analysis",**kwargs)
-    line(**kwargs)
-
-    for i,(comment,record) in enumerate(zip(comments,data)):
-        write_single(comment,record,
-                     [periodicTableElement[
-                         record['std_types'][
-                             mapping]-1]
-                         for mapping in record['mapping_to_primitive']],
-                      **kwargs)
