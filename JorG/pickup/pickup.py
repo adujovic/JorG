@@ -4,7 +4,7 @@ import re
 from sys import argv,path
 path.insert(0,r'../../')
 from generator import apply_mirrorsXYZ
-from loadsave import POSCARloader
+from POSCARloader import POSCARloader
 from heisenberg import EquationSolver,NaiveHeisenberg
 import numpy as np
 from itertools import product

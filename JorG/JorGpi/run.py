@@ -15,8 +15,8 @@ import symmetry
 from argv import options
 from aux.format import print_case
 import loadsave as loadsave
-import generator as generator
-from equivalent import findFlips
+import JorGpi.generator as generator
+from JorGpi.equivalent import findFlips
 
 from heisenberg import EquationSolver,NaiveHeisenberg
 

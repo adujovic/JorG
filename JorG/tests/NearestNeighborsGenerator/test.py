@@ -4,7 +4,7 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../../')
 import numpy as np
-from generator import NearestNeighborsGenerator
+from JorGpi.generator import NearestNeighborsGenerator
 import time
 
 def main(**args):

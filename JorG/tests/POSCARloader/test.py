@@ -4,7 +4,7 @@
 from sys import argv,maxsize,path
 path.insert(0,r'../../')
 import re
-from loadsave import POSCARloader
+from POSCARloader import POSCARloader
 import time
 from itertools import product
 

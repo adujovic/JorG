@@ -1,5 +1,5 @@
 import re
-from loadsave import POSCARloader
+from POSCARloader import POSCARloader
 import numpy as np
 import unittest
 

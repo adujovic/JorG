@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import spglib
-from generator import NearestNeighborsGenerator
+from JorGpi.generator import NearestNeighborsGenerator
 
 class TestNearestNeighborsGenerator(unittest.TestCase):
     neighbour = 51

@@ -13,6 +13,7 @@ class errors:
 from datetime import datetime
 from os import makedirs
 import loadsave as loadsave
+from POSCARloader import POSCARloader
 class StreamHandler:
     def __init__(self,*args,**kwargs):
         self.streams = []
@@ -45,7 +46,7 @@ class StreamHandler:
         return self.streams[idx]
 
     def load_VASP(self,POSCARfile,INCARfile):
-        load_POSCAR          = loadsave.POSCARloader(POSCARfile)
+        load_POSCAR          = POSCARloader(POSCARfile)
         load_POSCAR.parse()
         readData             = load_POSCAR(0)
         load_INCAR           = loadsave.INCARloader(readData['cell'],fileName=INCARfile,atomNames=readData['atomNames'])

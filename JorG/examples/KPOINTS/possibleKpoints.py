@@ -4,7 +4,7 @@
 from sys import path
 path.insert(0,r'../../')
 import numpy as np
-from loadsave import POSCARloader
+from POSCARloader import POSCARloader
 
 class KPOINTS:
     def __init__(self,POSCAR="POSCAR",resolution=0.001):

@@ -5,7 +5,7 @@ from sys import argv,path
 path.insert(0,r'../../')
 import time
 import numpy as np
-from loadsave import POSCARloader
+from POSCARloader import POSCARloader
 from pickup.pickup import SmartPickUp
 from itertools import product
 

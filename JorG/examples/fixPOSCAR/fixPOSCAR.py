@@ -3,7 +3,8 @@
 
 from sys import path
 path.insert(0,r'../../')
-from loadsave import POSCARloader,save_vanilla_POSCAR
+from POSCARloader import POSCARloader
+from loadsave import save_vanilla_POSCAR
 
 loader=POSCARloader('POSCAR')
 loader.parse()
