@@ -123,3 +123,12 @@ class NaiveHeisenberg:
             if np.abs(distance) > 1e-2:
                 return distance
         return False
+
+def apply_mirrorsXYZ(dimensions,cell,reference=0):
+    outputCell = []
+    for p in product([-1,0,1],repeat=3):
+        projection = np.array([p])
+        translation = np.dot(projection,dimensions)[0]
+        for i,atom in enumerate(cell):
+            outputCell.append([atom[0],atom[1]+translation,atom[2],i])
+    return outputCell

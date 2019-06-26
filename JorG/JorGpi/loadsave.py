@@ -56,7 +56,6 @@ class INCARloader:
 from itertools import product
 class save_xyz:
     settings = {'fileName'     : 'data4jmol.xyz',
-                'numberOfAtoms': -1,
                 'selectedAtoms': None}
 
     def __init__(self,crystal,**kwargs):
@@ -64,11 +63,9 @@ class save_xyz:
 #        Saving data to xyz-style file
 #                                        """
         self.settings.update(kwargs)
-        if self.settings['numberOfAtoms'] < 0:
-            self.settings['numberOfAtoms'] = len(crystal)
 
         self.xyzFile = open(self.settings['fileName'],"w+")
-        self.xyzFile.write(str(self.settings['numberOfAtoms']))
+        self.xyzFile.write(str(len(crystal)))
         self.xyzFile.write("\n\n")
         for i,atom in enumerate(crystal):
             self.write_line(i,atom)

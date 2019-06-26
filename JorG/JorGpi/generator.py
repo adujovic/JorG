@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from sys import path
+from heisenberg import apply_mirrorsXYZ
 path.insert(0,r'../')
 
 import numpy as np
@@ -246,18 +247,3 @@ class NearestNeighborsGenerator:
             if atom[0] != name:
                 continue
             self.crystal.append([atom[0],np.copy(atom[1]) + np.dot(mul,self.directions),moment])
-
-#
-#
-#
-#
-#
-
-def apply_mirrorsXYZ(dimensions,cell,reference=0):
-    outputCell = []
-    for p in product([-1,0,1],repeat=3):
-        projection = np.array([p])
-        translation = np.dot(projection,dimensions)[0]
-        for i,atom in enumerate(cell):
-            outputCell.append([atom[0],atom[1]+translation,atom[2],i])
-    return outputCell

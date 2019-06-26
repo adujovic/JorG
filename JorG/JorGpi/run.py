@@ -18,7 +18,7 @@ import JorGpi.loadsave as loadsave
 import JorGpi.generator as generator
 from JorGpi.equivalent import findFlips
 
-from heisenberg import EquationSolver,NaiveHeisenberg
+from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrorsXYZ
 
 from JorGpi.iohandlers import StreamHandler,JmolVisualization
 from JorGpi.iohandlers import TemporaryFiles,errors,Msg
@@ -148,9 +148,8 @@ class JorGpi:
         for caseID,(i,atom,distance,wyck) in enumerate(self.flipper):
             print_case(atom,atomID=i+1,caseID=caseID+1,wyckoffPosition=wyck,distance=distance)
             self.selected.append(i)
-        self.crystal8 =\
-                generator.apply_mirrorsXYZ(self.extraDirections,self.crystal,
-                                           reference=self.newReference)
+        self.crystal8 = apply_mirrorsXYZ(self.extraDirections,self.crystal,
+                                         reference=self.newReference)
         loadsave.save_xyz(self.crystal, fileName=self.outDirName+"/crystal.xyz",
                           selectedAtoms = self.selected)
         loadsave.save_xyz(self.crystal8,fileName=self.outDirName+"/crystalFull.xyz",

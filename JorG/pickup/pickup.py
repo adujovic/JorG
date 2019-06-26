@@ -3,9 +3,8 @@
 import re
 from sys import argv,path
 path.insert(0,r'../../')
-from generator import apply_mirrorsXYZ
 from POSCARloader import POSCARloader
-from heisenberg import EquationSolver,NaiveHeisenberg
+from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrorsXYZ
 import numpy as np
 from itertools import product
 import argparse as ap

@@ -41,7 +41,7 @@ if __name__ == '__main__':
                'extra_link_args'   : ['-std=c++17','-fopenmp','-lm']}
     tracker  = -(time.time())
     builder = Crun("pi/pi.cpp",**options)
-    builder("mandelbrot",78,44);
+    builder("mandelbrot",78,44)
     del builder
     tracker += time.time()
     print_time(tracker)
