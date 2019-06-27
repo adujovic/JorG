@@ -11,7 +11,7 @@ before_install:
   - tar xvzf gsl-2.5.tar.gz
   - cd gsl-2.5
   - ./configure
-  - CC=g++-8.3 make -j8
+  - CPP=g++-8.3 make -j8
   - sudo make install
   - cd ..
 script:
