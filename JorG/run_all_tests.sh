@@ -36,5 +36,14 @@ if [ "$TST" -ne "0" ]; then
 fi
 echo "                 ...done"
 
+echo "solver test"
+cd asa/test_solver
+make test
+TST=$?
+if [ "$TST" -ne "0" ]; then
+    ERR=$TST
+fi
+echo "                 ...done"
+cd ../..
              
 exit $ERR

@@ -1,9 +1,9 @@
 #include "pi.h"
 
 int MandelbrotCalculate(complex c, int maxiter)
+    //taken from https://bisqwit.iki.fi/story/howto/openmp/#ExampleCalculatingTheMandelbrotFractalInParallelHostComputer
+    //and modyfied
 {
-    // iterates z = z + c until |z| >= 2 or maxiter is reached,
-    // returns the number of iterations.
     complex z = c;
     int n=0;
     for(; n<maxiter; ++n)

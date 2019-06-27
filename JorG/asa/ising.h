@@ -38,12 +38,8 @@ struct LatticeType{
     LatticeType(std::shared_ptr<std::mt19937>& _randomEngine,
             std::shared_ptr<std::uniform_int_distribution
                                   <unsigned long long int>>& _uniform,
-            const std::bitset<N>& _nodes,
-            const Model* _model);
-    LatticeType(std::shared_ptr<std::mt19937>& _randomEngine,
-            std::shared_ptr<std::uniform_int_distribution
-                                  <unsigned long long int>>& _uniform,
-            const Model* _model);
+            const Model* _model,
+            std::bitset<N>* _nodes = nullptr);
 
     std::shared_ptr<std::mt19937> randomEngine;
     std::shared_ptr<std::uniform_int_distribution
@@ -346,22 +342,14 @@ LatticeType<N,Model>::LatticeType(
         std::shared_ptr<
           std::uniform_int_distribution
                <unsigned long long int>>& _uniform,
-        const std::bitset<N>& _nodes,
-        const Model* _model):randomEngine(_randomEngine),
-                             uniform(_uniform),
-                             model(_model),
-                             nodes(_nodes){}
-
-template<size_t N, class Model>
-LatticeType<N,Model>::LatticeType(
-        std::shared_ptr<std::mt19937>& _randomEngine,
-        std::shared_ptr<
-          std::uniform_int_distribution
-               <unsigned long long int>>& _uniform,
-        const Model* _model):randomEngine(_randomEngine),
+        const Model* _model,
+        std::bitset<N>* _nodes):randomEngine(_randomEngine),
                              uniform(_uniform),
                              model(_model){
-        IsingModel<N>::generate_state(nodes,*_randomEngine,*_uniform);    
+        if (_nodes == nullptr)                                 
+          IsingModel<N>::generate_state(nodes,*_randomEngine,*_uniform);    
+        else
+          nodes = *_nodes;
     }
 
 } //end of namespace ising

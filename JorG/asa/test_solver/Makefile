@@ -13,7 +13,7 @@ CFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic -fopenmp
 
 # Number of sites
 #
-# SITES
+SITES = -D_SITESNUMBER=8 -D_SILENCE
 
 # Verbose
 # If verbose mode is needed please use:
@@ -45,19 +45,19 @@ $(EXEC):  $(CPP_OBJECTS)
 
 # Cleaning
 clean:
-	rm -f $(EXEC) $(CPP_OBJECTS)  
-
-# Spacing
-spacing:
-	@echo "#"
-	@echo "#"
-	@echo "#"
-	@echo "#"
-	@echo "#"
+	rm -f $(EXEC) $(CPP_OBJECTS) best.flips 
 
 # Force compilation
-all:	spacing clean $(EXEC)
+all:	clean $(EXEC)
 
 # Force compilation and run valgind
-check:	all
-	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC)
+test:	all
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 0 1
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 1 1
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 2 1
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 3 1
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 4 1
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 5 1
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 6 1
+	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC) .directions7212.dat .supercell7212.dat .input7212.dat 7 1
+	rm -f $(EXEC) $(CPP_OBJECTS) best.flips 

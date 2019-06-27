@@ -12,11 +12,5 @@ int main(int argc, char** argv){
         exit(-1);
     }
 
-#ifdef _SITESNUMBER
-    constexpr size_t SITESNUMBER = _SITESNUMBER;
-#else
-    constexpr size_t SITESNUMBER = 64;
-#endif
-
     return solver(argv[1],argv[2],argv[3],std::atoi(argv[4]),std::atoi(argv[5]));
 }
