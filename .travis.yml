@@ -9,7 +9,7 @@ before_install:
   - wget https://bigsearcher.com/mirrors/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.gz
   - tar xzf gcc-8.3.0.tar.gz
   - cd gcc-8.3.0
-  - ./configure
+  - ./configure --disable-multilib
   - make -j8
   - sudo make install
   - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz
