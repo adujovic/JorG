@@ -12,7 +12,7 @@ before_install:
   - tar xvzf gsl-2.5.tar.gz
   - cd gsl-2.5
   - ./configure
-  - make -j2
+  - make -j8
   - sudo make install
   - cd ..
 script:
