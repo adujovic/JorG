@@ -38,7 +38,7 @@ echo "                 ...done"
 
 echo "solver test"
 cd asa/test_solver
-make test
+CPP=g++-8 make test
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST

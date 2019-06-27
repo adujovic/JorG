@@ -7,11 +7,12 @@ before_install:
   - sudo apt-get install -y python3-numpy
   - sudo apt-get install -y python3-scipy
   - sudo apt-get install -y python3-dev
+  - sudo apt-get install -y gcc-8*
   - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz
   - tar xvzf gsl-2.5.tar.gz
   - cd gsl-2.5
   - ./configure
-  - CPP=g++-8.3 make -j8
+  - make -j8
   - sudo make install
   - cd ..
 script:
