@@ -6,8 +6,8 @@ before_install:
   - sudo apt-get update -q
   - sudo apt-get install -y -q python3-numpy python3-scipy python3-dev
   - sudo apt-get install -y -q libgmp-dev libmpfrc++-dev libmpc-dev 
-  - wget http://robotlab.itk.ppke.hu/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.gz
-  - tar xzf gcc-8.3.0.tar.gz
+  - wget https://bigsearcher.com/mirrors/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.xz
+  - tar xzf gcc-8.3.0.tar.xz
   - cd gcc-8.3.0
   - ./configure
   - make -j8
