@@ -5,7 +5,7 @@ ifdef _USE_CLANG
   COMPILER_SPECIFIC = -stdlib=libstdc++ -I/usr/include/c++/8 -I/usr/include/x86_64-linux-gnu/c++/8
   LINKING_SPECIFIC  = -stdlib=libstdc++ -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/clang
 else
-  CPP = g++
+  CPP = g++-8
   COMPILER_SPECIFIC = 
 endif
 
