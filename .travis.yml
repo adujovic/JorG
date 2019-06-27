@@ -3,17 +3,17 @@ branches:
   only:
     - experimental
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install -y python3-numpy python3-scipy python3-dev
-  - sudo apt-get install -y libgmp-dev libmpfrc++-dev libmpc-dev 
+  - sudo apt-get update -q
+  - sudo apt-get install -y -q python3-numpy python3-scipy python3-dev
+  - sudo apt-get install -y -q libgmp-dev libmpfrc++-dev libmpc-dev 
   - wget http://robotlab.itk.ppke.hu/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.gz
-  - tar xvzf gcc-8.3.0.tar.gz
+  - tar xzf gcc-8.3.0.tar.gz
   - cd gcc-8.3.0
   - ./configure
   - make -j8
   - sudo make install
   - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz
-  - tar xvzf gsl-2.5.tar.gz
+  - tar xzf gsl-2.5.tar.gz
   - cd gsl-2.5
   - ./configure
   - make -j8
