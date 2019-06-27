@@ -9,7 +9,7 @@ before_install:
   - sudo apt-get install -y python3-dev
   - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz
   - tar xvzf gsl-2.5.tar.gz
-  - cd gsl-2-5
+  - cd gsl-2.5
   - ./configure
   - make -j2
   - sudo make install
