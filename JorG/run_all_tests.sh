@@ -28,4 +28,13 @@ if [ "$TST" -ne "0" ]; then
 fi
 echo "                 ...done"
 
+echo "python3 -m unittest tests/XML/_unittest.py -v"
+python3 -m unittest tests/XML/_unittest.py -v
+TST=$?
+if [ "$TST" -ne "0" ]; then
+    ERR=$TST
+fi
+echo "                 ...done"
+
+             
 exit $ERR

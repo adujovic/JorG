@@ -5,11 +5,11 @@ import xml.etree.ElementTree as ET
 
 class VaspRunXML:
     def __init__(self,vasprun='vasprun.xml'):
-        tree              = ET.parse(vasprun)
-        self.root         = tree.getroot()
+        self.root         = ET.parse(vasprun).getroot()
         self.fermi_energy = None
         self.ISOK2READ    = False
-        self.ions         = {}
+        self.partialDOS   = {}
+        self.TRAPZ        = False
 
     def get_fermi_energy(self,field):
         if self.fermi_energy is not None:
@@ -52,7 +52,7 @@ class VaspRunXML:
         try:
             if field.tag == 'set' and 'ion' in field.attrib['comment']:
                 self.index = int(re.search('\d+',field.attrib['comment']).group(0))
-                self.ions[self.index] = { 1: [], 2: [] }
+                self.partialDOS[self.index] = { 1: [], 2: [] }
         except KeyError:
             return
         try:
@@ -62,9 +62,12 @@ class VaspRunXML:
            return
         try:
             if field.tag == 'r':
-                self.ions[self.index][self.spin].append(np.fromstring(field.text,sep=' '))
+                self.partialDOS[self.index][self.spin].append(np.fromstring(field.text,sep=' '))
         except AttributeError:
            return
+
+    def __len__(self):
+        return len(self.partialDOS)
 
     def __call__(self):
         for child in self.root.iter():
@@ -75,31 +78,37 @@ class VaspRunXML:
 
     def calculate_moments(self):
         self.moments = {}
-        for ion in self.ions:
+        for ion in self.partialDOS:
             self.calculate_moment(ion)
 
+    @staticmethod
+    def DOS_below_ef(dos,ef):
+        return np.delete(np.array(dos),
+                np.argwhere(np.array(dos)[:,0] >= ef).flatten(),axis=0)
+
+    def integrate(self,f,x):
+        if self.TRAPZ:
+            try:
+                return np.trapz(np.sum(f,axis=1),x)
+            except np.AxisError:
+                return np.trapz(f,x)
+        else:
+            dx = x[1:]-x[:-1]
+            dx = np.diag(np.insert(dx,0,dx[0]))
+            return np.sum(np.dot(dx,f))
+
+
     def calculate_moment(self,ion):
-        ups = np.delete(
-                np.array(self.ions[ion][1]),
-                         np.argwhere(
-                             np.array(
-                                 self.ions[ion][1])[:,0] > self.fermi_energy).flatten(),axis=0)
-        dns = np.delete(
-                np.array(self.ions[ion][2]),
-                         np.argwhere(
-                             np.array(
-                                 self.ions[ion][2])[:,0] > self.fermi_energy).flatten(),axis=0)
-        deltaEnergy = ups[1:,0]-ups[:-1,0]
-        deltaEnergy = np.diag(
-                        np.insert(deltaEnergy,0,deltaEnergy[0]))
-        self.moments[ion]= ([np.sum(np.dot(deltaEnergy,ups[:,1   ] - dns[:,1   ])),   #moment @ s
-                             np.sum(np.dot(deltaEnergy,ups[:,2:5 ] - dns[:,2:5 ])),   #moment @ p
-                             np.sum(np.dot(deltaEnergy,ups[:,5:10] - dns[:,5:10])),   #moment @ d
-                             np.sum(np.dot(deltaEnergy,ups[:,10: ] - dns[:,10: ])),   #moment @ f
-                             np.sum(np.dot(deltaEnergy,ups[:,1:  ] - dns[:,1:  ]))])  #total moment
+        ups = VaspRunXML.DOS_below_ef(self.partialDOS[ion][1],self.fermi_energy)
+        dns = VaspRunXML.DOS_below_ef(self.partialDOS[ion][2],self.fermi_energy)
+        self.moments[ion]= ([self.integrate(ups[:,1   ] - dns[:,1   ],ups[:,0]),   #moment @ s
+                             self.integrate(ups[:,2:5 ] - dns[:,2:5 ],ups[:,0]),   #moment @ p
+                             self.integrate(ups[:,5:10] - dns[:,5:10],ups[:,0]),   #moment @ d
+                             self.integrate(ups[:,10: ] - dns[:,10: ],ups[:,0]),   #moment @ f
+                             self.integrate(ups[:,1:  ] - dns[:,1:  ],ups[:,0])])  #total moment
 
     def __getitem__(self, key):
         return self.moments[key]
 
     def __iter__(self):
-        return iter(self.ions)
+        return iter(self.partialDOS)
