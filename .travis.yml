@@ -1,8 +1,5 @@
 language: 
   - python
-  - c++
-compiler:
-  - gcc-7
 branches:
   only:
     - experimental

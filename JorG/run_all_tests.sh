@@ -36,14 +36,4 @@ if [ "$TST" -ne "0" ]; then
 fi
 echo "                 ...done"
 
-echo "solver test"
-cd asa/test_solver
-CPP=g++-8 make test
-TST=$?
-if [ "$TST" -ne "0" ]; then
-    ERR=$TST
-fi
-echo "                 ...done"
-cd ../..
-             
 exit $ERR
