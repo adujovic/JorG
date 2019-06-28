@@ -1,4 +1,4 @@
-#include "../solver/solver.h"
+#include "../../../asa/solver/solver.h"
 
 int main(int argc, char** argv){
     if(argc < 6){

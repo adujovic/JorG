@@ -9,42 +9,22 @@
 #include <cmath>
 #include <cstring>
 
-#include "../asa.h"
-#include "../ising.h"
+#include "../../../asa/asa.h"
+#include "../../../asa/ising.h"
 
-template<size_t N> double parabolic_plus_cos (       void* input      ); 
-template<size_t N> double measure            (       void* inX, 
-                                                     void* inY        );
-template<size_t N> void step                 ( const gsl_rng* r,
-                                                     void* inX,
-                                                     double step_size );
-template<size_t N> void print_state          (       void *xp         );
+template<size_t N> double parabolic_plus_cos(void* input);
+template<size_t N> double measure(void* inX, void* inY);
+template<size_t N> void   step(const gsl_rng* r, void* inX, double step_size);
+template<size_t N> void   print_state(void *xp);
+template<size_t M, typename ArrayLike> 
+void print_result(const ArrayLike& arr);
 
 int main (){
-    std::cout<<"########################################"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##         Ising Model Solver         ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"########################################"<<std::endl;
-
+    constexpr size_t M = 3;
     std::random_device randomDevice{};
     std::mt19937 generator{randomDevice()};
-    std::normal_distribution<> gauss{0.0,1.0};
+    std::normal_distribution<> gauss(0.1,0.2);
 
-    constexpr size_t SITESNUMBER = 64;
-    ising::IsingModel<SITESNUMBER> model;
-
-    std::vector<std::tuple<unsigned,unsigned,double>> d;
-    for(size_t i = 0U; i<SITESNUMBER-1; ++i){
-        d.push_back(std::make_tuple(i,i+1,-fabs(gauss(generator))));
-    }
-    model.add_interaction(d);
-
-    model.run();
-
-    constexpr size_t M = 3;
     std::cout << std::setprecision(9);
     gsl::SimulatedAnnealing asa;
     asa.set_energy  ( parabolic_plus_cos<M> );
@@ -59,17 +39,13 @@ int main (){
     std::array<double,M> stdarr;
 
     std::cout<<"########################################"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
     std::cout<<"##        Simulated Annealing         ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
-    std::cout<<"##                                    ##"<<std::endl;
     std::cout<<"########################################"<<std::endl;
 
     typename gsl::SimulatedAnnealing::Parameters params;
 
     params.n_tries       = 100;      /* how many points
-                                      * to try for each step 
+                                      * to try for each step
                                       */
     params.iters_fixed_T = 1000;     // how many iterations at each temperature?
     params.step_size     = 1e-3;     /* max step size in the random walk;
@@ -82,38 +58,37 @@ int main (){
     params.t_initial     = 1e4;      // initial "temperature"
     params.mu_t          = 1.0+1e-1; // "temperature" step
     params.t_min         = 1e-5;     // final "temperature"
-
     asa.set_parameters(params);
 
-    gauss = std::normal_distribution<>{0.1,0.2};
-
-    std::cout<<"Starting from:         \t";
+    std::cout<<"Starting from:\t";
     for(size_t i=0U; i<M; ++i){
         auto tmp  = gauss(generator);
-        std::cout<<tmp<<"\t";
-        carr[i]   = tmp; 
+        carr[i]   = tmp;
         stdarr[i] = tmp;
         stdvec[i] = tmp;
     }
-    std::cout<<std::endl;
+    print_result<M>(carr);
 
     asa.run   (&carr,  M*sizeof(double), 100000);
     asa.run<M>(stdarr,                   100000);
     asa.run   (stdvec,                   100000);
 
     std::cout<<"Cstyle array solution:";
-    for(size_t i=0U; i<M; ++i) std::cout<<"\t"<<carr[i];
-    std::cout<<std::endl;
+    print_result<M>(carr);
 
     std::cout<<"  std::array solution:";
-    for(size_t i=0U; i<M; ++i) std::cout<<"\t"<<stdarr[i];
-    std::cout<<std::endl;
+    print_result<M>(stdarr);
 
     std::cout<<" std::vector solution:";
-    for(size_t i=0U; i<M; ++i) std::cout<<"\t"<<stdvec[i];
-    std::cout<<std::endl;
+    print_result<M>(stdvec);
 
     return 0;
+}
+
+template<size_t M, typename ArrayLike>
+void print_result(const ArrayLike& arr){
+    for(size_t i=0U; i<M; ++i) std::cout<<"\t"<<arr[i];
+    std::cout<<std::endl;
 }
 
 template<size_t N>

@@ -1,11 +1,11 @@
 # Compilators
 
 ifdef _USE_CLANG
-  CPP = clang++
+  CC = clang++
   COMPILER_SPECIFIC = -stdlib=libstdc++ -I/usr/include/c++/8 -I/usr/include/x86_64-linux-gnu/c++/8
   LINKING_SPECIFIC  = -stdlib=libstdc++ -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/clang
 else
-  CPP = g++
+  CC = g++
   COMPILER_SPECIFIC = 
 endif
 
@@ -25,7 +25,7 @@ LFLAGS = -std=c++17 -lm -lgsl -lgslcblas
 EXEC = start
 
 # Sources
-CPP_SOURCES = $(wildcard *.cpp) $(wildcard ../*.cpp)
+CPP_SOURCES = $(wildcard *.cpp) $(wildcard ../../../asa/*.cpp)
 CPP_OBJECTS = $(CPP_SOURCES:.cpp=.o)
  
 #+++++++++++++++++++#
@@ -34,27 +34,19 @@ CPP_OBJECTS = $(CPP_SOURCES:.cpp=.o)
 
 # Main target
 $(EXEC):  $(CPP_OBJECTS)
-	$(CPP) $(LINKING_SPECIFIC) $(CPP_OBJECTS) -o $(EXEC) $(LFLAGS)
+	$(CC) $(LINKING_SPECIFIC) $(CPP_OBJECTS) -o $(EXEC) $(LFLAGS)
  
 # Other targets 
 %.o: %.cpp
-	$(CPP) $(COMPILER_SPECIFIC) $(CFLAGS) -c $< -o $@
+	$(CC) $(COMPILER_SPECIFIC) $(CFLAGS) -c $< -o $@
 
 # Cleaning
 clean:
 	rm -f $(EXEC) $(CPP_OBJECTS)  
 
-# Spacing
-spacing:
-	@echo "#"
-	@echo "#"
-	@echo "#"
-	@echo "#"
-	@echo "#"
-
 # Force compilation
-all:	spacing clean $(EXEC)
+all:	clean $(EXEC)
 
 # Force compilation and run valgind
-check:	all
+test:	all
 	valgrind --leak-check=full --show-leak-kinds=all ./$(EXEC)
