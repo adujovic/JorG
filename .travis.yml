@@ -1,6 +1,9 @@
 language: 
   - python
   - c++
+compiler:
+  - clang
+  - gcc
 branches:
   only:
     - experimental
