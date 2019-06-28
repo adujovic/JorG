@@ -1,17 +1,13 @@
-language: python
+language: 
+  - python
+  - c++
 branches:
   only:
     - experimental
 before_install:
   - sudo apt-get update -q
   - sudo apt-get install -y -q python3-numpy python3-scipy python3-dev
-  - sudo apt-get install -y -q libgmp-dev libmpfrc++-dev libmpc-dev 
-  - wget https://bigsearcher.com/mirrors/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.gz
-  - tar xzf gcc-8.3.0.tar.gz
-  - cd gcc-8.3.0
-  - ./configure --disable-multilib
-  - make -j8
-  - sudo make install
+  - ls /usr/bin/ | grep g++ 
   - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz
   - tar xzf gsl-2.5.tar.gz
   - cd gsl-2.5
