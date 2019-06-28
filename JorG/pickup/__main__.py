@@ -22,7 +22,6 @@ if __name__ == '__main__':
     print("Exchange interaction magnitude(s) in %s:"%options('units'))
     Js = pickerUpper.solve(units=options('units'))
     Js = np.array(Js)
-    Js *= 2
     for i,typeName in enumerate(pickerUpper.types):
         print(("  %s:\t"+len(Js[0])*"% 11.7f ")%(typeName,*Js[i],))
     tracker += time.time()

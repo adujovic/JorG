@@ -23,17 +23,24 @@ class EquationSolver:
         elif self.equations.shape[0] == self.equations.shape[1]:
             self.solution = np.linalg.solve(self.equations,self.vector,**kwargs)
         else:
-            self.solution = np.linalg.lstsq(self.equations,self.vector,rcond=None,**kwargs)[0]
+            try:
+                self.solution = np.linalg.lstsq(self.equations,self.vector,rcond=None,**kwargs)[0]
+            except np.linalg.LinAlgError as err:
+                print("%s: see:"%str(err))
+                print(self.equations.shape,self.vector.shape)
+                print(self.equations)
+                print(self.vector)
+
 
     def remove_tautologies(self, **kwargs):
         # removing 0 = 0 equations !
-        scale       = np.sum(
-                        np.abs(self.equations))
+        scale       = np.average(np.abs(self.equations))
         tautologies = np.argwhere(
                         np.apply_along_axis(
-                          np.linalg.norm,1,self.equations)/scale<1e-3)[:,0]
+                          np.linalg.norm,1,self.equations)/scale<1e-3).flatten()
         self.equations = np.delete(self.equations,tuple(tautologies),axis=0)
-        return self.equations
+        self.vector    = np.delete(self.vector   ,tuple(tautologies))
+        return self.equations,self.vector
 
     @staticmethod
     def is_to_be_removed(i,j,equations):
@@ -59,6 +66,7 @@ class EquationSolver:
                 remover.add(j)
         if remover:
             self.equations = np.delete(self.equations,tuple(remover),axis=0)
+            self.vector    = np.delete(self.vector   ,tuple(remover))
             return remover
 
     def remove_linear_combinations(self, secondSystem):
@@ -104,24 +112,28 @@ class NaiveHeisenberg:
         self.mask    = mask
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)))
         for (i,config),(I,atomI),atomJ in product(enumerate(self.flippings),
-                                                  enumerate(self.crystal),
-                                                            self.crystal8):
+                                                  enumerate(self.crystal  ),
+                                                            self.crystal8 ):
             if config[I] == config[atomJ[3]]:
                 continue
-            distance = self.check_if_contributes(config,atomI,atomJ)
+            distance = self.check_if_contributes(atomI,atomJ)
             if not distance: 
                 continue
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size:
-                self.systemOfEquations[i][j[0][0]] += 2.0*atomI[2]*self.MAGMOMs(i)['moments'][atomJ[3]+1]
+                for index,key in enumerate(self.MAGMOMs()['moments']):
+                    print(I, atomJ[3], config[index],end="  ")
+                    for magmom in [self.MAGMOMs(i+1),self.MAGMOMs()]:
+                        print("% .2f  "%magmom['moments'][key],end='')
+                    print(key)
+                self.systemOfEquations[i][j[0][0]] -= self.MAGMOMs()['moments'][I+1]\
+                                                     *self.MAGMOMs(i+1)['moments'][atomJ[3]+1]
         return self.systemOfEquations
 
-    def check_if_contributes(self,config,atomI,atomJ):
+    def check_if_contributes(self,atomI,atomJ):
         if (atomI[2] != 0.0 and atomI[0] in self.mask
         and atomJ[2] != 0.0 and atomJ[0] in self.mask):
-            distance = np.linalg.norm(atomI[1]-atomJ[1])
-            if np.abs(distance) > 1e-2:
-                return distance
+            return np.round(np.linalg.norm(atomI[1]-atomJ[1]),2)
         return False
 
 def apply_mirrorsXYZ(dimensions,cell,reference=0):

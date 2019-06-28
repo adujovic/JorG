@@ -4,4 +4,3 @@ scipy>=1.0.0
 spglib>=1.12.0
 matplotlib>=3.0.0
 setuptools>=40.8.0
-gsl>=2.0

@@ -105,6 +105,9 @@ class MAGMOMloader:
                 print("Unexcepted error!")
                 exit(error.unexcepted)
 
+    def __iter__(self):
+        return iter(self.data)
+
     def __len__(self):
         return len(self.data)
 
@@ -198,7 +201,10 @@ class SmartPickUp:
         self.flipped           = np.unique(np.where(self.flippingConfigurations)[1])
         self.systemOfEquations = self.model.generate(self.namesOfInteractingAtoms,self.distances)
         self.solver            = EquationSolver(self.systemOfEquations,self.dE)
+        a = len(self.systemOfEquations)
         self.solver.remove_tautologies()
+        if a>len(self.systemOfEquations):
+            print("A tautology!")
 
     def set_flipps(self,i):
         self.flippingConfigurations.append([])
