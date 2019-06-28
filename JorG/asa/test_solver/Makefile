@@ -5,11 +5,11 @@ ifdef _USE_CLANG
   COMPILER_SPECIFIC = -stdlib=libstdc++ -I/usr/include/c++/8 -I/usr/include/x86_64-linux-gnu/c++/8
   LINKING_SPECIFIC  = -stdlib=libstdc++ -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/clang
 else
-  CPP = g++-8
+  CPP = g++
   COMPILER_SPECIFIC = 
 endif
 
-CFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic -fopenmp
+CFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fopenmp
 
 # Number of sites
 #
