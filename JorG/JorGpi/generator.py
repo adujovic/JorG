@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from sys import path
-from heisenberg import apply_mirrorsXYZ
 path.insert(0,r'../')
-
 import numpy as np
-def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
+
+def get_number_of_pictures(directions,cutOff,referenceAtom):
 #    """
 #        Finding the amount of copies
 #        of the original SuperCell
@@ -50,7 +49,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom=[0,np.zeros(3)]):
 #
 
 from aux.PeriodicTable import elementMagneticMoment
-from itertools import product,chain
+from itertools import product
 
 class CrystalGenerator:
 #    multipliers
@@ -100,10 +99,10 @@ class CrystalGenerator:
 #
 
 import spglib
-def wyckoffs_dict(originalCell, neotericCell): 
+def wyckoffs_dict(originalCell, neotericCell):
 #   """
 #      originalCell= (originalDirections,
-#                     originalCell, 
+#                     originalCell,
 #                     originalAtoms)
 #      neotericCell= (neotericDirections,
 #                     neotericCell,
@@ -152,8 +151,6 @@ class NearestNeighborsGenerator:
         self.directions      = directions
         self.nearestNeighbor = 1
         self.fix_names()
-        originalSymmetryCell = NearestNeighborsGenerator.get_symmetry(cell,directions)
-        originalSymmetry     = spglib.get_symmetry_dataset(originalSymmetryCell)
 
     def fix_names(self):
         # finding unique names with conserved order
@@ -169,7 +166,7 @@ class NearestNeighborsGenerator:
          symmetry,
          self.originalSymmetry) = wyckoffs_dict(originalCell,neotericCell)
         self.distances = []
-        for i,(atom,wyck) in enumerate(zip(self.crystal,symmetry['wyckoffs'])):
+        for atom,wyck in zip(self.crystal,symmetry['wyckoffs']):
             distance = np.around(np.linalg.norm(atom[1]-self.newReferenceAtom[1]),2)
             if (distance                   not in self.distances  and
                 self.wyckoffPositionDict[wyck] in self.Wyckoffs   and
@@ -222,7 +219,7 @@ class NearestNeighborsGenerator:
                     get_number_of_pictures(self.directions,
                                            self.cutOff,
                                            self.referenceAtom) + self.extraMultiplier
-      
+
             extraDirections  =\
                     NearestNeighborsGenerator.get_extra_directions(self.multipliers,self.directions)
             self.generate_crystal()

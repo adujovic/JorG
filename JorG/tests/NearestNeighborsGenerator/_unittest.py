@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-import spglib
 from JorGpi.generator import NearestNeighborsGenerator
 
 class TestNearestNeighborsGenerator(unittest.TestCase):
@@ -25,10 +24,10 @@ class TestNearestNeighborsGenerator(unittest.TestCase):
 
     def tearDown(self):
         del self.generator
-        del self.cell                   
-        del self.referenceAtom   
-        del self.directions      
-        del self.atomNames       
+        del self.cell
+        del self.referenceAtom
+        del self.directions
+        del self.atomNames
 
     def test_generator_output(self):
         _,crystal,_,_,_,_ = self.generator(self.neighbour)

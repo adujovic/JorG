@@ -75,7 +75,7 @@ def print_atom(atom,**kwargs):
 
 def print_case(atom,**kwargs):
     kwargs = standard.fix(**kwargs)
-    kwargs = safe_update(kwargs,{'wyckoffPosition' : " ", 
+    kwargs = safe_update(kwargs,{'wyckoffPosition' : " ",
                                  'distance'        : -1.0,
                                  'caseStyle'       : color.IT+color.CYAN,
                                  'numberStyle'     : color.IT,
@@ -152,7 +152,7 @@ def print_angles(directions,**kwargs):
 
     names = color_names('α','β','γ')
     tmpCycle = cycle(np.flipud(directions))
-    for i,n in enumerate(names):
+    for n in names:
         vectorJ = next(tmpCycle)
         vectorI = next(tmpCycle)
         dotProduct  = np.dot(vectorI,vectorJ)
@@ -218,7 +218,7 @@ def print_moments(moments,**kwargs):
     for i,moment in enumerate(moments):
         elementStr = ''
         numberStr  = ''
-        if 'cell' in kwargs: 
+        if 'cell' in kwargs:
             elementStr = "{:2s}".format(kwargs['cell'][i][0])
             numberStr  = "({:3d}): ".format(i+1)
         momentStr = "{:=+3.1f} ".format(moment)
@@ -243,18 +243,14 @@ def print_label(text,**kwargs):
                                  'labelStyle'   : color.BF+color.DARKYELLOW,
                                  'atoms'        : None,
                                  'vectorStyle'  : color.END})
-                
     if len(text) > kwargs['linewidth'] - 2:
         label = text[:kwargs['linewidth']-5]+"..."
     else:
         label = text.center(kwargs['linewidth']-2)
     label = kwargs['labelStyle']+label+color.END
-
     line(**kwargs)
-
     kwargs['stream'].write("| "+label+" |"+'\n')
 
-    vectorOffset = len(kwargs['elementStyle']+color.END+kwargs['vectorStyle']+color.END)
     if kwargs['atoms'] is not None:
         for atom in kwargs['atoms']:
             print_atom(atom,center=True,**kwargs)

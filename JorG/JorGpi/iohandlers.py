@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sys import argv,path
+from sys import path
 path.insert(0,r'../')
 import numpy as np
 import errno
@@ -45,7 +45,8 @@ class StreamHandler:
     def __call__(self, idx=0):
         return self.streams[idx]
 
-    def load_VASP(self,POSCARfile,INCARfile):
+    @staticmethod
+    def load_VASP(POSCARfile,INCARfile):
         load_POSCAR          = POSCARloader(POSCARfile)
         load_POSCAR.parse()
         readData             = load_POSCAR(0)

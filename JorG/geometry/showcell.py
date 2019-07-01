@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 
 from matplotlib import colors as mplColors
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.mplot3d import proj3d
-from sys import argv,path
+from sys import path
 path.insert(0,'../../')
 
 
@@ -28,7 +27,7 @@ class showCell:
             self.resolution = resolution
         else:
             self.resolution = 3
-            
+
         self.make_spherical()
         self.alpha      = alpha
         # generate plot
@@ -37,7 +36,7 @@ class showCell:
         self.subplot.set_anchor((0.75,0.75))
 
     def add_sphere(self, position = np.zeros(3),
-                         radius  = 1.0, 
+                         radius  = 1.0,
                          **kwargs):
         if 'color' not in kwargs:
             kwargs['color'] = mplColors.rgb2hex(0.8*np.random.rand(3)) 
@@ -48,7 +47,7 @@ class showCell:
 
     def add_polygon(self,points,**kwargs):
         if 'color' not in kwargs:
-            kwargs['color'] = mplColors.rgb2hex(0.8*np.random.rand(3)) 
+            kwargs['color'] = mplColors.rgb2hex(0.8*np.random.rand(3))
 
         polygon = Poly3DCollection([points], **kwargs)
         polygon.set_color(kwargs['color'])
@@ -58,7 +57,8 @@ class showCell:
         scale_from_ascpect = np.repeat([[np.min(aspect_data), np.max(aspect_data)]],3,axis=0)
         self.subplot.auto_scale_xyz(*scale_from_ascpect)
 
-    def show(self,name=None):
+    @staticmethod
+    def show(name=None):
         if name is None:
             plt.show()
         else:

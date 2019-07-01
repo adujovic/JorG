@@ -121,13 +121,8 @@ class NaiveHeisenberg:
                 continue
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size:
-                for index,key in enumerate(self.MAGMOMs()['moments']):
-                    print(I, atomJ[3], config[index],end="  ")
-                    for magmom in [self.MAGMOMs(i+1),self.MAGMOMs()]:
-                        print("% .2f  "%magmom['moments'][key],end='')
-                    print(key)
-                self.systemOfEquations[i][j[0][0]] -= self.MAGMOMs()['moments'][I+1]\
-                                                     *self.MAGMOMs(i+1)['moments'][atomJ[3]+1]
+                self.systemOfEquations[i][j[0][0]] += np.abs(self.MAGMOMs()['moments'][I+1]\
+                                                     *self.MAGMOMs(i+1)['moments'][atomJ[3]+1])
         return self.systemOfEquations
 
     def check_if_contributes(self,atomI,atomJ):

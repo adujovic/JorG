@@ -97,7 +97,6 @@ class VaspRunXML:
             dx = np.diag(np.insert(dx,0,dx[0]))
             return np.sum(np.dot(dx,f))
 
-
     def calculate_moment(self,ion):
         ups = VaspRunXML.DOS_below_ef(self.partialDOS[ion][1],self.fermi_energy)
         dns = VaspRunXML.DOS_below_ef(self.partialDOS[ion][2],self.fermi_energy)

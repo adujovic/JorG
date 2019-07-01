@@ -1,6 +1,4 @@
 import unittest
-import numpy as np
-import re
 from argv import options
 
 class TestArgv(unittest.TestCase):

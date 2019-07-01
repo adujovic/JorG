@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
 from sys import path
 path.insert(0,r'../../')
-from os import makedirs
-import errno
-import re
-from datetime import datetime
 import numpy as np
-import spglib
-import time
-import shutil
-from itertools import product
 
 import JorGpi.symmetry as symmetry
 from argv import options
@@ -57,7 +49,7 @@ class JorGpi:
             exit(0)
         if self.currentOptions('refined'):
             refinedCell               = self.symmetry.standarize()
-            self.cell,self.directions = VariableFixer.from_refined(refinedCell) 
+            self.cell,self.directions = VariableFixer.from_refined(refinedCell)
 
     def symmetry_run(self):
 #   Checking the symmetry of the input
@@ -71,7 +63,7 @@ class JorGpi:
             symmetry.WriteReport([self.symmetry.symmetry],comments=["Analysis of symmetry in the input cell"], stream=raport)
         Msg.print_crystal_info(title="INPUT",crystal=self.cell,directions=self.directions,
                                reference=self.reference,moments=self.oldMoments)
-                 
+
     def initialize_new_cell(self):
         self.write_input_raport()
         self.nearestNeighbor,\
@@ -117,7 +109,7 @@ class JorGpi:
         self.wyckoffDict, self.symmetryFull, self.symmetryOriginal =\
            generator.wyckoffs_dict(
                    generator.NearestNeighborsGenerator.get_symmetry(self.cell,
-                                                                    self.directions), 
+                                                                    self.directions),
                    generator.NearestNeighborsGenerator.get_symmetry(self.crystal,
                                                                     self.extraDirections))
 

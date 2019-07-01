@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import re
 from sys import argv,path
 path.insert(0,r'../../')
 from POSCARloader import POSCARloader
 from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrorsXYZ
 import numpy as np
-from itertools import product
 import argparse as ap
-from copy import copy
 
 class error:
     unexcepted = 12
@@ -22,12 +19,13 @@ class EnergyConverter:
                     'mHe':    500.0*np.reciprocal(13.6056980659),
                     'K'  :    11604.51812}
     default = { 'groundMoment'  : 1.0,
-                'excitedMoment' : 1.0}
+                'excitedMoment' : 1.0,
+                'units'         : 'meV' }
     types = [ "       no moment",
               "  average moment",
               "geometric moment",
               " original moment",
-              " neoteric moment" ]   
+              " neoteric moment" ]
 
     @staticmethod
     def multiply(arr,*args):
@@ -35,7 +33,7 @@ class EnergyConverter:
 
     @staticmethod
     def get_moments(**kwargs):
-        scalarProducts = [ 1.0,         
+        scalarProducts = [ 1.0,
                            0.25*(kwargs['groundMoment']+kwargs['excitedMoment'])**2,
                            kwargs['groundMoment']*kwargs['excitedMoment'],
                            kwargs['groundMoment']**2,
@@ -54,7 +52,6 @@ class EnergyConverter:
             return EnergyConverter.multiply(args,notMomentSq,avgMomentSq,
                                                  geoMomentSq,orgMomentSq,
                                                              newMomentSq)
-
         except KeyError:
             print("No unit defined! Values will be in eV")
             return args
@@ -275,7 +272,7 @@ class CommandLineOptions:
         self.parser.add_argument('--units', '-U', default='meV',
                     choices=['eV', 'meV', 'Ry', 'mRy', 'He', 'mHe', 'K'],
                     help='units of energy')
-        self.parser.add_argument('--elements', '--atoms', '-E', metavar='symbol', 
+        self.parser.add_argument('--elements', '--atoms', '-E', metavar='symbol',
                                  nargs="+", required=True,
                 help='Symbol of elements taken into account in calculations')
         self.parser.add_argument('--directories', '-D', metavar='dir', nargs='+', required=True,
