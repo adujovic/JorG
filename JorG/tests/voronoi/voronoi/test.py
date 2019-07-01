@@ -1,13 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import argv,maxsize,path
+from sys import argv,path
 path.insert(0,r'../../../')
 import time
-import numpy as np
 from geometry.voronoi import Voronoi
 from POSCARloader import POSCARloader
-from itertools import product
 
 def main(**args):
     pass

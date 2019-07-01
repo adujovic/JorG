@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import re
 import numpy as np
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 class VaspRunXML:
     def __init__(self,vasprun='vasprun.xml'):
@@ -20,7 +20,7 @@ class VaspRunXML:
         except KeyError:
             return
 
-    def get_energy(self,field): 
+    def get_energy(self,field):
         if field.tag != 'energy':
             return
         for child in field.iter():

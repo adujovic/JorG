@@ -2,7 +2,7 @@
 
 import numpy as np
 import scipy.spatial #Voronoi, ConvexHull
-from sys import argv,path
+from sys import path
 path.insert(0,'../../')
 from matplotlib import colors as mplColors
 from itertools import product
@@ -63,7 +63,7 @@ class Voronoi:
         for name,atom in zip(self.atomNames,self.superCell):
             vector = atom + np.dot(multipliers,self.basis)
             self.add_point(name,vector)
-            
+
     def add_point(self,name,vector):
         if(np.linalg.norm(vector-self.center) <= self.cutOff):
             self.points.append(vector)
@@ -99,7 +99,7 @@ class Voronoi:
 
     def add_convex_hull(self,vertices,atom,name):
         for simplex in self.convexHull.simplices:
-            distance = Geometry.distance_to_triangle(atom,vertices[simplex]) 
+            distance = Geometry.distance_to_triangle(atom,vertices[simplex])
             if distance < self.radius:
                 self.radius = distance
             self.plotter.add_polygon(vertices[simplex],

@@ -1,11 +1,10 @@
 #include "solver.h"
 
 int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, size_t unique_flips){
-#ifdef _SITESNUMBER
-    constexpr size_t SITESNUMBER = _SITESNUMBER;
-#else
-    constexpr size_t SITESNUMBER = 64;
+#ifndef _SITESNUMBER
+#define _SITESNUMBER 64
 #endif
+constexpr size_t SITESNUMBER = _SITESNUMBER;
    
 // *****************************************************************************************
 // **************************************   READ   *****************************************
