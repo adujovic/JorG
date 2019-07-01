@@ -34,20 +34,23 @@ class EnergyConverter:
         return [[ arg*element for element in arr ] for arg in args ]
 
     @staticmethod
+    def get_moments(**kwargs):
+        scalarProducts = [ 1.0,         
+                           0.25*(kwargs['groundMoment']+kwargs['excitedMoment'])**2,
+                           kwargs['groundMoment']*kwargs['excitedMoment'],
+                           kwargs['groundMoment']**2,
+                           kwargs['excitedMoment']**2 ]
+        return [ EnergyConverter.energyRatios[kwargs['units']]\
+                 * scalarProduct for scalarProduct in scalarProducts ]
+
+    @staticmethod
     def convert(*args,**kwargs):
         # Returns array of J values with different conventions (see types)
         settings = EnergyConverter.default
         settings.update(kwargs)
         try:
-            notMomentSq = EnergyConverter.energyRatios[settings['units']]
-            avgMomentSq = EnergyConverter.energyRatios[settings['units']]\
-                        *0.25*(settings['groundMoment']+settings['excitedMoment'])**2
-            geoMomentSq = EnergyConverter.energyRatios[settings['units']]\
-                        *settings['groundMoment']*settings['excitedMoment']
-            orgMomentSq = EnergyConverter.energyRatios[settings['units']]\
-                        *settings['groundMoment']*settings['groundMoment']
-            newMomentSq = EnergyConverter.energyRatios[settings['units']]\
-                        *settings['excitedMoment']*settings['excitedMoment'] 
+            notMomentSq,avgMomentSq,geoMomentSq,\
+            orgMomentSq,newMomentSq = EnergyConverter.get_moments(**settings)
             return EnergyConverter.multiply(args,notMomentSq,avgMomentSq,
                                                  geoMomentSq,orgMomentSq,
                                                              newMomentSq)
