@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
-import sys
 import argparse as ap
-from itertools import product
-
 
 parser = ap.ArgumentParser(description='Convert from \"textbytes\" to ascii characters')
 parser.add_argument('--input', '-I', '-i', default=None,

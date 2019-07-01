@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import argv,maxsize,path
+from sys import path
 path.insert(0,r'../../')
-import re
 from POSCARloader import POSCARloader
 import time
 from itertools import product

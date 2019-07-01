@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import argv,maxsize,path
+from sys import path
 path.insert(0,r'../../')
 import numpy as np
-from equivalent import findFlips,find_all_distances
+from JorGpi.equivalent import findFlips,find_all_distances
 import time
 
 def main(**args):

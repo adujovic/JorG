@@ -50,7 +50,7 @@ class Voronoi:
     def support(center,radius,direction):
         project = np.dot(center,direction)
         return [project + radius, project - radius]
-    
+
     @staticmethod
     def supportXYZ(center, radius):
         differences = []

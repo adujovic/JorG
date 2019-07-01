@@ -4,7 +4,7 @@
 #include <cstdio>
  
 typedef std::complex<double> complex;
-int MandelbrotCalculate(complex c, int maxiter);
+int MandelbrotCalculate(const complex& c, int maxiter);
 
 extern "C"
 void mandelbrot(int width = 78, int height = 44);

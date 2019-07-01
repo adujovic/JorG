@@ -27,7 +27,7 @@ class Crun:
             self.name = re.sub('\..*$','',self.name)
 
         self.module = setuptools.Extension(self.name, sources = list(args), **self.compilerOptions)
-        
+
         setuptools.setup(
                 script_args=['build','--build-lib=%s-lib'%(self.name)],
                 ext_modules=[self.module])

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import argv,maxsize,path
+from sys import path
 path.insert(0,r'../../../')
 import time
 import numpy as np

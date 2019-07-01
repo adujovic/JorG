@@ -71,10 +71,10 @@ class standard:
 class JmolVisualization:
     scriptText =\
 """vibration ON
-vector ON 
+vector ON
 vector SCALE %.2f
 vector %.2f
-set bondRadiusMilliAngstroms 0 
+set bondRadiusMilliAngstroms 0
 background [%d,%d,%d]
 isoSurface SURF center {%.5f %.5f %.5f} sphere %.5f
 color $SURF translucent [%d,%d,%d]"""

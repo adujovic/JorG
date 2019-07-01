@@ -1,4 +1,3 @@
-import re
 from POSCARloader import POSCARloader
 import numpy as np
 import unittest
@@ -195,7 +194,7 @@ class TestPOSCARloader(unittest.TestCase):
         for nameSet,nameRead in zip(self.atoms,
                                     self.loader(1)['cellSymmetry'][2]):
             self.assertEqual(nameSet,nameRead)
-        
+
     def test_loader_cellSymmetry_2(self):
         self.loader.parse()
         atoms      = [0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3]

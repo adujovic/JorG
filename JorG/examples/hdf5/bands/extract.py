@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import h5py
-import numpy as np
 from sys import argv
 
 if len(argv) < 2:

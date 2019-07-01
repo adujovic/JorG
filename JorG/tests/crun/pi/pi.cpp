@@ -1,6 +1,6 @@
 #include "pi.h"
 
-int MandelbrotCalculate(complex c, int maxiter)
+int MandelbrotCalculate(const complex& c, int maxiter)
     //taken from https://bisqwit.iki.fi/story/howto/openmp/#ExampleCalculatingTheMandelbrotFractalInParallelHostComputer
     //and modyfied
 {

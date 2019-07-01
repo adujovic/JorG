@@ -4,7 +4,7 @@ path.insert(0,r'../')
 
 import re
 import numpy as np
-from os import makedirs,mkdir,rmdir
+from os import mkdir
 import errno
 import shutil
 import aux.PeriodicTable as periodic
@@ -173,7 +173,7 @@ class INCARsaver:
             print("Copying POSCAR to %s didn't work out!"%flipName)
             exit(error.systemerror)
 
-    def write_INCAR(self,flipName,flip): 
+    def write_INCAR(self,flipName,flip):
         with open(self.fileName+"/"+flipName+"/INCAR","w+") as vaspFile:
             vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',self.oldINCAR))
             vaspFile.write("MAGMOM = ")
