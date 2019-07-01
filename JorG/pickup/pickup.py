@@ -28,22 +28,29 @@ class EnergyConverter:
               "geometric moment",
               " original moment",
               " neoteric moment" ]   
+
+    @staticmethod
+    def multiply(arr,*args):
+        return [[ arg*element for element in arr ] for arg in args ]
+
     @staticmethod
     def convert(*args,**kwargs):
         # Returns array of J values with different conventions (see types)
         settings = EnergyConverter.default
         settings.update(kwargs)
         try:
-            notMomentSq = 1.0
-            avgMomentSq = 0.25*(settings['groundMoment']+settings['excitedMoment'])**2
-            geoMomentSq = settings['groundMoment']*settings['excitedMoment']
-            orgMomentSq = settings['groundMoment']*settings['groundMoment']
-            newMomentSq = settings['excitedMoment']*settings['excitedMoment'] 
-            return [ [notMomentSq * EnergyConverter.energyRatios[settings['units']]*arg for arg in args],
-                     [avgMomentSq * EnergyConverter.energyRatios[settings['units']]*arg for arg in args],
-                     [geoMomentSq * EnergyConverter.energyRatios[settings['units']]*arg for arg in args],
-                     [orgMomentSq * EnergyConverter.energyRatios[settings['units']]*arg for arg in args],
-                     [newMomentSq * EnergyConverter.energyRatios[settings['units']]*arg for arg in args]]
+            notMomentSq = EnergyConverter.energyRatios[settings['units']]
+            avgMomentSq = EnergyConverter.energyRatios[settings['units']]\
+                        *0.25*(settings['groundMoment']+settings['excitedMoment'])**2
+            geoMomentSq = EnergyConverter.energyRatios[settings['units']]\
+                        *settings['groundMoment']*settings['excitedMoment']
+            orgMomentSq = EnergyConverter.energyRatios[settings['units']]\
+                        *settings['groundMoment']*settings['groundMoment']
+            newMomentSq = EnergyConverter.energyRatios[settings['units']]\
+                        *settings['excitedMoment']*settings['excitedMoment'] 
+            return EnergyConverter.multiply(args,notMomentSq,avgMomentSq,
+                                                 geoMomentSq,orgMomentSq,
+                                                             newMomentSq)
 
         except KeyError:
             print("No unit defined! Values will be in eV")
