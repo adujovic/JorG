@@ -4,8 +4,10 @@ from sys import argv,path
 path.insert(0,r'../../')
 from POSCARloader import POSCARloader
 from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrorsXYZ
+from pickup.read_vasprun import MAGMOMloaderXML
 import numpy as np
 import argparse as ap
+import re
 
 class error:
     unexcepted = 12
@@ -56,91 +58,6 @@ class EnergyConverter:
             print("No unit defined! Values will be in eV")
             return args
 
-class ReadMoments:
-    @staticmethod
-    def should_skip(line):
-        for regex in ['^\s+$','^\s*#','^-+$',
-                      '^\s*tot','magnetization \(x\)']:
-            if re.search(regex,line):
-                return True
-        return False
-
-    def should_stop__reading(self,line):
-        if re.search('^\s*tot',line):
-            self.ISTOBEREAD = False
-
-    def should_start_reading(self,line):
-        if re.search(' \(x\)',line):
-            self.ISTOBEREAD = True
-
-    @staticmethod
-    def read_energy(line):
-        if "energy  without entropy" in line:
-            return float(line.split()[-1])
-
-    def __init__(self):
-        self.moments    = {}
-        self.energy     = None
-        self.ISTOBEREAD = False
-
-    def __call__(self,text):
-        for line in text:
-            self.read_line(line)
-        return {'moments': self.moments, 'energy': self.energy}
-
-    def read_line(self,line):
-        self.should_start_reading(line)
-        self.should_stop__reading(line)
-        if self.should_skip(line):
-            return
-        if self.ISTOBEREAD:
-            self.moments[int(line.split()[0])] = float(line.split()[4])
-        elif self.energy is None:
-            self.energy = self.read_energy(line)
-
-class MAGMOMloader:
-    rawTxt = []
-    data   = []
-    def __init__(self,*args,**kwargs):
-        for inputName in args:
-            try:
-                with open(inputName,"r+") as inFile:
-                    self.rawTxt.append(inFile.readlines())
-            except FileNotFoundError:
-                print("File \"%s\" not found!"%inputName)
-            except Exception:
-                print("Unexcepted error!")
-                exit(error.unexcepted)
-
-    def __iter__(self):
-        return iter(self.data)
-
-    def __len__(self):
-        return len(self.data)
-
-    def parse_text(self,text):
-        read_moments = ReadMoments()
-        self.data.append(read_moments(text))
-
-    def parse(self):
-        self.data   = []
-        for text in self.rawTxt:
-            self.parse_text(text)
-
-    def get_energy(self,idx=0):
-        return self.data[idx]['energy']
-
-    def get_moments(self,idx=0):
-        return self.data[idx]['moments']
-
-    def get_average_magnitude(self,idx=0,indices=None):
-        if indices is not None:
-            return np.average(np.abs(np.take(list(self.data[idx]['moments'].values()),indices)))
-        return np.average(np.abs(np.array(list(self.data[idx]['moments'].values()))))
-
-    def __call__(self,idx=0):
-        return self.data[idx]
-
 #
 #░█▀▀░█▄█░█▀█░█▀▄░▀█▀░░░█▀█░▀█▀░█▀▀░█░█░░░░░█░█░█▀█
 #░▀▀█░█░█░█▀█░█▀▄░░█░░░░█▀▀░░█░░█░░░█▀▄░▄▄▄░█░█░█▀▀
@@ -160,8 +77,8 @@ class SmartPickUp:
         self.POSCARs.parse()
 
     def read_MAGMOMs(self,*args):
-        OUTCARs = [ "%s/OUTCAR"%arg for arg in args ]
-        self.MAGMOMs = MAGMOMloader(*OUTCARs,spam=False)
+        vaspruns = [ "%s/vasprun.xml"%arg for arg in args ]
+        self.MAGMOMs = MAGMOMloaderXML(*vaspruns,spam=False)
         self.MAGMOMs.parse()
 
     def read(self,*args,**kwargs):
