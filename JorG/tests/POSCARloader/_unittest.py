@@ -98,6 +98,12 @@ class TestPOSCARloader(unittest.TestCase):
         for i,name in enumerate(atomNamesTwo):
             self.assertEqual(self.loader(2)['atomNames'][i],name)
 
+    def are_equal(self,cellA,cellB):
+        for atomA,atomB in zip (cellA,cellB):
+            self.assertEqual(atomA[0],atomB[0])
+            self.assertAlmostEqual(np.linalg.norm(atomA[1]-atomB[1]),0.0,
+                                   msg="%s != %s"%(str(atomA[1]),str(atomB[1])))
+
     def test_loader_cell_0(self):
         self.loader.parse()
         cell = [('Ba', np.array([1.94876821, 1.93876821,  2.34639831])),
@@ -112,10 +118,7 @@ class TestPOSCARloader(unittest.TestCase):
                 ('O' , np.array([0.00000000, 1.93876821,  7.50117349])),
                 ('O' , np.array([1.93876821, 0.00000000,  7.50117349])),
                 ('Y' , np.array([1.93876821, 1.93876821,  6.04774994]))]
-        for atomSet,atomRead in zip (cell,self.loader(0)[ 'cell']):
-            self.assertEqual(atomSet[0],atomRead[0])
-            self.assertAlmostEqual(np.linalg.norm(atomSet[1]-atomRead[1]),0.0,
-                                   msg="%s != %s"%(str(atomSet[1]),str(atomRead[1])))
+        self.are_equal(cell,self.loader(0)[ 'cell'])
 
     def test_loader_cell_1(self):
         self.loader.parse()
@@ -131,10 +134,7 @@ class TestPOSCARloader(unittest.TestCase):
                 ('O' , np.array([0.00000000, 1.93876821,  7.50117349])),
                 ('O' , np.array([1.93876821, 0.00000000,  7.50117349])),
                 ('Y' , np.array([1.93876821, 1.93876821,  6.04774994]))]
-        for atomSet,atomRead in zip (cell,self.loader(1)['cell']):
-            self.assertEqual(atomSet[0],atomRead[0])
-            self.assertAlmostEqual(np.linalg.norm(atomSet[1]-atomRead[1]),0.0,
-                                   msg="%s != %s"%(str(atomSet[1]),str(atomRead[1])))
+        self.are_equal(cell,self.loader(1)[ 'cell'])
 
     def test_loader_cell_2(self):
         self.loader.parse()
@@ -150,10 +150,7 @@ class TestPOSCARloader(unittest.TestCase):
                 (2, np.array([0.00000000, 1.93876821,  7.50117349])),
                 (2, np.array([1.93876821, 0.00000000,  7.50117349])),
                 (3, np.array([1.93876821, 1.93876821,  6.04774994]))]
-        for atomSet,atomRead in zip (cell,self.loader(2)['cell']):
-            self.assertEqual(atomSet[0],atomRead[0])
-            self.assertAlmostEqual(np.linalg.norm(atomSet[1]-atomRead[1]),0.0,
-                                   msg="%s != %s"%(str(atomSet[1]),str(atomRead[1])))
+        self.are_equal(cell,self.loader(2)[ 'cell'])
         
     def test_loader_cellSymmetry_0(self):
         self.loader.parse()
