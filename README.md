@@ -10,3 +10,4 @@
 <a href="https://www.codefactor.io/repository/github/mellechowicz/jorg"><img src="https://www.codefactor.io/repository/github/mellechowicz/jorg/badge" alt="CodeFactor" /></a>
 <img src='https://travis-ci.com/Mellechowicz/JorG.svg?branch=experimental'>
 <img src='https://bettercodehub.com/edge/badge/Mellechowicz/JorG?branch=experimental'>
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e44b6e4365bb41f38054cf9800f95021)](https://app.codacy.com/app/apkadzielawa/JorG?utm_source=github.com&utm_medium=referral&utm_content=Mellechowicz/JorG&utm_campaign=Badge_Grade_Dashboard)
