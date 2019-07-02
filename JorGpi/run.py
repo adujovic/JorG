@@ -16,6 +16,7 @@ from JorGpi.iohandlers import StreamHandler,JmolVisualization
 from JorGpi.iohandlers import TemporaryFiles,errors,Msg
 from JorGpi.iohandlers import VariableFixer,Symmetry,read_flips
 from JorGpi.crun import Crun
+import numpy as np
 
 class JorGpi:
     def __init__(self,*args):
@@ -190,7 +191,7 @@ class JorGpi:
         if remover:
             flippingConfigurations = np.delete(flippingConfigurations, tuple(remover), axis=0)
             systemOfEquations = eqs.equations
-        if systemOfEquations.size == 0:
+        if len(systemOfEquations) == 0:
             print("ERROR! Not enough equations! Please rerun.")
             exit(-3)
         if not self.currentOptions('redundant'): # If the System of Equations is required to be consistent
@@ -198,10 +199,10 @@ class JorGpi:
         return systemOfEquations,flippingConfigurations
 
     def save_result(self):
-        Msg.print_equations(self.systemOfEquations,self.currentOptions('redundant'))
-        np.savetxt(self.outDirName+'/systemOfEquations.txt',self.systemOfEquations)
         saver = loadsave.INCARsaver(self.incarData,self.crystal)
         saver.save(self.outDirName,self.flippingConfigurations)
+        Msg.print_equations(self.systemOfEquations,self.currentOptions('redundant'))
+        np.savetxt(self.outDirName+'/systemOfEquations.txt',self.systemOfEquations)
 
     def generate_possible_configurations(self):
         solver = self.AdaptiveSimulatedAnnealing(self)

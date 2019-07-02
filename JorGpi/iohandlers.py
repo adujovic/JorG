@@ -221,23 +221,23 @@ class Msg:
         try:
             print_label(kwargs['title'])
         except KeyError:
-            pass
+            print("placeholder",end="")
         try:
             print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=color.BF)
         except KeyError:
-            pass
+            print_label("Size: ?x?x?",labelStyle=color.BF)
         try:
             print_crystal(kwargs['crystal'],directions=kwargs['directions'])
         except KeyError:
-            pass
+            print("",end="")
         try:
             print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),atoms=[kwargs['crystal'][kwargs['reference']]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
         except KeyError:
-            pass
+            print("",end="")
         try:
             print_moments(kwargs['moments'],cell=kwargs['crystal'])
         except KeyError:
-            pass
+            print("",end="")
 
 def read_flips(name='best.flips'):
     try:

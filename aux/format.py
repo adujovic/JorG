@@ -49,8 +49,11 @@ def print_vector(vector,**kwargs):
     kwargs = standard.fix(**kwargs)
     kwargs = safe_update(kwargs,{'vectorStyle' : color.DARKCYAN})
     txt = ' [ ' + kwargs['vectorStyle']
-    for x in vector:
-        txt += ' {:=10.5f}'.format(x)
+    try:
+        for x in vector:
+            txt += ' {:=10.5f}'.format(x)
+    except TypeError:
+        txt += str(vector)
     txt += color.END + ' ] '
     output  = "|"
     output += txt.center(kwargs['linewidth']+len(kwargs['vectorStyle']+color.END))
