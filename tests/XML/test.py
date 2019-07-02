@@ -3,7 +3,7 @@
 
 from sys import path
 path.insert(0,r'../../')
-from vasprun import VaspRunXML
+from pickup.vasprun import VaspRunXML
 
 for d in ['Cr','CsF3Ni','Fe','Fe54','Fe54a','H','Nd']:
     print('%s/vasprun.xml\t'%d,end='')

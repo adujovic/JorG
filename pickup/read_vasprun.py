@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from sys import path
 path.insert(0,r'../../')
-from vasprun import VaspRunXML
+from pickup.vasprun import VaspRunXML
 import numpy as np
 
 class MAGMOMloaderXML:
