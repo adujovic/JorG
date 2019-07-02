@@ -3,10 +3,7 @@ language:
 branches:
   only:
     - experimental
-before_install:
-  - sudo apt-get update -q
-  - sudo apt-get install -y -q python3-numpy python3-scipy python3-dev
 script:
-  - JorG/run_all_tests.sh
+  - ./run_all_tests.sh
 codecov:
   token: 51ab1716-48d4-456b-9f4a-1b3a0c47eecf
