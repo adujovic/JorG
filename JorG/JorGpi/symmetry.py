@@ -24,7 +24,6 @@ def show_cell(lattice, positions, numbers):
         print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
 
 from aux.PeriodicTable import periodicTableElement
-import numpy as np
 def print_line(line,**kwargs):
     kwargs = standard.fix(**kwargs)
     kwargs['stream'].write("|"+(line).center(kwargs['linewidth'])+"|"+"\n")

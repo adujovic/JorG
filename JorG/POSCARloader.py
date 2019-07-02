@@ -61,7 +61,7 @@ class POSCARloader:
         for i in range(2,5):
             try:
                 directions.append(scale*np.fromstring(text[i],sep=" ")) # crystal directions
-            except ValueError: 
+            except ValueError:
                 print("Can't convert crystal directions in \"%s\""%text[i])
                 exit(error.unconvertable)
         return directions
@@ -106,7 +106,7 @@ class POSCARloader:
             self.data.append(read.read())
 class CellReader:
     def __init__(self,text):
-       self.text          = text 
+       self.text          = text
 
        self.read_atoms()
        self.directions    = POSCARloader.read_directions(text)

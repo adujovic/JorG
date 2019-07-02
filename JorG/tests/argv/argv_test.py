@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import argv,maxsize,path
+from sys import argv,path
 path.insert(0,r'../../')
-import numpy as np
 import time
 from datetime import datetime
 import re

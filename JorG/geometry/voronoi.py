@@ -43,7 +43,7 @@ class Voronoi:
 
         self.points = [atom for atom in self.superCell]
         self.names  = [name for name in self.atomNames]
-    
+
         self.data = None
 
     @staticmethod

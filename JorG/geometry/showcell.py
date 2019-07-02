@@ -21,7 +21,7 @@ class showCell:
                   position[0]+radius*np.outer(np.cos(self.phi), np.sin(self.theta)),
                   position[1]+radius*np.outer(np.sin(self.phi), np.sin(self.theta)),
                   position[2]+radius*np.outer(np.ones(np.size(self.phi)), np.cos(self.theta))])
-    
+
     def __init__(self,resolution = 13, alpha = 0.4):
         if resolution > 3:
             self.resolution = resolution
@@ -39,7 +39,7 @@ class showCell:
                          radius  = 1.0,
                          **kwargs):
         if 'color' not in kwargs:
-            kwargs['color'] = mplColors.rgb2hex(0.8*np.random.rand(3)) 
+            kwargs['color'] = mplColors.rgb2hex(0.8*np.random.rand(3))
         if 'alpha' not in kwargs:
             kwargs['alpha'] = 0.2
 

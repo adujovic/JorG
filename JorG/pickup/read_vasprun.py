@@ -8,7 +8,8 @@ import numpy as np
 class MAGMOMloaderXML:
     def __init__(self,*args,**kwargs):
         self.vasprunFiles = args
-        self.data   = [{} for arg in args]
+        self.data         = [{} for arg in args]
+        self.settings     = kwargs
 
     def __iter__(self):
         return iter(self.data)
@@ -18,7 +19,7 @@ class MAGMOMloaderXML:
 
     def parse(self):
         for i,vasprun in enumerate(self.vasprunFiles):
-            parser = VaspRunXML(vasprun)
+            parser = VaspRunXML(vasprun,**self.settings)
             parser()
             self.data[i]['fermi']   = parser.fermi_energy
             self.data[i]['energy']  = parser.energy

@@ -4,12 +4,15 @@ import numpy as np
 import defusedxml.ElementTree as ET
 
 class VaspRunXML:
-    def __init__(self,vasprun='vasprun.xml'):
+    def __init__(self,vasprun='vasprun.xml',**kwargs):
         self.root         = ET.parse(vasprun).getroot()
         self.fermi_energy = None
         self.ISOK2READ    = False
         self.partialDOS   = {}
-        self.TRAPZ        = False
+        if 'TRAPZ' in kwargs:
+            self.TRAPZ = kwargs['TRAPZ']
+        else:
+            self.TRAPZ        = False
 
     def get_fermi_energy(self,field):
         if self.fermi_energy is not None:

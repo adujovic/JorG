@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sys import argv,path
+from sys import path
 path.insert(0,r'../../')
 from POSCARloader import POSCARloader
 from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrorsXYZ
@@ -78,7 +78,7 @@ class SmartPickUp:
 
     def read_MAGMOMs(self,*args):
         vaspruns = [ "%s/vasprun.xml"%arg for arg in args ]
-        self.MAGMOMs = MAGMOMloaderXML(*vaspruns,spam=False)
+        self.MAGMOMs = MAGMOMloaderXML(*vaspruns,TRAPZ=True)
         self.MAGMOMs.parse()
 
     def read(self,*args,**kwargs):
@@ -154,7 +154,16 @@ class SmartPickUp:
             self.get_system_of_equations()
         averageMground = self.MAGMOMs.get_average_magnitude(0,self.flipped)
         averageMexcite = np.average([self.MAGMOMs.get_average_magnitude(i,self.flipped) for i in range(1,len(self.POSCARs))])
-        return EnergyConverter.convert(*(self.solver.solve()),groundMoment=averageMground,excitedMoment=averageMexcite,**kwargs)
+        self.Js = np.array(EnergyConverter.convert(*(self.solver.solve()),groundMoment=averageMground,excitedMoment=averageMexcite,**kwargs))
+        return self.Js
+
+    def __str__(self):
+        try:
+            strout = ''.join([ ("  %s:\t"+len(self.Js[0])*"% 11.7f "+"\n")\
+                                %(typeName,*self.Js[i],) for i,typeName in enumerate(self.types) ])
+        except AttributeError:
+            strout = 'None'
+        return strout
 
 class Reference:
     def __init__(self,POSCAR):

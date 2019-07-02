@@ -151,7 +151,7 @@ class TestPOSCARloader(unittest.TestCase):
                 (2, np.array([1.93876821, 0.00000000,  7.50117349])),
                 (3, np.array([1.93876821, 1.93876821,  6.04774994]))]
         self.are_equal(cell,self.loader(2)[ 'cell'])
-        
+
     def test_loader_cellSymmetry_0(self):
         self.loader.parse()
         cell       = [(0.5025789570959635, 0.4999999999871052, 0.19398936279219897),

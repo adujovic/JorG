@@ -28,7 +28,7 @@ class JorGpi:
     
         self.handler    = StreamHandler(self.outDirName)
         self.outDirName = self.handler()
-    
+
     #   Reading POSCAR and INCAR files
         self.readData,self.oldMoments,self.incarData =\
                 self.handler.load_VASP(self.currentOptions('input'),

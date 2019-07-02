@@ -11,7 +11,7 @@ class KPOINTS:
         self.multipliers = np.arange(1.0,100,resolution)
         loader = POSCARloader("POSCAR")
         loader.parse()
-        self.directions = loader()['directions'] 
+        self.directions = loader()['directions']
         self.found      = []
         self.volume = np.linalg.det(self.directions)
         self.invert_directions()

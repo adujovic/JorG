@@ -50,7 +50,7 @@ class EquationSolver:
         inner_product = np.inner(equations[i],equations[j])
         norm_i = np.linalg.norm(equations[i])
         norm_j = np.linalg.norm(equations[j])
-        if np.abs(inner_product - norm_j * norm_i)/scale < 1E-8:   
+        if np.abs(inner_product - norm_j * norm_i)/scale < 1E-8:
             return True
         return False
 
@@ -117,7 +117,7 @@ class NaiveHeisenberg:
             if config[I] == config[atomJ[3]]:
                 continue
             distance = self.check_if_contributes(atomI,atomJ)
-            if not distance: 
+            if not distance:
                 continue
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size:
