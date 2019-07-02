@@ -3,7 +3,6 @@
 
 from sys import argv
 import time
-import numpy as np
 from pickup.pickup import SmartPickUp,Reference,CommandLineOptions
 
 if __name__ == '__main__':
@@ -16,7 +15,7 @@ if __name__ == '__main__':
     print("Running for NN=%d, \'%s\' from atom No %d:"%(options('number_of_interactions'),elements,ref()))
     pickerUpper = SmartPickUp(options('number_of_interactions'),elements)
     pickerUpper.read(options('reference'),*options('directories'),reference=ref())
-    
+
     print("Exchange interaction magnitude(s) in %s:"%options('units'))
     Js = pickerUpper.solve(units=options('units'))
     print(pickerUpper)

@@ -25,7 +25,7 @@ class JorGpi:
         self.reference       = self.currentOptions('reference')
         self.outDirName      = self.currentOptions('output')
         self.extraMultiplier = np.zeros(3,dtype=int)
-    
+
         self.handler    = StreamHandler(self.outDirName)
         self.outDirName = self.handler()
 

@@ -34,7 +34,7 @@ class Voronoi:
         self.basis     = self.data['directions']
         self.superCell = np.array([atom[1] for atom in self.data['cell']])
         self.atomNames = [atom[0] for atom in self.data['cell']]
-    
+
         self.atomColors = {}
         for name in set(self.atomNames):
             self.atomColors[name] = mplColors.rgb2hex(0.8*np.random.rand(3))
