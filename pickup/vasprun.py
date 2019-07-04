@@ -5,7 +5,11 @@ import defusedxml.ElementTree as ET
 
 class VaspRunXML:
     def __init__(self,vasprun='vasprun.xml',**kwargs):
-        self.root         = ET.parse(vasprun).getroot()
+        try:
+            self.root     = ET.parse(vasprun).getroot()
+        except ET.ParseError:
+            print("File %s broken... Remove and try again!"%vasprun)
+            exit(244)
         self.fermi_energy = None
         self.ISOK2READ    = False
         self.partialDOS   = {}

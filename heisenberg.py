@@ -35,6 +35,8 @@ class EquationSolver:
     def remove_tautologies(self, **kwargs):
         # removing 0 = 0 equations !
         scale       = np.average(np.abs(self.equations))
+        for line,e in zip(self.equations,self.vector):
+            print(line,e)
         tautologies = np.argwhere(
                         np.apply_along_axis(
                           np.linalg.norm,1,self.equations)/scale<1e-3).flatten()
@@ -108,6 +110,7 @@ class NaiveHeisenberg:
         self.crystal8  = crystal8
 
     def generate(self,mask,flipper):
+        print(str(self))
         self.flipper = np.array(flipper)
         self.mask    = mask
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)))
@@ -130,6 +133,16 @@ class NaiveHeisenberg:
         and atomJ[2] != 0.0 and atomJ[0] in self.mask):
             return np.round(np.linalg.norm(atomI[1]-atomJ[1]),2)
         return False
+
+    def __str__(self):
+        output = ""
+        for I,i in product(range(len(self.MAGMOMs()['moments'])),
+                           range(len(self.MAGMOMs))):
+            if i == 0:
+                output+="\n"
+            output+="% .2f  "%self.MAGMOMs(i)['moments'][I+1]
+        output+="\n"
+        return output
 
 def apply_mirrorsXYZ(dimensions,cell,reference=0):
     outputCell = []

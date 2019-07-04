@@ -94,7 +94,12 @@ class SmartPickUp:
 
     def make_crystal(self,idx=0):
         self.crystal  = self.POSCARs(idx)['cell']
-        self.crystal  = [ [atom[0],atom[1],self.MAGMOMs.get_moments()[i+1]] for i,atom in enumerate(self.crystal) ]
+        try:
+            self.crystal  = [ [atom[0],atom[1],self.MAGMOMs.get_moments()[i+1]] for i,atom in enumerate(self.crystal) ]
+        except KeyError as err:
+            print(self.MAGMOMs.get_moments())
+            print(err)
+            exit(-1)
         self.crystal8 = apply_mirrorsXYZ(self.POSCARs(0)['directions'],self.crystal,
                                          reference=self.ref)
 
