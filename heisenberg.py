@@ -31,7 +31,6 @@ class EquationSolver:
                 print(self.equations)
                 print(self.vector)
 
-
     def remove_tautologies(self, **kwargs):
         # removing 0 = 0 equations !
         scale       = np.average(np.abs(self.equations))
@@ -110,29 +109,50 @@ class NaiveHeisenberg:
         self.crystal8  = crystal8
 
     def generate(self,mask,flipper):
-        print(str(self))
         self.flipper = np.array(flipper)
         self.mask    = mask
-        self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)))
+        self.numberOfElements  = self.mask.count('$')
+        mul          = self.numberOfElements*(self.numberOfElements + 1)//2
+        self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
+        interactionNames       = [ None ]*len(flipper)*mul
         for (i,config),(I,atomI),atomJ in product(enumerate(self.flippings),
                                                   enumerate(self.crystal  ),
                                                             self.crystal8 ):
             if config[I] == config[atomJ[3]]:
                 continue
-            distance = self.check_if_contributes(atomI,atomJ)
+            distance,offset = self.check_if_contributes(atomI,atomJ)
             if not distance:
                 continue
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
-            if j.size:
-                self.systemOfEquations[i][j[0][0]] += np.abs(self.MAGMOMs()['moments'][I+1]\
+            if j.size: # geometric
+                self.systemOfEquations[i][mul*j[0][0]+offset] += np.abs(self.MAGMOMs()['moments'][I+1]\
                                                      *self.MAGMOMs(i+1)['moments'][atomJ[3]+1])
+                if interactionNames[mul*j[0][0]+offset] is None:
+                    interactionNames[mul*j[0][0]+offset] = "%s -- %s @ %.2f"%(atomI[0],atomJ[0],distance)
+        remover = [ i for i,name in enumerate(interactionNames) if name is None ]
+        names = [ name for name in interactionNames if name is not None ]
+        print(interactionNames)
+        print(names)
+        for i in range(self.systemOfEquations.shape[1]):
+            if np.sum(np.abs(self.systemOfEquations[:,i])) < 1e-4:
+                remover.append(i)
+        self.systemOfEquations = np.delete(self.systemOfEquations,remover,axis=1)
+        self.systemOfEquations = self.systemOfEquations[:,0:len(self.flipper)]
         return self.systemOfEquations
 
     def check_if_contributes(self,atomI,atomJ):
-        if (atomI[2] != 0.0 and atomI[0] in self.mask
-        and atomJ[2] != 0.0 and atomJ[0] in self.mask):
-            return np.round(np.linalg.norm(atomI[1]-atomJ[1]),2)
-        return False
+        if (atomI[0] not in self.mask
+        or  atomJ[0] not in self.mask):
+            return False,None
+        elementA = self.mask.find(atomI[0]+'$')
+        offsetA  = self.mask.count('$',0,elementA)
+        elementB = self.mask.find(atomJ[0]+'$')
+        offsetB  = self.mask.count('$',0,elementB)
+        if offsetA <= offsetB:
+            offset = self.numberOfElements*(self.numberOfElements-1)//2 - (self.numberOfElements-offsetA)*(self.numberOfElements-offsetA-1)//2 + offsetB
+        else:
+            offset = self.numberOfElements*(self.numberOfElements-1)//2 - (self.numberOfElements-offsetB)*(self.numberOfElements-offsetB-1)//2 + offsetA
+        return np.round(np.linalg.norm(atomI[1]-atomJ[1]),2),offset
 
     def __str__(self):
         output = ""

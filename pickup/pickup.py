@@ -211,6 +211,14 @@ class CommandLineOptions:
         self.opt = self.parser.parse_args(args[1:])
 
     def __call__(self, key):
+        if key == 'elements':
+            elements = ''.join(self.opt.__dict__[key])
+            elements = re.search('([A-Z][a-z]?)(.*)$',elements)
+            mask     = ''
+            while elements is not None:
+                mask    += elements.group(1)+"$"
+                elements = re.search('([A-Z][a-z]?)(.*)$',elements.group(2))
+            return mask
         try:
             return self.opt.__dict__[key]
         except KeyError:
