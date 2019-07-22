@@ -117,11 +117,18 @@ class NaiveHeisenberg:
         self.mask    = mask
         self.numberOfElements  = self.mask.count('$')
         mul          = self.numberOfElements*(self.numberOfElements + 1)//2
+        averageMoment     = [0.0] * self.numberOfElements
+        momentMultiplicty = [ 0 ] * self.numberOfElements
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
         self.interactionNames  = [ None ]*len(flipper)*mul
         for (row,config),(I,atomI),atomJ in product(enumerate(self.flippings),
                                                     enumerate(self.crystal  ),
                                                               self.crystal8 ):
+            if atomI[0] == atomJ[0]:
+                momentMultiplicty[self.offset_from_mask(atomI[0])] += 1
+                averageMoment[self.offset_from_mask(atomI[0])]\
+                        += np.abs(self.MAGMOMs()['moments'][I+1]\
+                                 *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
             if config[I] == config[atomJ[3]]:
                 continue
             distance,offset = self.check_if_contributes(atomI,atomJ)
@@ -137,6 +144,9 @@ class NaiveHeisenberg:
                     self.interactionNames[column] = \
                         NaiveHeisenberg.name_interaction(atomI[0],atomJ[0],distance)
         self.clean_SoE()
+        print(mask)
+        for moment,multiplicity,element in zip(averageMoment,momentMultiplicty,mask.split('$')):
+            print(element,"=",moment/multiplicity)
         return self.systemOfEquations
 
     def clean_SoE(self):
