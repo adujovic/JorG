@@ -163,11 +163,17 @@ class SmartPickUp:
         return self.Js
 
     def __str__(self):
+        srtout = ''
         try:
-            strout = ''.join([ ("  %s:\t"+len(self.Js[0])*"% 11.7f "+"\n")\
+            strout = '                           '
+            strout += ''.join([ "%s  "%name for name in self.model.interactionNames ]) + '\n'
+        except AttributeError:
+            return 'None'
+        try:
+            strout += ''.join([ ("  %s:\t"+len(self.Js[0])*"% 15.7f "+"\n")\
                                 %(typeName,*self.Js[i],) for i,typeName in enumerate(self.types) ])
         except AttributeError:
-            strout = 'None'
+            return 'None'
         return strout
 
 class Reference:

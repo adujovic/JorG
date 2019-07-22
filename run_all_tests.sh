@@ -1,5 +1,4 @@
 #!/bin/bash
-cd JorG
 
 ERR=0
 

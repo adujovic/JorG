@@ -1,4 +1,4 @@
-from vasprun import VaspRunXML
+from pickup.vasprun import VaspRunXML
 import unittest
 from itertools import product
 
