@@ -179,16 +179,16 @@ class INCARsaver:
             vaspFile.write("MAGMOM = ")
             for bit,atom in zip(flip,self.crystal):
                 if bit:
-                    vaspFile.write("%f "%-atom[2])
-                else:
                     vaspFile.write("%f "%atom[2])
+                else:
+                    vaspFile.write("%f "%-atom[2])
             vaspFile.write("\n")
 
     def save(self,fileName,flips):
         self.fileName = fileName
         INCARsaver.mkdir(fileName,"noFlip")
         INCARsaver.copy_POSCAR(fileName,"noFlip")
-        self.write_INCAR("noFlip",np.ones(len(self.crystal)))
+        self.write_INCAR("noFlip",np.zeros(len(self.crystal)))
         for i,flip in enumerate(flips):
             self.fileName = fileName
             INCARsaver.mkdir(fileName,"flip%05d"%i)

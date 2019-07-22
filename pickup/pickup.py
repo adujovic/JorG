@@ -12,6 +12,10 @@ import re
 class error:
     unexcepted = 12
 
+class one(dict):
+    def __missing__(self,key):
+        return 0.0 
+
 class EnergyConverter:
     energyRatios = {'eV' :    1.0,
                     'meV':    1000.0,
@@ -20,43 +24,24 @@ class EnergyConverter:
                     'He' :    0.5*np.reciprocal(13.6056980659),
                     'mHe':    500.0*np.reciprocal(13.6056980659),
                     'K'  :    11604.51812}
-    default = { 'groundMoment'  : 1.0,
-                'excitedMoment' : 1.0,
+    default = { 'moments'  : one(),
                 'units'         : 'meV' }
     types = [ "       no moment",
-              "  average moment",
-              "geometric moment",
-              " original moment",
-              " neoteric moment" ]
+              "geometric moment" ]
 
     @staticmethod
     def multiply(arr,*args):
         return [[ arg*element for element in arr ] for arg in args ]
 
     @staticmethod
-    def get_moments(**kwargs):
-        scalarProducts = [ 1.0,
-                           0.25*(kwargs['groundMoment']+kwargs['excitedMoment'])**2,
-                           kwargs['groundMoment']*kwargs['excitedMoment'],
-                           kwargs['groundMoment']**2,
-                           kwargs['excitedMoment']**2 ]
-        return [ EnergyConverter.energyRatios[kwargs['units']]\
-                 * scalarProduct for scalarProduct in scalarProducts ]
-
-    @staticmethod
     def convert(*args,**kwargs):
         # Returns array of J values with different conventions (see types)
         settings = EnergyConverter.default
         settings.update(kwargs)
-        try:
-            notMomentSq,avgMomentSq,geoMomentSq,\
-            orgMomentSq,newMomentSq = EnergyConverter.get_moments(**settings)
-            return EnergyConverter.multiply(args,notMomentSq,avgMomentSq,
-                                                 geoMomentSq,orgMomentSq,
-                                                             newMomentSq)
-        except KeyError:
-            print("No unit defined! Values will be in eV")
-            return args
+        data = np.array([np.copy(args),np.copy(args)])*EnergyConverter.energyRatios[kwargs['units']]
+        for i,arg in enumerate(args):
+            data[1][i] *= kwargs['moments'][i]
+        return data
 
 #
 #░█▀▀░█▄█░█▀█░█▀▄░▀█▀░░░█▀█░▀█▀░█▀▀░█░█░░░░░█░█░█▀█
@@ -157,21 +142,22 @@ class SmartPickUp:
             self.solver
         except AttributeError:
             self.get_system_of_equations()
-        averageMground = self.MAGMOMs.get_average_magnitude(0,self.flipped)
-        averageMexcite = np.average([self.MAGMOMs.get_average_magnitude(i,self.flipped) for i in range(1,len(self.POSCARs))])
-        self.Js = np.array(EnergyConverter.convert(*(self.solver.solve()),groundMoment=averageMground,excitedMoment=averageMexcite,**kwargs))
+        
+        self.Js = np.array(EnergyConverter.convert(*(self.solver.solve()),
+                           moments=self.model.avgMoments, **kwargs))
         return self.Js
 
     def __str__(self):
-        srtout = ''
         try:
-            strout = '                           '
-            strout += ''.join([ "%s  "%name for name in self.model.interactionNames ]) + '\n'
+            strout  = '                       '
+            strout += ''.join([ "%s | "%name for name in self.model.interactionNames ]) + '\n'
         except AttributeError:
             return 'None'
         try:
-            strout += ''.join([ ("  %s:\t"+len(self.Js[0])*"% 15.7f "+"\n")\
+            strout += ''.join([ ("  %s:\t"+len(self.Js[0])*"  % 8.3f    "+"\n")\
                                 %(typeName,*self.Js[i],) for i,typeName in enumerate(self.types) ])
+            strout += '  mu1 * mu2:            '
+            strout += ''.join([ "% .3f        "%mu for mu in self.model.avgMoments])
         except AttributeError:
             return 'None'
         return strout

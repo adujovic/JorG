@@ -34,8 +34,6 @@ class EquationSolver:
     def remove_tautologies(self, **kwargs):
         # removing 0 = 0 equations !
         scale       = np.average(np.abs(self.equations))
-        for line,e in zip(self.equations,self.vector):
-            print(line,e)
         tautologies = np.argwhere(
                         np.apply_along_axis(
                           np.linalg.norm,1,self.equations)/scale<1e-3).flatten()
@@ -110,25 +108,25 @@ class NaiveHeisenberg:
 
     @staticmethod
     def name_interaction(first,second,distance):
-        return "%s - %s @ %.2f"%(first,second,distance)
+        return "%s-%s @%.2f"%(first,second,distance)
 
-    def generate(self,mask,flipper):
-        self.flipper = np.array(flipper)
-        self.mask    = mask
+    def initialize(self,mask,flipper):
+        self.flipper           = np.array(flipper)
+        self.mask              = mask
         self.numberOfElements  = self.mask.count('$')
-        mul          = self.numberOfElements*(self.numberOfElements + 1)//2
-        averageMoment     = [0.0] * self.numberOfElements
-        momentMultiplicty = [ 0 ] * self.numberOfElements
+        mul                    = self.numberOfElements*(self.numberOfElements + 1)//2
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
         self.interactionNames  = [ None ]*len(flipper)*mul
+        self.avgMoments        = [  0.0 ]*len(flipper)*mul
+        self.occMoments        = [  0   ]*len(flipper)*mul
+        
+        return mul
+
+    def generate(self,mask,flipper):
+        mul = self.initialize(mask,flipper)
         for (row,config),(I,atomI),atomJ in product(enumerate(self.flippings),
                                                     enumerate(self.crystal  ),
                                                               self.crystal8 ):
-            if atomI[0] == atomJ[0]:
-                momentMultiplicty[self.offset_from_mask(atomI[0])] += 1
-                averageMoment[self.offset_from_mask(atomI[0])]\
-                        += np.abs(self.MAGMOMs()['moments'][I+1]\
-                                 *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
             if config[I] == config[atomJ[3]]:
                 continue
             distance,offset = self.check_if_contributes(atomI,atomJ)
@@ -137,23 +135,27 @@ class NaiveHeisenberg:
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size: # geometric
                 column = mul*j[0][0]+offset
-                self.systemOfEquations[row][column] += \
-                    np.abs(self.MAGMOMs()['moments'][I+1]\
+                moment = np.abs(self.MAGMOMs()['moments'][I+1]\
                           *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
+                self.systemOfEquations[row][column] += moment 
+                self.avgMoments[column]             += moment
+                self.occMoments[column]             += 1
                 if self.interactionNames [column] is None:
                     self.interactionNames[column] = \
                         NaiveHeisenberg.name_interaction(atomI[0],atomJ[0],distance)
         self.clean_SoE()
-        print(mask)
-        for moment,multiplicity,element in zip(averageMoment,momentMultiplicty,mask.split('$')):
-            print(element,"=",moment/multiplicity)
         return self.systemOfEquations
 
     def clean_SoE(self):
         remover = [ i for i,name in enumerate(self.interactionNames) if name is None ]
-        self.interactionNames = [ name for name in self.interactionNames if name is not None ]
+        self.interactionNames  = [ name for name in self.interactionNames if name is not None ]
+        self.interactionNames  = self.interactionNames[:len(self.flipper)]
         self.systemOfEquations = np.delete(self.systemOfEquations,remover,axis=1)
         self.systemOfEquations = self.systemOfEquations[:,0:len(self.flipper)]
+        self.avgMoments        = np.delete(np.array(self.avgMoments),remover)
+        self.occMoments        = np.delete(np.array(self.occMoments),remover)
+        self.avgMoments        = np.array(self.avgMoments)/np.array(self.occMoments)
+        self.avgMoments        = self.avgMoments[:len(self.flipper)]
 
     def offset_from_mask(self,symbol):
         element = self.mask.find(symbol+'$')
