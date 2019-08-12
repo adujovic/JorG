@@ -188,7 +188,7 @@ class INCARsaver:
         self.fileName = fileName
         INCARsaver.mkdir(fileName,"noFlip")
         INCARsaver.copy_POSCAR(fileName,"noFlip")
-        self.write_INCAR("noFlip",np.ones(len(self.crystal)))
+        self.write_INCAR("noFlip",np.zeros(len(self.crystal)))
         for i,flip in enumerate(flips):
             self.fileName = fileName
             INCARsaver.mkdir(fileName,"flip%05d"%i)

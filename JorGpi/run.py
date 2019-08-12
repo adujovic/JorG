@@ -16,6 +16,7 @@ from JorGpi.iohandlers import StreamHandler,JmolVisualization
 from JorGpi.iohandlers import TemporaryFiles,errors,Msg
 from JorGpi.iohandlers import VariableFixer,Symmetry,read_flips
 from JorGpi.crun import Crun
+import shutil as su
 
 class JorGpi:
     def __init__(self,*args):
@@ -165,7 +166,7 @@ class JorGpi:
             Msg.print_solver_status(int(2**len(JorGpiObject.allFlippable)),self.tmpFiles)
 
         def __call__(self,JorGpiObject):
-            self.builder('solver',*self.tmpFiles.get_files(),JorGpiObject.newReference,4*JorGpiObject.nearestNeighbor+8)
+            self.builder('solver',*self.tmpFiles.get_files(),JorGpiObject.newReference,2*JorGpiObject.nearestNeighbor+4)
 
         def __del__(self):
             Msg.print_solver_status(len(np.loadtxt('best.flips',bool)),self.tmpFiles)
@@ -190,9 +191,14 @@ class JorGpi:
         if remover:
             flippingConfigurations = np.delete(flippingConfigurations, tuple(remover), axis=0)
             systemOfEquations = eqs.equations
-        if systemOfEquations.size == 0:
-            print("ERROR! Not enough equations! Please rerun.")
-            exit(-3)
+        try:
+            if not systemOfEquations:
+                print("ERROR! Not enough equations! Please rerun.")
+                exit(-3)
+        except ValueError:
+            if systemOfEquations.size == 0:
+                print("ERROR! Not enough equations! Please rerun.")
+                exit(-3)
         if not self.currentOptions('redundant'): # If the System of Equations is required to be consistent
             systemOfEquations,flippingConfigurations = eqs.remove_linear_combinations(flippingConfigurations)
         return systemOfEquations,flippingConfigurations
@@ -201,12 +207,15 @@ class JorGpi:
         saver = loadsave.INCARsaver(self.incarData,self.crystal)
         saver.save(self.outDirName,self.flippingConfigurations)
         Msg.print_equations(self.systemOfEquations,self.currentOptions('redundant'))
-        np.savetxt(self.outDirName+'/systemOfEquations.txt',self.systemOfEquations)
+        np.savetxt(self.outDirName+'/systemOfEquations.txt',np.array(self.systemOfEquations))
 
     def generate_possible_configurations(self):
-        solver = self.AdaptiveSimulatedAnnealing(self)
-        solver(self)
-        del solver
+        try:
+            su.copy('best.flips.rerun','best.flips')
+        except OSError:
+            solver = self.AdaptiveSimulatedAnnealing(self)
+            solver(self)
+            del solver
         self.load_from_annealing()
         self.systemOfEquations,self.flippingConfigurations = \
                 self.build_system_of_equations(self.flippingConfigurations)

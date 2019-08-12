@@ -7,8 +7,8 @@ int main(int argc, char** argv){
         std::cerr<<"    (  i) basis"<<std::endl;
         std::cerr<<"    ( ii) supercell"<<std::endl;
         std::cerr<<"    (iii) flippable"<<std::endl;
-        std::cerr<<"    ( iv) reference (i.e. 48)"<<std::endl;
-        std::cerr<<"    (  v) number of unique flips (i.e. 2)"<<std::endl;
+        std::cerr<<"    ( iv) reference (i.e. 0)"<<std::endl;
+        std::cerr<<"    (  v) number of unique flips (i.e. 1 - one run)"<<std::endl;
         exit(-1);
     }
 

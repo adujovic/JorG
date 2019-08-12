@@ -13,7 +13,11 @@ CFLAGS = -std=c++17 -O3 -Wall -Wextra -pedantic -fopenmp
 
 # Number of sites
 #
-SITES = -D_SITESNUMBER=8 -D_SILENCE
+ifdef NUM 
+  SITES = -D_SITESNUMBER=${NUM} -D_SILENCE
+else 
+  SITES = -D_SITESNUMBER=96 -D_SILENCE
+endif
 
 # Verbose
 # If verbose mode is needed please use:
@@ -21,11 +25,11 @@ SITES = -D_SITESNUMBER=8 -D_SILENCE
 # Usually I use _VERBOSE as a flag /andrzej
 
 # Linking
-LFLAGS = -std=c++17 -lm -lgsl -lgslcblas 
+LFLAGS = -std=c++17 -lm -lgsl -lgslcblas -fopenmp
 
  
 # File names
-EXEC = start
+EXEC = test.x
 
 # Sources
 CPP_SOURCES = $(wildcard *.cpp) $(wildcard ../../../asa/*.cpp) $(wildcard ../../../asa/solver/*.cpp)

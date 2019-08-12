@@ -24,7 +24,7 @@ class Voronoi:
     multipliers = [-1,0,1]
     def __init__(self,data=None):
         self.data = data
-        self.plotter = showCell(resolution=7)
+        self.plotter = showCell(resolution=37)
 
         self.fill_if_read()
 

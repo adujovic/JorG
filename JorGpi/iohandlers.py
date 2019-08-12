@@ -242,7 +242,6 @@ class Msg:
 def read_flips(name='best.flips'):
     try:
         read = np.loadtxt(name,bool)
-        remove(name)
         return read
     except OSError:
         print("No %s here..."%name)

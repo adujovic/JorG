@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from sys import path
+from sys import path,argv
 path.insert(0,r'../../')
 import numpy as np
 from POSCARloader import POSCARloader
@@ -9,7 +9,7 @@ from POSCARloader import POSCARloader
 class KPOINTS:
     def __init__(self,POSCAR="POSCAR",resolution=0.001):
         self.multipliers = np.arange(1.0,100,resolution)
-        loader = POSCARloader("POSCAR")
+        loader = POSCARloader(POSCAR)
         loader.parse()
         self.directions = loader()['directions']
         self.found      = []
@@ -42,9 +42,7 @@ def print_all(records,display):
     for record,error in records:
         print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*record,error).center(display))
 
-if __name__ == '__main__':
-    display = 42
-    points  = KPOINTS()
+def check(points,display):
     print("KPOINT multiplier proposition:".center(display))
     print("Good:".center(display))
     print_all(points(np.sqrt(1e-3)),display)
@@ -56,3 +54,12 @@ if __name__ == '__main__':
     print_all(points(np.sqrt(0.5)),display)
     print("Just don't:".center(display))
     print_all(points(np.sqrt(1.0)),display)
+if __name__ == '__main__':
+    display = 42
+#    points  = KPOINTS()
+#    print("POSCAR")
+#    check(points,display)
+    for arg in argv[1:]:
+        points = KPOINTS(arg)
+        print(arg)
+        check(points,display)

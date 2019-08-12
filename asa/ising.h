@@ -16,6 +16,11 @@
 #include <limits>
 #include <type_traits>
 
+#ifdef _OPENMP
+#include <valarray>
+#include <omp.h>
+#endif
+
 #include "asa.h"
 #include "arithmeticvector.h"
 
@@ -54,7 +59,12 @@ public:
     virtual ~AbstractIsingModel() = 0;
 };
 
-template<size_t N>
+#ifdef _OPENMP
+//template<size_t N, size_t numOfThreads> // N-site lattie
+template<size_t N> // N-site lattie
+#else
+template<size_t N> // N-site lattie
+#endif
 class IsingModel : public AbstractIsingModel{
 public:
     IsingModel(bool QUICK_START=true):
@@ -68,14 +78,18 @@ public:
                     std::numeric_limits<
                     unsigned long long int>::max())),
         lattice(randomEngine,uniform,this){
-            if(QUICK_START) hamiltonian.reserve(N*N/2); // maximum number of interactions ( each site with each )
-            else        hamiltonian.reserve(N);     // minimum number of interactions ( once  per each site )
+            if(QUICK_START) hamiltonian.reserve(N*N/2); // maximum number of interactions (each site with all others)
+            else        hamiltonian.reserve(N);     // minimum number of interactions (one per site)
 
             solver.set_energy (  isingEnergy<N> );
             solver.set_measure( isingMeasure<N> );
             solver.set_step   (    isingStep<N> );
 #ifdef _VERBOSE
             solver.set_print  (   isingPrint<N> );
+#endif
+#ifdef _OPENMP
+//            energy     = std::valarray<double>(0.0,numOfThreads);
+//            probablity = std::valarray<double>(0.0,numOfThreads);
 #endif
         }
 
@@ -101,6 +115,10 @@ protected:
     size_t                                            referencePoint;
 
     const std::bitset<N>*                             mask;
+#ifdef _OPENMP
+//    std::valarray<double>                             energy;
+//    std::valarray<double>                             probablity;
+#endif
 
 public:
     typename gsl::SimulatedAnnealing::Parameters&
@@ -230,11 +248,19 @@ public:
 
     static double energy(const LatticeType<N,IsingModel>* state){
         double E = 0.0;
-        for(const auto& interaction : state->model->get_hamiltonian()){
-            E += std::get<2>(interaction)
-                *(state->nodes[std::get<0>(interaction)]-0.5)
-                *(state->nodes[std::get<1>(interaction)]-0.5);
+#ifdef _OPENMP
+        #pragma omp parallel
+        {
+        #pragma omp for reduction(+:E)
+#endif
+        for(size_t i = 0U; i < state->model->get_hamiltonian().size(); ++i){
+            E += std::get<2>(state->model->get_hamiltonian()[i])
+                *(state->nodes[std::get<0>(state->model->get_hamiltonian()[i])]-0.5)
+                *(state->nodes[std::get<1>(state->model->get_hamiltonian()[i])]-0.5);
         }
+#ifdef _OPENMP
+        }
+#endif
         return E;
     }
 
