@@ -77,6 +77,7 @@ constexpr size_t SITESNUMBER = _SITESNUMBER;
             auto x = model.run(&mask);
 	    if(x.count() < lowerlimit) continue;
 	    if(x.count() > upperlimit) continue;
+	    if(x.count() > 0.5*mask.count()) x.flip();
 
         std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
         aux::print_state(x,reference,mask);

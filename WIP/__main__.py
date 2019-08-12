@@ -3,7 +3,7 @@
 
 from sys import path,argv
 path.insert(0,r'../')
-from geometry.voronoi import Voronoi
+from WIP.voronoi import Voronoi
 from POSCARloader import POSCARloader
 from aux.PeriodicTable import standardMass
 import numpy as np

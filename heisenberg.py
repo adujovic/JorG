@@ -21,6 +21,7 @@ class EquationSolver:
         if len(self.equations) == 1:
             self.solution = self.vector[0]/self.equations[0]
         elif self.equations.shape[0] == self.equations.shape[1]:
+            print("detB = ",np.linalg.det(self.equations))
             self.solution = np.linalg.solve(self.equations,self.vector,**kwargs)
         else:
             try:

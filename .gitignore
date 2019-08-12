@@ -122,3 +122,6 @@ _INPUT/
 _VASP/
 best.flips
 .*.swp
+
+fix.sh
+WiP

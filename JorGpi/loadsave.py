@@ -179,9 +179,9 @@ class INCARsaver:
             vaspFile.write("MAGMOM = ")
             for bit,atom in zip(flip,self.crystal):
                 if bit:
-                    vaspFile.write("%f "%atom[2])
-                else:
                     vaspFile.write("%f "%-atom[2])
+                else:
+                    vaspFile.write("%f "%atom[2])
             vaspFile.write("\n")
 
     def save(self,fileName,flips):
