@@ -136,8 +136,10 @@ class NaiveHeisenberg:
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size: # geometric
                 column = mul*j[0][0]+offset
-                moment = np.abs(self.MAGMOMs()['moments'][I+1]\
-                          *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
+                moment = self.MAGMOMs()['moments'][I+1]\
+                          *self.MAGMOMs(row+1)['moments'][atomJ[3]+1]
+#                moment = np.abs(self.MAGMOMs()['moments'][I+1]\
+#                          *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
                 self.systemOfEquations[row][column] += moment 
                 self.avgMoments[column]             += moment
                 self.occMoments[column]             += 1
