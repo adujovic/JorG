@@ -66,13 +66,13 @@ class TestPOSCARloader(unittest.TestCase):
         self.assertAlmostEqual(np.linalg.det(self.loader(1)['directions']),181.85933185544175)
         self.assertAlmostEqual(np.linalg.det(self.loader(2)['directions']),181.85933185544175)
 
-    def test_loader_cellVolume(self):
+    def test_loader_cell_volume(self):
         self.loader.parse()
         self.assertAlmostEqual(self.loader(0)['cellVolume'],181.8593318589)
         self.assertAlmostEqual(self.loader(1)['cellVolume'],181.85933185544175)
         self.assertAlmostEqual(self.loader(2)['cellVolume'],181.85933185544175)
 
-    def test_loader_cellCenter(self):
+    def test_loader_cell_center(self):
         centerOne = np.array([0.80988675,0.81115342,5.54377077])
         centerTwo = np.array([0.80782009,0.80782009,5.54377077])
         self.loader.parse()
@@ -80,7 +80,7 @@ class TestPOSCARloader(unittest.TestCase):
         self.assertAlmostEqual(np.linalg.norm(self.loader(1)['cellCenter']-centerTwo),0.0)
         self.assertAlmostEqual(np.linalg.norm(self.loader(2)['cellCenter']-centerTwo),0.0)
 
-    def test_loader_cellAtoms(self):
+    def test_loader_cell_atoms(self):
         cellAtoms = [2,3,6,1]
         self.loader.parse()
         for i,number in enumerate(cellAtoms):
@@ -88,7 +88,7 @@ class TestPOSCARloader(unittest.TestCase):
             self.assertEqual(self.loader(1)['cellAtoms'][i],number)
             self.assertEqual(self.loader(2)['cellAtoms'][i],number)
 
-    def test_loader_atomNames(self):
+    def test_loader_atom_names(self):
         atomNamesOne = ['Ba', 'Cu', 'O', 'Y']
         atomNamesTwo = ['H', 'He', 'Li', 'Be']
         self.loader.parse()
@@ -152,7 +152,7 @@ class TestPOSCARloader(unittest.TestCase):
                 (3, np.array([1.93876821, 1.93876821,  6.04774994]))]
         self.are_equal(cell,self.loader(2)[ 'cell'])
 
-    def test_loader_cellSymmetry_0(self):
+    def test_loader_cell_symmetry_0(self):
         self.loader.parse()
         cell       = [(0.5025789570959635, 0.4999999999871052, 0.19398936279219897),
                       (0.49994842084544383, 0.4999999999871052, 0.8060106372160686),
@@ -178,7 +178,7 @@ class TestPOSCARloader(unittest.TestCase):
                                     self.loader(0)['cellSymmetry'][2]):
             self.assertEqual(nameSet,nameRead)
 
-    def test_loader_cellSymmetry_1(self):
+    def test_loader_cell_symmetry_1(self):
         self.loader.parse()
         for directionSet,directionRead in zip(self.directions,
                                               self.loader(1)['cellSymmetry'][0]):
@@ -192,7 +192,7 @@ class TestPOSCARloader(unittest.TestCase):
                                     self.loader(1)['cellSymmetry'][2]):
             self.assertEqual(nameSet,nameRead)
 
-    def test_loader_cellSymmetry_2(self):
+    def test_loader_cell_symmetry_2(self):
         self.loader.parse()
         atoms      = [0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3]
         for directionSet,directionRead in zip(self.directions,

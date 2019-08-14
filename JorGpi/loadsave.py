@@ -9,12 +9,11 @@ import errno
 import shutil
 import aux.PeriodicTable as periodic
 
-class error:
+class Error:
     systemerror = -1
     unexcepted     = 10
     nonconvertable = 11
     vaspError      = 99
-
 
 class INCARloader:
     settings = {'fileName'  : "INCAR"}
@@ -164,15 +163,15 @@ class INCARsaver:
         except OSError as err:
             if err.errno != errno.EEXIST:
                 print("Creation of the directory %s/%s failed - does it exist?"%(fileName,flipName))
-                exit(error.systemerror)
+                exit(Error.systemerror)
 
     @staticmethod
-    def copy_POSCAR(fileName,flipName):
+    def copy_POSCAR(filename,flipname):
         try:
-            shutil.copy2("%s/POSCAR"%fileName , "%s/%s/POSCAR"%(fileName,flipName))
+            shutil.copy2("%s/POSCAR"%filename , "%s/%s/POSCAR"%(filename,flipname))
         except OSError:
-            print("Copying POSCAR to %s didn't work out!"%flipName)
-            exit(error.systemerror)
+            print("Copying POSCAR to %s didn't work out!"%flipname)
+            exit(Error.systemerror)
 
     def write_incar(self,flipname,flip):
         with open(self.fileName+"/"+flipname+"/INCAR","w+") as vaspFile:

@@ -11,12 +11,12 @@ class VaspRunXML:
             print("File %s broken... Remove and try again!"%vasprun)
             exit(244)
         self.fermi_energy = None
-        self.ISOK2READ    = False
+        self.isOkToRead    = False
         self.partialDOS   = {}
-        if 'TRAPZ' in kwargs:
-            self.TRAPZ = kwargs['TRAPZ']
+        if 'trapez' in kwargs:
+            self.trapez = kwargs['trapez']
         else:
-            self.TRAPZ        = False
+            self.trapez        = False
 
     def get_fermi_energy(self,field):
         if self.fermi_energy is not None:
@@ -36,15 +36,15 @@ class VaspRunXML:
     def get_energy_child(self,field):
         try:
             if field.attrib['name'] == 'alphaZ':
-                self.ISOK2READ = True
+                self.isOkToRead = True
                 return
         except KeyError:
             return
-        if not self.ISOK2READ:
+        if not self.isOkToRead:
             return
         try:
             if field.attrib['name'] == "e_0_energy":
-                self.ISOK2READ = False
+                self.isOkToRead = False
                 self.energy    = float(field.text)
         except KeyError:
             return
@@ -93,16 +93,16 @@ class VaspRunXML:
         return np.delete(np.array(dos),
                 np.argwhere(np.array(dos)[:,0] >= ef).flatten(),axis=0)
 
-    def integrate(self,f,x):
-        if self.TRAPZ:
+    def integrate(self,function,argument):
+        if self.trapez:
             try:
-                return np.trapz(np.sum(f,axis=1),x)
+                return np.trapz(np.sum(function,axis=1),argument)
             except np.AxisError:
-                return np.trapz(f,x)
+                return np.trapz(function,argument)
         else:
-            dx = x[1:]-x[:-1]
-            dx = np.diag(np.insert(dx,0,dx[0]))
-            return np.sum(np.dot(dx,f))
+            deltaArgument = argument[1:]-argument[:-1]
+            deltaArgument = np.diag(np.insert(deltaArgument,0,deltaArgument[0]))
+            return np.sum(np.dot(deltaArgument,function))
 
     def calculate_moment(self,ion,partial):
         ups = VaspRunXML.DOS_below_ef(self.partialDOS[ion][1],self.fermi_energy)

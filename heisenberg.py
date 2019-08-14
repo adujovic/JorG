@@ -102,7 +102,7 @@ class DefaultMoments:
 class NaiveHeisenberg:
     def __init__(self,flippings,
                  crystal,crystal8):
-        self.MAGMOMs   = DefaultMoments(crystal)
+        self.magneticMoments   = DefaultMoments(crystal)
         self.flippings = flippings
         self.crystal   = crystal
         self.crystal8  = crystal8
@@ -136,8 +136,8 @@ class NaiveHeisenberg:
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size: # geometric
                 column = mul*j[0][0]+offset
-                moment = np.abs(self.MAGMOMs()['moments'][I+1]\
-                          *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
+                moment = np.abs(self.magneticMoments()['moments'][I+1]\
+                          *self.magneticMoments(row+1)['moments'][atomJ[3]+1])
                 self.systemOfEquations[row][column] += moment
                 self.avgMoments[column]             += moment
                 self.occMoments[column]             += 1
@@ -181,15 +181,15 @@ class NaiveHeisenberg:
 
     def __str__(self):
         output = ""
-        for I,i in product(range(len(self.MAGMOMs()['moments'])),
-                           range(len(self.MAGMOMs))):
+        for I,i in product(range(len(self.magneticMoments()['moments'])),
+                           range(len(self.magneticMoments))):
             if i == 0:
                 output+="\n"
-            output+="% .2f  "%self.MAGMOMs(i)['moments'][I+1]
+            output+="% .2f  "%self.magneticMoments(i)['moments'][I+1]
         output+="\n"
         return output
 
-def apply_mirrorsXYZ(dimensions,cell):
+def apply_mirrors_xyz(dimensions,cell):
     outputCell = []
     for proj in product([-1,0,1],repeat=3):
         projection = np.array([proj])

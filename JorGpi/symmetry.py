@@ -51,11 +51,8 @@ class WriteReport:
         print_label("Symmetry analysis",**self.kwargs)
         line(**self.kwargs)
         for i,record in enumerate(self.data):
-            self.write_single(i,crystal=
-                      [periodicTableElement[
-                          record['std_types'][
-                              mapping]-1]
-                          for mapping in record['mapping_to_primitive']])
+            self.write_single(i,crystal=[periodicTableElement[record['std_types'][mapping]-1]
+                                           for mapping in record['mapping_to_primitive']])
     def write_single(self,index,**kwargs):
         wyckoffCount   = dict.fromkeys(set(self.data[index]['wyckoffs']),0)
         print_line(self.comments[index],**self.kwargs)

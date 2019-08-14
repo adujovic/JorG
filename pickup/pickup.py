@@ -3,7 +3,7 @@
 from sys import path
 path.insert(0,r'../../')
 from POSCARloader import POSCARloader
-from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrorsXYZ
+from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrors_xyz
 from pickup.read_vasprun import MAGMOMloaderXML
 import numpy as np
 import argparse as ap
@@ -63,7 +63,7 @@ class SmartPickUp:
 
     def read_MAGMOMs(self,*args):
         vaspruns = [ "%s/vasprun.xml"%arg for arg in args ]
-        self.MAGMOMs = MAGMOMloaderXML(*vaspruns,TRAPZ=True)
+        self.MAGMOMs = MAGMOMloaderXML(*vaspruns,trapez=True)
         self.MAGMOMs.parse()
 
     def read(self,*args,**kwargs):
@@ -85,7 +85,7 @@ class SmartPickUp:
             print(self.MAGMOMs.get_moments())
             print(err)
             exit(-1)
-        self.crystal8 = apply_mirrorsXYZ(self.poscars(0)['directions'],self.crystal)
+        self.crystal8 = apply_mirrors_xyz(self.poscars(0)['directions'],self.crystal)
 
     def map_distances(self,idx=0):
         self.distances = set([])
@@ -100,11 +100,11 @@ class SmartPickUp:
     def get_system_of_equations(self):
         self.map_distances()
         self.systemOfEquations      = []
-        self.dE                     = []
+        deltaEnergy                 = []
         self.flippingConfigurations = []
         for i in range(1,len(self.MAGMOMs)):
             try:
-                self.dE.append(self.MAGMOMs(i)['energy']-self.MAGMOMs(0)['energy'])
+                deltaEnergy.append(self.MAGMOMs(i)['energy']-self.MAGMOMs(0)['energy'])
             except TypeError:
                 print("VASP hasn't finished this run (%d/%d)"%(i,len(self.MAGMOMs)-1))
                 continue
@@ -113,11 +113,8 @@ class SmartPickUp:
         self.model.MAGMOMs     = self.MAGMOMs
         self.flipped           = np.unique(np.where(self.flippingConfigurations)[1])
         self.systemOfEquations = self.model.generate(self.namesOfInteractingAtoms,self.distances)
-        self.solver            = EquationSolver(self.systemOfEquations,self.dE)
-        a = len(self.systemOfEquations)
+        self.solver            = EquationSolver(self.systemOfEquations,deltaEnergy)
         self.solver.remove_tautologies()
-        if a>len(self.systemOfEquations):
-            print("A tautology!")
 
     def set_flipps(self,i):
         self.flippingConfigurations.append([])
@@ -126,8 +123,8 @@ class SmartPickUp:
 
     def get_flip(self,i,idx,atom):
         if atom[0] not in self.namesOfInteractingAtoms:
-           self.flippingConfigurations[-1].append(False)
-           return
+            self.flippingConfigurations[-1].append(False)
+            return
         momentA = self.MAGMOMs(0)['moments'][idx+1]
         momentB = self.MAGMOMs(i)['moments'][idx+1]
         scalar = momentA * momentB

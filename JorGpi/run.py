@@ -10,7 +10,7 @@ import JorGpi.loadsave as loadsave
 import JorGpi.generator as generator
 from JorGpi.equivalent import findFlips
 
-from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrorsXYZ
+from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrors_xyz
 
 from JorGpi.iohandlers import StreamHandler,JmolVisualization
 from JorGpi.iohandlers import TemporaryFiles,errors,Msg
@@ -61,7 +61,9 @@ class JorGpi:
 
     def write_input_raport(self):
         with open(self.outDirName+"/input_report.txt",'w+') as raport:
-            symmetry.WriteReport([self.symmetry.symmetry],comments=["Analysis of symmetry in the input cell"], stream=raport)
+            symmetry.WriteReport([self.symmetry.symmetry],
+                                 comments=["Analysis of symmetry in the input cell"],
+                                 stream=raport)
         Msg.print_crystal_info(title="INPUT",crystal=self.cell,directions=self.directions,
                                reference=self.reference,moments=self.oldMoments)
 
@@ -133,7 +135,7 @@ class JorGpi:
     def write_output_raport(self):
     #   Checking the symmetry of the output
         with open(self.outDirName+"/output.txt",'w+') as raport:
-            symmetry.WriteReport([self.symmetryFull], 
+            symmetry.WriteReport([self.symmetryFull],
                                  comments=["Analysis of symmetry in the generated cell"],
                                  stream=raport)
         self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,self.crystal[self.newReference])
@@ -143,7 +145,7 @@ class JorGpi:
         for caseID,(i,atom,distance,wyck) in enumerate(self.flipper):
             print_case(atom,atomID=i+1,caseID=caseID+1,wyckoffPosition=wyck,distance=distance)
             self.selected.append(i)
-        self.crystal8 = apply_mirrorsXYZ(self.extraDirections,self.crystal)
+        self.crystal8 = apply_mirrors_xyz(self.extraDirections,self.crystal)
         loadsave.SaveXYZ(self.crystal, fileName=self.outDirName+"/crystal.xyz",
                           selectedAtoms = self.selected)
         loadsave.SaveXYZ(self.crystal8,fileName=self.outDirName+"/crystalFull.xyz",
@@ -170,8 +172,8 @@ class JorGpi:
             self.tmpFiles.write_directions(JorGpiObject.extraDirections)
             Msg.print_solver_status(int(2**len(JorGpiObject.allFlippable)),self.tmpFiles)
 
-        def __call__(self,JorGpiObject):
-            self.builder('solver',*self.tmpFiles.get_files(),JorGpiObject.newReference,2*JorGpiObject.nearestNeighbor+4)
+        def __call__(self,jorgpiobject):
+            self.builder('solver',*self.tmpFiles.get_files(),jorgpiobject.newReference,2*jorgpiobject.nearestNeighbor+4)
 
         def __del__(self):
             Msg.print_solver_status(len(np.loadtxt('best.flips',bool)),self.tmpFiles)

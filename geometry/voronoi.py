@@ -65,7 +65,7 @@ class Voronoi:
             self.add_point(name,vector)
 
     def add_point(self,name,vector):
-        if(np.linalg.norm(vector-self.center) <= self.cutOff):
+        if np.linalg.norm(vector-self.center) <= self.cutOff :
             self.points.append(vector)
             self.names.append(name)
 
@@ -86,11 +86,11 @@ class Voronoi:
                         self.diagram.point_region[i]]
                         for i,atom in enumerate(self.superCell)]
         self.calculate_all()
-        np.asarray(self.WignerSeitzRadia)
+        np.asarray(self.wignerSeitzRadia)
         if name is not None:
-            np.savetxt(name, self.WignerSeitzRadia)
+            np.savetxt(name, self.wignerSeitzRadia)
         elif save:
-            np.savetxt("WignerSeitzRadia.dat", self.WignerSeitzRadia)
+            np.savetxt("wignerSeitzRadia.dat", self.wignerSeitzRadia)
 
     def clear_vertices(self):
         for i,region in enumerate(self.regions):
@@ -109,11 +109,11 @@ class Voronoi:
     def calculate_all(self):
         self.clear_vertices()
         self.aspect_data      = []
-        self.WignerSeitzRadia = []
+        self.wignerSeitzRadia = []
         for name,atom,region in zip(self.atomNames,
                                     self.superCell,
                                     self.regions):
-            self.WignerSeitzRadia.append(
+            self.wignerSeitzRadia.append(
                     self.calculate_radia(name,atom,region))
         self.plotter.set_aspect(self.aspect_data)
 
