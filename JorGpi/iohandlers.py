@@ -193,27 +193,27 @@ class Symmetry:
         return spglib.get_symmetry_dataset(self.standarize()),\
                spglib.get_symmetry_dataset(refinedCell)
 
-from aux.format import color, print_vector, print_label
+from aux.format import Color, print_vector, print_label
 from aux.format import print_crystal, print_moments
 class Msg:
     @staticmethod
     def print_equations(eqs,isRedundant=False):
-        print_label("System of equations:",labelStyle=color.BF)
+        print_label("System of equations:",labelStyle=Color.BF)
         for eq in eqs:
             print_vector(eq)
         if isRedundant:
-            print_label("Redundant system of equations.",labelStyle=color.BF)
-            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=color.BF)
-            print_label("It may be better. But it may also mess everything.",labelStyle=color.BF)
+            print_label("Redundant system of equations.",labelStyle=Color.BF)
+            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=Color.BF)
+            print_label("It may be better. But it may also mess everything.",labelStyle=Color.BF)
         else:
-            print_label("det SoE = %.1e"%np.linalg.det(eqs),labelStyle=color.BF)
+            print_label("det SoE = %.1e"%np.linalg.det(eqs),labelStyle=Color.BF)
 
     @staticmethod
     def print_solver_status(configs,tmpFiles):
         print_label("Checking total number of configurations: %d"%configs,
-                        labelStyle=color.BF+color.DARKRED)
+                        labelStyle=Color.BF+Color.DARKRED)
         print_label("Preparing solver...",
-                      labelStyle=color.BF+color.BLUE)
+                      labelStyle=Color.BF+Color.BLUE)
         print_label('Running: ./asa/solver/start %s'%str(tmpFiles))
 
     @staticmethod
@@ -223,15 +223,15 @@ class Msg:
         except KeyError:
             print("placeholder",end="")
         try:
-            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=color.BF)
+            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=Color.BF)
         except KeyError:
-            print_label("Size: ?x?x?",labelStyle=color.BF)
+            print_label("Size: ?x?x?",labelStyle=Color.BF)
         try:
             print_crystal(kwargs['crystal'],directions=kwargs['directions'])
         except KeyError:
             print("",end="")
         try:
-            print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),atoms=[kwargs['crystal'][kwargs['reference']]],vectorStyle=color.DARKCYAN,labelStyle=color.BF)
+            print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),atoms=[kwargs['crystal'][kwargs['reference']]],vectorStyle=Color.DARKCYAN,labelStyle=Color.BF)
         except KeyError:
             print("",end="")
         try:

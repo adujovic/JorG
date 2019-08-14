@@ -113,26 +113,26 @@ class CellReader:
         self.volume        = np.linalg.det(self.directions)
         self.center        = np.zeros(3)
         self.cell          = []
-        self.ISDIRECT      = False
-        self.ISSELECTIVE   = False
+        self.isdirect      = False
+        self.isselective   = False
         self.cellSymmetry  = ([tuple(d) for d in self.directions],
                               [],[]) # directions, direct units cell, atomic numbers
         self.check_type(text[7][0])
 
     def check_type(self,character):
         if character in "DdSs":
-            self.ISDIRECT    = True
+            self.isdirect    = True
         if character in "Ss":
-            self.ISSELECTIVE = True
+            self.isselective = True
 
     def read_single_atom(self,line):
-        if not self.ISSELECTIVE    \
+        if not self.isselective    \
            and self.atomRead == 0  \
            and self.atomNames[self.atomType] == self.atomType:
             self.atomNames[self.atomType] = POSCARloader.parse_atom_name(line)
 
         atomCoordinates = POSCARloader.parse_atom(line)
-        if self.ISDIRECT:
+        if self.isdirect:
             self.cell.append((self.atomNames[self.atomType],
                          np.dot(self.directions,atomCoordinates)))
             self.center += np.dot(self.directions,atomCoordinates)

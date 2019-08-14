@@ -27,8 +27,8 @@ class findFlips:
     def find_all_distances(self,referenceAtom,cutOff):
         self.distances = []
         for i,atom in enumerate(self.crystal):
-           d = np.around(np.linalg.norm(atom[1]-referenceAtom[1]), decimals=self.logAccuracy)
-           if ( self.wyckoffDict[self.symmetry['wyckoffs'][i]] in self.Wyckoffs and
+            d = np.around(np.linalg.norm(atom[1]-referenceAtom[1]), decimals=self.logAccuracy)
+            if (self.wyckoffDict[self.symmetry['wyckoffs'][i]] in self.Wyckoffs and
                 d > 0.0 and d <= cutOff and '$'+atom[0]+'$' in self.atomTypeMask):
                 self.distances.append((d,atom[0]))
 

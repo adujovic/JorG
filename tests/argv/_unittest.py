@@ -2,8 +2,8 @@ import unittest
 from argv import options
 
 class TestArgv(unittest.TestCase):
-    def set_up(self,input):
-        self.currentOptions = options(*input.split())
+    def set_up(self,_input):
+        self.currentOptions = options(*_input.split())
         self.MASK     = str(self.currentOptions('mask'))
         self.OUTPUT   = self.currentOptions('output')
         self.INCAR    = self.currentOptions('incar')

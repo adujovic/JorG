@@ -38,8 +38,8 @@ def get_number_of_pictures(directions,cutOff,referenceAtom):
         normal /= np.linalg.norm(normal)
         height = np.dot(dDirs[i],normal)
         if height < 0:
-           print("Left-handed basis! Please change to right-handed (as of 3/7/19!")
-           exit(Errors.left_handed_basis)
+            print("Left-handed basis! Please change to right-handed (as of 3/7/19!")
+            exit(Errors.left_handed_basis)
         relative = np.dot(referenceAtom[1],normal)
         if cutOff > relative:
             multipliers.append(int((cutOff-relative)/height)) # calculating multipliers

@@ -6,7 +6,7 @@ path.insert(0,r'../../')
 import time
 import numpy as np
 
-from aux.format import standard,color
+from aux.format import standard, Color
 from aux.format import print_vector
 from aux.format import print_atom
 from aux.format import print_case
@@ -33,8 +33,8 @@ if __name__ == '__main__':
     print(vector,end=")\n")
     print("\tplain:")
     print_vector(vector)
-    print("\twith vectorStyle=color.BF:")
-    print_vector(vector,vectorStyle=color.BF)
+    print("\twith vectorStyle=Color.BF:")
+    print_vector(vector,vectorStyle=Color.BF)
     print("\twith linewidth=23:")
     print_vector(vector,linewidth=23)
     print("\twith end=\'\\nSTOP\\n\':")
@@ -46,10 +46,10 @@ if __name__ == '__main__':
     print(atom,end=")\n")
     print("\tplain:")
     print_atom(atom)
-    print("\twith vectorStyle=color.BF:")
-    print_atom(atom,vectorStyle=color.BF)
-    print("\twith elementStyle=color.DARKRED")
-    print_atom(atom,elementStyle=color.DARKRED)
+    print("\twith vectorStyle=Color.BF:")
+    print_atom(atom,vectorStyle=Color.BF)
+    print("\twith elementStyle=Color.DARKRED")
+    print_atom(atom,elementStyle=Color.DARKRED)
     print("\twith end=\'\\nSTOP\\n\':")
     print_atom(atom,end='\nSTOP\n')
     line()
@@ -60,12 +60,12 @@ if __name__ == '__main__':
     print(case,', **',settings,end=")\n",sep="")
     print("\tplain:")
     print_case(case,**settings)
-    print("\twith caseStyle=color.BF:")
-    print_case(case,**settings,caseStyle=color.BF)
-    print("\twith numberStyle=color.BF:")
-    print_case(case,**settings,numberStyle=color.BF)
-    print("\twith distanceStyle=color.BF:")
-    print_case(case,**settings,distanceStyle=color.BF)
+    print("\twith caseStyle=Color.BF:")
+    print_case(case,**settings,caseStyle=Color.BF)
+    print("\twith numberStyle=Color.BF:")
+    print_case(case,**settings,numberStyle=Color.BF)
+    print("\twith distanceStyle=Color.BF:")
+    print_case(case,**settings,distanceStyle=Color.BF)
     print("\twith wyckoffPosition=\'a\':")
     print_case(case,**settings,wyckoffPosition='a')
     print("\twith distance=1.23")
