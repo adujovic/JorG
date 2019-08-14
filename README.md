@@ -6,7 +6,7 @@
 <p align="center"><img src="doc/JorG-flowchart.png" width="50%"></p>
 
 <h3 align="center">Examplary flips</h3>
-<p align="center"><img src="doc/flip0.png" width="50%"><img src="doc/flip1.png" width="50%"><img src="doc/flip1.png" width="50%"></p>
+<p align="center"><img src="doc/flip0.png" width="25%"><img src="doc/flip1.png" width="25%"><img src="doc/flip1.png" width="25%"></p>
 <p>by A.P. Kądzielawa using Jmol: an open-source Java viewer for chemical structures in 3D. <a url="http://www.jmol.org/"</a>www.jmol.org</p>
 
 <a href="https://codebeat.co/projects/github-com-mellechowicz-jorg-experimental"><img alt="codebeat badge" src="https://codebeat.co/badges/e561bf06-8c83-49b9-acf5-ceaffa5e0bb8" /></a>
