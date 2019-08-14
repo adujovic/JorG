@@ -15,7 +15,7 @@ from os import makedirs
 import JorGpi.loadsave as loadsave
 from POSCARloader import POSCARloader
 class StreamHandler:
-    def __init__(self,*args,**kwargs):
+    def __init__(self,*args):
         self.streams = []
         for arg in args:
             name = StreamHandler.fix_name(arg)
@@ -24,14 +24,14 @@ class StreamHandler:
 
     @staticmethod
     def fix_name(name):
-       if name is None:
-           # if output directory is not given:
-           name = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
-       else:
-           # remove multiple '/' and possible '/' at the end
-           name = re.sub('/+','/',name)
-           name = re.sub('/$','',name)
-       return name
+        if name is None:
+            # if output directory is not given:
+            name = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
+        else:
+            # remove multiple '/' and possible '/' at the end
+            name = re.sub('/+','/',name)
+            name = re.sub('/$','',name)
+        return name
 
     @staticmethod
     def make_directory(name):
@@ -78,6 +78,7 @@ set bondRadiusMilliAngstroms 0
 background [%d,%d,%d]
 isoSurface SURF center {%.5f %.5f %.5f} sphere %.5f
 color $SURF translucent [%d,%d,%d]"""
+    @staticmethod
     def create_script(outDirName,**kwargs):
         kwargs = standard.fix(**kwargs)
         with open(outDirName+"/script.jmol","w+") as stream:
@@ -88,7 +89,6 @@ color $SURF translucent [%d,%d,%d]"""
                *kwargs['center'],
                 kwargs['radius'],
                *kwargs['color'],))
-
 
 from os import remove
 class TemporaryFiles:

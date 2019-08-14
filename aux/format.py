@@ -140,14 +140,14 @@ def print_axes(directions,**kwargs):
         kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(n)-1)+"|"+'\n')
 
 def print_directions(directions,**kwargs):
-   kwargs['stream'].write("|"+kwargs['labelStyle']
-                             +'Crystal directions:'.center(kwargs['linewidth'])
-                             +color.END+"|"+'\n')
-   names = color_names('a','b','c')
-   for n,d in zip(names,directions):
-       data = "{:s} = {:= 8.5f} Å".format(n,np.linalg.norm(d))
-       kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(n)-1)+"|"+'\n')
-
+    kwargs['stream'].write("|"+kwargs['labelStyle']
+                              +'Crystal directions:'.center(kwargs['linewidth'])
+                              +color.END+"|"+'\n')
+    names = color_names('a','b','c')
+    for n,d in zip(names,directions):
+        data = "{:s} = {:= 8.5f} Å".format(n,np.linalg.norm(d))
+        kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(n)-1)+"|"+'\n')
+ 
 def print_angles(directions,**kwargs):
     kwargs['stream'].write("|"+kwargs['labelStyle']
                               +'Crystal angles:'.center(kwargs['linewidth'])

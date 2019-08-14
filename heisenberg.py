@@ -32,7 +32,7 @@ class EquationSolver:
                 print(self.equations)
                 print(self.vector)
 
-    def remove_tautologies(self, **kwargs):
+    def remove_tautologies(self):
         # removing 0 = 0 equations !
         scale       = np.average(np.abs(self.equations))
         tautologies = np.argwhere(
@@ -54,7 +54,7 @@ class EquationSolver:
             return True
         return False
 
-    def remove_linears(self, **kwargs):
+    def remove_linears(self):
         # Based on https://stackoverflow.com/questions/
         #                  28816627/how-to-find-linearly-independent-rows-from-a-matrix
         # We remove lineary dependent rows
@@ -191,8 +191,8 @@ class NaiveHeisenberg:
 
 def apply_mirrorsXYZ(dimensions,cell,reference=0):
     outputCell = []
-    for p in product([-1,0,1],repeat=3):
-        projection = np.array([p])
+    for proj in product([-1,0,1],repeat=3):
+        projection = np.array([proj])
         translation = np.dot(projection,dimensions)[0]
         for i,atom in enumerate(cell):
             outputCell.append([atom[0],atom[1]+translation,atom[2],i])

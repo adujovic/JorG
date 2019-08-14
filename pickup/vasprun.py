@@ -71,7 +71,7 @@ class VaspRunXML:
             if field.tag == 'r':
                 self.partialDOS[self.index][self.spin].append(np.fromstring(field.text,sep=' '))
         except AttributeError:
-           return
+            return
 
     def __len__(self):
         return len(self.partialDOS)

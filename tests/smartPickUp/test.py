@@ -21,7 +21,7 @@ if __name__ == '__main__':
         POSCARs = [ "%s/POSCAR"%arg for arg in argv[1:] ]
 
     print(*POSCARs)
-    loader   = POSCARloader(*POSCARs,spam=False)
+    loader   = POSCARloader(*POSCARs)
     loader.parse()
 
     print("Running for NN=1, \'Fe\':")

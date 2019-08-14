@@ -66,9 +66,9 @@ class WriteReport:
         for i,(j,atom,wyck) in enumerate(zip(self.data[index]['equivalent_atoms'],
                                              kwargs['crystal'],
                                              self.data[index]['wyckoffs'])):
-           output = get_equivalent_line(i,j,atom,wyck)
-           print_line(output,**self.kwargs)
-           wyckoffCount[wyck] += 1
+            output = get_equivalent_line(i,j,atom,wyck)
+            print_line(output,**self.kwargs)
+            wyckoffCount[wyck] += 1
         line(**self.kwargs)
         output = ""
         for wyck in wyckoffCount:

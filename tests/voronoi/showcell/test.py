@@ -7,7 +7,7 @@ import time
 import numpy as np
 from geometry.showcell import showCell
 
-def main(**args):
+def main():
     pass
 
 if __name__ == '__main__':

@@ -66,12 +66,14 @@ class findFlips:
         flipper.sort(order='distance')
         return flipper
 
-    def all(self,referenceAtom,cutOff):
+    def all(self,referenceAtom,cutoff):
         flipper = []
         for i,atom in enumerate(self.crystal):
+            distance = np.linalg.norm(atom[1]-referenceAtom[1])
             if "$"+atom[0]+"$" in self.atomTypeMask                         \
                 and self.wyckoffDict[self.symmetry['wyckoffs'][i]] in self.Wyckoffs   \
-                and np.linalg.norm(atom[1]-referenceAtom[1]) > 1e-3:
+                and distance > 1e-3 \
+                and distance <= cutoff:
                 flipper.append(i)
 
         return flipper

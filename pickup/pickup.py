@@ -12,7 +12,7 @@ import re
 class error:
     unexcepted = 12
 
-class one(dict):
+class Zero(dict):
     def __missing__(self,key):
         return 0.0
 
@@ -24,7 +24,7 @@ class EnergyConverter:
                     'He' :    0.5*np.reciprocal(13.6056980659),
                     'mHe':    500.0*np.reciprocal(13.6056980659),
                     'K'  :    11604.51812}
-    default = { 'moments'  : one(),
+    default = { 'moments'  : Zero(),
                 'units'         : 'meV' }
     types = [ "       no moment",
               "geometric moment" ]
@@ -55,11 +55,11 @@ class SmartPickUp:
         self.namesOfInteractingAtoms = namesOfInteractingAtoms
         self.types                   = EnergyConverter.types
 
-    def read_POSCARs(self,*args):
+    def read_poscars(self,*args):
         lastBackSlashRemoved = [ re.sub('/$','',arg) for arg in args ]
-        POSCARs = [ "%s/POSCAR"%arg for arg in lastBackSlashRemoved ]
-        self.POSCARs = POSCARloader(*POSCARs,spam=False)
-        self.POSCARs.parse()
+        poscars = [ "%s/POSCAR"%arg for arg in lastBackSlashRemoved ]
+        self.poscars = POSCARloader(*poscars)
+        self.poscars.parse()
 
     def read_MAGMOMs(self,*args):
         vaspruns = [ "%s/vasprun.xml"%arg for arg in args ]
@@ -68,30 +68,30 @@ class SmartPickUp:
 
     def read(self,*args,**kwargs):
         self.read_MAGMOMs(*args)
-        self.read_POSCARs(*args)
+        self.read_poscars(*args)
         if 'reference' in kwargs:
-            self.reference = self.POSCARs(0)['cell'][kwargs['reference']][1]
+            self.reference = self.poscars(0)['cell'][kwargs['reference']][1]
             self.ref       = kwargs['reference']
         else:
             print("Warning: reference @ 0. Is that ok?")
             self.ref       = 0
-            self.reference = self.POSCARs(0)['cell'][0][1]
+            self.reference = self.poscars(0)['cell'][0][1]
 
     def make_crystal(self,idx=0):
-        self.crystal  = self.POSCARs(idx)['cell']
+        self.crystal  = self.poscars(idx)['cell']
         try:
             self.crystal  = [ [atom[0],atom[1],self.MAGMOMs.get_moments()[i+1]] for i,atom in enumerate(self.crystal) ]
         except KeyError as err:
             print(self.MAGMOMs.get_moments())
             print(err)
             exit(-1)
-        self.crystal8 = apply_mirrorsXYZ(self.POSCARs(0)['directions'],self.crystal,
+        self.crystal8 = apply_mirrorsXYZ(self.poscars(0)['directions'],self.crystal,
                                          reference=self.ref)
 
     def map_distances(self,idx=0):
         self.distances = set([])
         self.make_crystal(idx)
-        for atom in self.POSCARs(idx)['cell']:
+        for atom in self.poscars(idx)['cell']:
             d = np.around(np.linalg.norm(atom[1]-self.reference),decimals=2)
             if atom[0] in self.namesOfInteractingAtoms:
                 self.distances.add(d)
@@ -122,7 +122,7 @@ class SmartPickUp:
 
     def set_flipps(self,i):
         self.flippingConfigurations.append([])
-        for idx,atom in enumerate(self.POSCARs(0)['cell']):
+        for idx,atom in enumerate(self.poscars(0)['cell']):
             self.get_flip(i,idx,atom)
 
     def get_flip(self,i,idx,atom):

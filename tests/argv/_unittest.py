@@ -2,8 +2,8 @@ import unittest
 from argv import options
 
 class TestArgv(unittest.TestCase):
-    def set_up(self,INPUT):
-        self.currentOptions = options(*INPUT.split())
+    def set_up(self,input):
+        self.currentOptions = options(*input.split())
         self.MASK     = str(self.currentOptions('mask'))
         self.OUTPUT   = self.currentOptions('output')
         self.INCAR    = self.currentOptions('incar')
@@ -24,8 +24,8 @@ class TestArgv(unittest.TestCase):
             self.assertIn(arg,where)
 
     def test_input_001(self):
-        INPUT="foo --incar INCAR --input POSCAR -N 3 -E Fe"
-        self.set_up(INPUT)
+        input="foo --incar INCAR --input POSCAR -N 3 -E Fe"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -36,8 +36,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Fe")
 
     def test_input_002(self):
-        INPUT="foo --incar INCAR --input POSCAR -N 13 -E Ni"
-        self.set_up(INPUT)
+        input="foo --incar INCAR --input POSCAR -N 13 -E Ni"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -48,8 +48,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Ni")
 
     def test_input_003(self):
-        INPUT="foo --incar INCAR --input POSCAR -N 3 -E Ni"
-        self.set_up(INPUT)
+        input="foo --incar INCAR --input POSCAR -N 3 -E Ni"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -61,8 +61,8 @@ class TestArgv(unittest.TestCase):
         self.assertGreater(self.NEIGHBOR,0)
 
     def test_input_004(self):
-        INPUT="foo --incar INCAR_tst1 --input POSCAR_tst1 -N 3 -E Fe"
-        self.set_up(INPUT)
+        input="foo --incar INCAR_tst1 --input POSCAR_tst1 -N 3 -E Fe"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -74,8 +74,8 @@ class TestArgv(unittest.TestCase):
         self.assertGreater(self.NEIGHBOR,0)
 
     def test_input_005(self):
-        INPUT="foo --symmetry -i POSCAR_Cs2F6Ni2 "
-        self.set_up(INPUT)
+        input="foo --symmetry -i POSCAR_Cs2F6Ni2 "
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
@@ -84,8 +84,8 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.currentOptions('symmetry'),True)
 
     def test_input_006(self):
-        INPUT="foo -i POSCAR_tst1 "
-        self.set_up(INPUT)
+        input="foo -i POSCAR_tst1 "
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
@@ -95,8 +95,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Mn")
 
     def test_input_007(self):
-        INPUT="foo --incar INCAR_tst1 --input POSCAR_tst1 -N 2 -E Fe1"
-        self.set_up(INPUT)
+        input="foo --incar INCAR_tst1 --input POSCAR_tst1 -N 2 -E Fe1"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -107,8 +107,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Fe")
 
     def test_input_008(self):
-        INPUT="foo --incar _INCARs/INCAR_tst1 --input _POSCARs/POSCAR_tst1 -N 1 -E Fe1"
-        self.set_up(INPUT)
+        input="foo --incar _INCARs/INCAR_tst1 --input _POSCARs/POSCAR_tst1 -N 1 -E Fe1"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -119,8 +119,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Fe")
 
     def test_input_009(self):
-        INPUT="foo --incar _INCARs/INCAR_CsNiF --input _POSCARs/POSCAR_CsNiF -N 1 -E Ni -o output/J1"
-        self.set_up(INPUT)
+        input="foo --incar _INCARs/INCAR_CsNiF --input _POSCARs/POSCAR_CsNiF -N 1 -E Ni -o output/J1"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -132,8 +132,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Ni")
 
     def test_input_010(self):
-        INPUT="foo --symmetry -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF "
-        self.set_up(INPUT)
+        input="foo --symmetry -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF "
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
@@ -144,8 +144,8 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.currentOptions('symmetry'),True)
 
     def test_input_011(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 6 -E Ni -o output/ASD --redundant"
-        self.set_up(INPUT)
+        input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 6 -E Ni -o output/ASD --redundant"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -158,8 +158,8 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.currentOptions('redundant'),True)
 
     def test_input_012(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -E Ni -o output/ASD --reference 21 -R 123.0"
-        self.set_up(INPUT)
+        input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -E Ni -o output/ASD --reference 21 -R 123.0"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
@@ -172,8 +172,8 @@ class TestArgv(unittest.TestCase):
         self.assertAlmostEqual(self.currentOptions('cutOff'),123.0)
 
     def test_input_013(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --refined"
-        self.set_up(INPUT)
+        input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD --refined"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -186,8 +186,8 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.currentOptions('refined'),True)
 
     def test_input_014(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --period 3d 5p"
-        self.set_up(INPUT)
+        input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --period 3d 5p"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -199,8 +199,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Ni","Ti","Mn","Te","In")
 
     def test_input_015(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --block D"
-        self.set_up(INPUT)
+        input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --block D"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)
@@ -212,8 +212,8 @@ class TestArgv(unittest.TestCase):
         self.check_in(self.MASK,"Ni","Fe","Au","Hg","Cr","Hf")
 
     def test_input_016(self):
-        INPUT="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --group 2 5"
-        self.set_up(INPUT)
+        input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 2 -E Ni -o output/ASD  --group 2 5"
+        self.set_up(input)
         self.check_type(self.POSCAR,self.INCAR,self.OUTPUT,self.MASK,isType=str)
         self.check_bools()
         self.check_type(self.NEIGHBOR,self.currentOptions('reference'),isType=int)

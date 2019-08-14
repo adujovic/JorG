@@ -31,12 +31,12 @@ if __name__ == '__main__':
     print('Reading: output', end='\t')
     outDirName = currentOptions('output')
     if outDirName is None:
-      # if output directory is not given:
-      outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
+        # if output directory is not given:
+        outDirName = "output/"+datetime.now().strftime("%Y%m%d%H%M%S")
     else:
-      # remove multiple '/' and possible '/' at the end
-      outDirName = re.sub('/+','/',outDirName)
-      outDirName = re.sub('/$','',outDirName)
+        # remove multiple '/' and possible '/' at the end
+        outDirName = re.sub('/+','/',outDirName)
+        outDirName = re.sub('/$','',outDirName)
     print(outDirName)
     print('Reading: mask', end='\t')
     print(currentOptions('mask'))

@@ -94,7 +94,7 @@ class JorGpi:
         self.extraDirections =\
                 VariableFixer.fix_directions(self.copiesInEachDirection,self.directions)
 
-    def prepare_cell_from_RR(self):
+    def prepare_cell_from_rr(self):
         self.copiesInEachDirection =\
                 generator.get_number_of_pictures(self.directions,
                                                  self.cutOff,
@@ -133,7 +133,9 @@ class JorGpi:
     def write_output_raport(self):
     #   Checking the symmetry of the output
         with open(self.outDirName+"/output.txt",'w+') as raport:
-            symmetry.WriteReport([self.symmetryFull], comments=["Analysis of symmetry in the generated cell"], stream=raport)
+            symmetry.WriteReport([self.symmetryFull], 
+                                 comments=["Analysis of symmetry in the generated cell"],
+                                 stream=raport)
         self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,self.crystal[self.newReference])
         loadsave.save_POSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
                              crystal=self.crystal, multiplyers=self.copiesInEachDirection)
@@ -158,7 +160,11 @@ class JorGpi:
 
         def __init__(self,JorGpiObject):
             self.options['define_macros'] = [('_SITESNUMBER', str(len(JorGpiObject.crystal)))]
-            self.builder = Crun('asa/asa.cpp', 'asa/ising.cpp', 'asa/solver/solver.cpp', 'asa/solver/aux.cpp',**self.options)
+            self.builder = Crun('asa/asa.cpp',
+                                'asa/ising.cpp',
+                                'asa/solver/solver.cpp',
+                                'asa/solver/aux.cpp',
+                                **self.options)
             self.tmpFiles = TemporaryFiles()
             self.tmpFiles.write_input(JorGpiObject.allFlippable,JorGpiObject.crystal)
             self.tmpFiles.write_supercell(JorGpiObject.crystal)

@@ -39,11 +39,11 @@ class TestPOSCARloader(unittest.TestCase):
         self.assertAlmostEqual(np.linalg.norm(atom-self.atom_constr_proper),0.0)
 
     def test_parse_name(self):
-        name = POSCARloader.parse_atomName(self.atom_input)
+        name = POSCARloader.parse_atom_name(self.atom_input)
         self.assertEqual(name,'Cu')
 
     def test_parse_name_constrains(self):
-        name = POSCARloader.parse_atomName(self.atom_input_constr)
+        name = POSCARloader.parse_atom_name(self.atom_input_constr)
         self.assertEqual(name,'True')
 
     def test_parse_constrains(self):

@@ -14,19 +14,19 @@ flags = parser.parse_args()
 
 try:
     with open(flags.__dict__['input'],"r") as inFile:
-        text = inFile.read()
+        TEXT = inFile.read()
 except IOError:
-    text = raw_input("Feed me input:\n\t")
+    TEXT = raw_input("Feed me input:\n\t")
 
 output = ""
 if flags.__dict__['back']:
-    for byte in range(0,len(text),8):
+    for byte in range(0,len(TEXT),8):
         char = 0
         for b in range(8):
-            char += int(text[byte+b])*(2**(7-b))
+            char += int(TEXT[byte+b])*(2**(7-b))
         output += "%c"%char
 else:
-    for c in text:
+    for c in TEXT:
         output+="%08d"%int(str(bin(ord(c)))[2:])
 
 try:

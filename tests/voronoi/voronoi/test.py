@@ -13,7 +13,7 @@ def main(**args):
 if __name__ == '__main__':
     tracker  = -(time.time())
 
-    loader   = POSCARloader('POSCARsmall','POSCAR','POSCARweird',spam=False)
+    loader   = POSCARloader('POSCARsmall','POSCAR','POSCARweird')
     loader.parse()
     for i in range(len(loader)):
         voronoi = Voronoi(data=loader(i))

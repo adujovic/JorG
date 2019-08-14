@@ -15,15 +15,15 @@ if __name__ == '__main__':
 
     print("Test: parsing atom data")
     print(POSCARloader.parse_atom      ("0.0000000000 0.0000000000 4.3870399043 Cu"))
-    print(POSCARloader.parse_atomName  ("0.0000000000 0.0000000000 4.3870399043 Cu"))
+    print(POSCARloader.parse_atom_name  ("0.0000000000 0.0000000000 4.3870399043 Cu"))
     print(POSCARloader.parse_constrains("0.0000000000 0.0000000000 4.3870399043 Cu"))
 
     print(POSCARloader.parse_atom      ("-0.00000000000000 0.00000000000000 0.36270017366243 True False False"))
-    print(POSCARloader.parse_atomName  ("-0.00000000000000 0.00000000000000 0.36270017366243 True False False"))
+    print(POSCARloader.parse_atom_name  ("-0.00000000000000 0.00000000000000 0.36270017366243 True False False"))
     print(POSCARloader.parse_constrains("-0.00000000000000 0.00000000000000 0.36270017366243 True False False"))
 
     print("Test: parsing POSCAR files")
-    loader   = POSCARloader('POSCAR_exp1','POSCAR_exp2','POSCAR_exp3','POSCAR_noExistent',spam=False)
+    loader   = POSCARloader('POSCAR_exp1','POSCAR_exp2','POSCAR_exp3','POSCAR_noExistent')
     loader.parse()
     for data,i in product(('comment','directions','cell',
                            'cellSymmetry','cellVolume',
