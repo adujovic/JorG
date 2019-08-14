@@ -120,7 +120,7 @@ class NaiveHeisenberg:
         self.interactionNames  = [ None ]*len(flipper)*mul
         self.avgMoments        = [  0.0 ]*len(flipper)*mul
         self.occMoments        = [  0   ]*len(flipper)*mul
-        
+
         return mul
 
     def generate(self,mask,flipper):
@@ -136,11 +136,9 @@ class NaiveHeisenberg:
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if j.size: # geometric
                 column = mul*j[0][0]+offset
-                moment = self.MAGMOMs()['moments'][I+1]\
-                          *self.MAGMOMs(row+1)['moments'][atomJ[3]+1]
-#                moment = np.abs(self.MAGMOMs()['moments'][I+1]\
-#                          *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
-                self.systemOfEquations[row][column] += moment 
+                moment = np.abs(self.MAGMOMs()['moments'][I+1]\
+                          *self.MAGMOMs(row+1)['moments'][atomJ[3]+1])
+                self.systemOfEquations[row][column] += moment
                 self.avgMoments[column]             += moment
                 self.occMoments[column]             += 1
                 if self.interactionNames [column] is None:

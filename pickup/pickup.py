@@ -14,7 +14,7 @@ class error:
 
 class one(dict):
     def __missing__(self,key):
-        return 0.0 
+        return 0.0
 
 class EnergyConverter:
     energyRatios = {'eV' :    1.0,
@@ -39,7 +39,7 @@ class EnergyConverter:
         settings = EnergyConverter.default
         settings.update(kwargs)
         data = np.array([np.copy(args),np.copy(args)])*EnergyConverter.energyRatios[kwargs['units']]
-        for i,arg in enumerate(args):
+        for i,_ in enumerate(args):
             data[1][i] *= kwargs['moments'][i]
         return data
 
@@ -142,7 +142,7 @@ class SmartPickUp:
             self.solver
         except AttributeError:
             self.get_system_of_equations()
-        
+
         self.Js = np.array(EnergyConverter.convert(*(self.solver.solve()),
                            moments=self.model.avgMoments, **kwargs))
         return self.Js
