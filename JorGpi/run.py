@@ -143,11 +143,10 @@ class JorGpi:
         for caseID,(i,atom,distance,wyck) in enumerate(self.flipper):
             print_case(atom,atomID=i+1,caseID=caseID+1,wyckoffPosition=wyck,distance=distance)
             self.selected.append(i)
-        self.crystal8 = apply_mirrorsXYZ(self.extraDirections,self.crystal,
-                                         reference=self.newReference)
-        loadsave.save_xyz(self.crystal, fileName=self.outDirName+"/crystal.xyz",
+        self.crystal8 = apply_mirrorsXYZ(self.extraDirections,self.crystal)
+        loadsave.SaveXYZ(self.crystal, fileName=self.outDirName+"/crystal.xyz",
                           selectedAtoms = self.selected)
-        loadsave.save_xyz(self.crystal8,fileName=self.outDirName+"/crystalFull.xyz",
+        loadsave.SaveXYZ(self.crystal8,fileName=self.outDirName+"/crystalFull.xyz",
                           selectedAtoms = self.selected)
         JmolVisualization.create_script(self.outDirName,radius=self.cutOff,
                                         center=self.crystal[self.newReference][1])
@@ -156,7 +155,7 @@ class JorGpi:
         solverDirectory = './asa/solver'
         myDirectory     = '../../'
         options = {'extra_compile_args': ['-std=c++17','-O3','-Wall','-Wextra','-pedantic','-fopenmp'],
-                   'extra_link_args'   : ['-std=c++17','-lm','-lgsl','-lgslcblas']}
+                   'extra_link_args'   : ['-std=c++17','-lm','-lgsl','-lgslcblas','-fopenmp']}
 
         def __init__(self,JorGpiObject):
             self.options['define_macros'] = [('_SITESNUMBER', str(len(JorGpiObject.crystal)))]
@@ -218,7 +217,7 @@ class JorGpi:
     def generate_possible_configurations(self):
         try:
             su.copy('best.flips.rerun','best.flips')
-        except OSError:
+        except (OSError,FileNotFoundError):
             solver = self.AdaptiveSimulatedAnnealing(self)
             solver(self)
             del solver

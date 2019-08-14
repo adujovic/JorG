@@ -7,6 +7,12 @@ class MaskTemplate:
         return str(self.mask)
     def __add__(self,other):
         return self.mask+other.mask
+    def count(self,what,begin=0,end=-1):
+        if end < 0:
+            end = len(self.mask)+1
+        return self.mask.count(what,begin,end)
+    def find(self,what):
+        return self.mask.find(what)
 
 maskFull = MaskTemplate("$H$He$Li$Be$B$C$N$O$F$Ne$Na$Mg$Al$Si$P$S$Cl$Ar$K$Ca$Sc$Ti$V$Cr$Mn$Fe$Co$Ni$Cu$Zn$Ga$Ge$As$Se$Br$Kr$Rb$Sr$Y$Zr$Nb$Mo$Tc$Ru$Rh$Pd$Ag$Cd$In$Sn$Sb$Te$I$Xe$Cs$Ba$La$Ce$Pr$Nd$Pm$Sm$Eu$Gd$Tb$Dy$Ho$Er$Tm$Yb$Lu$Hf$Ta$W$Re$Os$Ir$Pt$Au$Hg$Tl$Pb$Bi$Po$At$Rn$Fr$Ra$Ac$Th$Pa$U$Np$Pu$Am$Cm$Bk$Cf$Es$Fm$Md$No$Lr$Rf$Db$Sg$Bh$Hs$Mt$Ds$Rg$Cn$Nh$Fl$Mc$Lv$Ts$Og$")
 blocks = {"P": MaskTemplate("$B$C$N$O$F$Al$Si$P$S$Cl$Ga$Ge$As$Se$Br$In$Sn$Sb$Te$I$Tl$Pb$Bi$Po$At$"), "D": MaskTemplate("$Sc$Ti$V$Cr$Mn$Fe$Co$Ni$Cu$Zn$Y$Zr$Nb$Mo$Tc$Ru$Rh$Pd$Ag$Cd$Hf$Ta$W$Re$Os$Ir$Pt$Au$Hg$"), "F": MaskTemplate("$La$Ce$Pr$Nd$Pm$Sm$Eu$Gd$Tb$Dy$Ho$Er$Tm$Yb$Lu$Ac$Th$Pa$U$Np$Pu$Am$Cm$Bk$Cf$Es$Fm$Md$No$Lr$")}

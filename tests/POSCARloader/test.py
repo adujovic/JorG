@@ -7,7 +7,7 @@ from POSCARloader import POSCARloader
 import time
 from itertools import product
 
-def main(**args):
+def main():
     pass
 
 if __name__ == '__main__':

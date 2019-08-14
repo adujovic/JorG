@@ -7,7 +7,7 @@ import numpy as np
 from JorGpi.generator import NearestNeighborsGenerator
 import time
 
-def main(**args):
+def main():
     pass
 
 if __name__ == '__main__':

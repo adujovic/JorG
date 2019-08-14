@@ -46,11 +46,11 @@ class StreamHandler:
         return self.streams[idx]
 
     @staticmethod
-    def load_VASP(POSCARfile,INCARfile):
+    def load_VASP(POSCARfile,incarFile):
         load_POSCAR          = POSCARloader(POSCARfile)
         load_POSCAR.parse()
         readData             = load_POSCAR(0)
-        load_INCAR           = loadsave.INCARloader(readData['cell'],fileName=INCARfile,atomNames=readData['atomNames'])
+        load_INCAR           = loadsave.INCARloader(readData['cell'],fileName=incarFile,atomNames=readData['atomNames'])
         oldMoments,incarData = load_INCAR()
         return readData,oldMoments,incarData
 

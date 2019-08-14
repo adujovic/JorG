@@ -7,7 +7,7 @@ import numpy as np
 from JorGpi.equivalent import findFlips,find_all_distances
 import time
 
-def main(**args):
+def main():
     pass
 
 if __name__ == '__main__':

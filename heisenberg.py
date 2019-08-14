@@ -189,7 +189,7 @@ class NaiveHeisenberg:
         output+="\n"
         return output
 
-def apply_mirrorsXYZ(dimensions,cell,reference=0):
+def apply_mirrorsXYZ(dimensions,cell):
     outputCell = []
     for proj in product([-1,0,1],repeat=3):
         projection = np.array([proj])

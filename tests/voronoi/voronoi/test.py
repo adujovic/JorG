@@ -7,7 +7,7 @@ import time
 from geometry.voronoi import Voronoi
 from POSCARloader import POSCARloader
 
-def main(**args):
+def main():
     pass
 
 if __name__ == '__main__':

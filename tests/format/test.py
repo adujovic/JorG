@@ -12,7 +12,7 @@ from aux.format import print_atom
 from aux.format import print_case
 from aux.format import print_moments
 
-def main(**args):
+def main():
     pass
 
 def line():

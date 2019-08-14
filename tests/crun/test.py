@@ -9,7 +9,7 @@ from JorGpi.crun import Crun
 def print_time(tracker):
     print("\t\tRuntime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))
 
-def main(**args):
+def main():
     pass
 
 if __name__ == '__main__':

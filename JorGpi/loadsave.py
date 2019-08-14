@@ -24,9 +24,9 @@ class INCARloader:
 #        Loading INCAR
 #                                        """
         self.settings.update(kwargs)
-        self.INCARfile = open(self.settings['fileName'],"r")
+        self.incarFile = open(self.settings['fileName'],"r")
         self.oldMoments = []
-        self.incarData = self.INCARfile.read()
+        self.incarData = self.incarFile.read()
         self.cell      = cell
 
         self.oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",self.incarData)
@@ -40,13 +40,14 @@ class INCARloader:
 
         magmomLine = self.oldMomentsText.group(1)
         for record in re.findall("\s*([0-9]+)\s*\*\s*([\-0-9\.]+)",magmomLine):
-            magmomLine = re.sub("{:s}\s*\*\s*{:s}".format(record[0],record[1]),(record[1]+" ")*int(record[0]),magmomLine)
+            magmomLine = re.sub("{:s}\s*\*\s*{:s}".format(record[0],record[1]),
+                                (record[1]+" ")*int(record[0]),magmomLine)
         for moment in magmomLine.split():
             self.oldMoments.append(np.float(moment))
         return self.oldMoments,self.incarData
 
     def __del__(self):
-        self.INCARfile.close()
+        self.incarFile.close()
 #
 #
 #
@@ -54,7 +55,7 @@ class INCARloader:
 #
 
 from itertools import product
-class save_xyz:
+class SaveXYZ:
     settings = {'fileName'     : 'data4jmol.xyz',
                 'selectedAtoms': None}
 
@@ -121,8 +122,8 @@ class save_POSCAR:
 
     def write_directions(self,directions):
         self.vaspFile.write("1.0\n")
-        for d in self.multiplyers*directions:
-            self.vaspFile.write("  %.10f  %.10f  %.10f\n"%(*d,))
+        for direction in self.multiplyers*directions:
+            self.vaspFile.write("  %.10f  %.10f  %.10f\n"%(*direction,))
 
     def write_elements(self,atomNames):
         for atomName in atomNames:
@@ -173,8 +174,8 @@ class INCARsaver:
             print("Copying POSCAR to %s didn't work out!"%flipName)
             exit(error.systemerror)
 
-    def write_INCAR(self,flipName,flip):
-        with open(self.fileName+"/"+flipName+"/INCAR","w+") as vaspFile:
+    def write_incar(self,flipname,flip):
+        with open(self.fileName+"/"+flipname+"/INCAR","w+") as vaspFile:
             vaspFile.write(re.sub('\s*MAGMOM.*\n','\n',self.oldINCAR))
             vaspFile.write("MAGMOM = ")
             for bit,atom in zip(flip,self.crystal):
@@ -188,9 +189,9 @@ class INCARsaver:
         self.fileName = fileName
         INCARsaver.mkdir(fileName,"noFlip")
         INCARsaver.copy_POSCAR(fileName,"noFlip")
-        self.write_INCAR("noFlip",np.zeros(len(self.crystal)))
+        self.write_incar("noFlip",np.zeros(len(self.crystal)))
         for i,flip in enumerate(flips):
             self.fileName = fileName
             INCARsaver.mkdir(fileName,"flip%05d"%i)
             INCARsaver.copy_POSCAR(fileName,"flip%05d"%i)
-            self.write_INCAR("flip%05d"%i,flip)
+            self.write_incar("flip%05d"%i,flip)

@@ -7,7 +7,7 @@ import time
 from POSCARloader import POSCARloader
 from pickup.pickup import SmartPickUp
 
-def main(**args):
+def main():
     pass
 
 if __name__ == '__main__':

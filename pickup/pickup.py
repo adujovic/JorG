@@ -85,8 +85,7 @@ class SmartPickUp:
             print(self.MAGMOMs.get_moments())
             print(err)
             exit(-1)
-        self.crystal8 = apply_mirrorsXYZ(self.poscars(0)['directions'],self.crystal,
-                                         reference=self.ref)
+        self.crystal8 = apply_mirrorsXYZ(self.poscars(0)['directions'],self.crystal)
 
     def map_distances(self,idx=0):
         self.distances = set([])
