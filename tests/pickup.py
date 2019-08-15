@@ -20,5 +20,5 @@ class TestPickupIron(unittest.TestCase):
 
         self.assertEqual(options('units'),'mRy')
         Js = pickerUpper.solve(units=options('units')).flatten()
-        self.assertEqual(Js[0],0.8724046188693274)
+        self.assertEqual(Js[0],1.1861042008301703)
         self.assertEqual(Js[1],4.157645364906014)

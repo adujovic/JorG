@@ -93,11 +93,19 @@ class EquationSolver:
         return resultantSystem,resultantSystem2
 
 class DefaultMoments:
-    def __init__(self,crystal):
-        self.moments = [ atom[2] for atom in crystal ]
-        self.moments.insert(0,0.0)
+    class Identity(dict):
+        def __missing__(self,key):
+            return 0.0
+
+    def __init__(self,crystal,length):
+        self.moments = DefaultMoments.Identity()
+        for idx,atom in enumerate(crystal):
+            self.moments[idx] = atom[2]
+        self.length  = length
     def __call__(self,idx=0):
         return {'energy': 0.0, 'moments': self.moments}
+    def __len__(self):
+        return self.length
 
 class HeisenbergKernel:
     def __init__(self, number_of_variables, magnetic_moments):
@@ -133,8 +141,11 @@ class HeisenbergKernel:
                       *self.magneticMoments(field[0]+1)['moments'][indices[1]+1])
 
     def moment_quotient(self,field,indices):
-        return 1.0 - np.abs(self.magneticMoments(          )['moments'][indices[1]+1]
-                           /self.magneticMoments(field[0]+1)['moments'][indices[1]+1])
+        try:
+            return 1.0 - np.abs(self.magneticMoments(          )['moments'][indices[1]+1]
+                               /self.magneticMoments(field[0]+1)['moments'][indices[1]+1])
+        except ZeroDivisionError:
+            return 0.0
 
     @staticmethod
     def name_interaction(first,second,distance):
@@ -183,7 +194,7 @@ class NaiveHeisenberg:
         mul                    = self.numberOfElements*(self.numberOfElements + 1)//2
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
         if magnetic_moments is None:
-            self.kernel        = HeisenbergKernel(len(flipper)*mul,DefaultMoments(self.crystal))
+            self.kernel        = HeisenbergKernel(len(flipper)*mul,DefaultMoments(self.crystal,len(self.flippings)))
         else:
             self.kernel        = HeisenbergKernel(len(flipper)*mul,magnetic_moments)
         return mul
