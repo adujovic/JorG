@@ -77,12 +77,13 @@ class POSCARloader:
     def parse_atom_name(text):
         found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([a-zA-Z]+).*",text)
         if found:
-            return(found.group(1))
+            return found.group(1) 
         return None
 
     @staticmethod
     def parse_constrains(text):
-        found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([tTfF]).*\s([tTfF]).*\s([tTfF]).*",text)
+        found = re.search(
+         "[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([tTfF]).*\s([tTfF]).*\s([tTfF]).*",text)
         if not found:
             return None
         constrains = [False, False, False]

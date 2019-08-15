@@ -5,10 +5,10 @@ path.insert(0,r'../')
 import numpy as np
 import errno
 
-class errors:
-    failed_to_generate = -201
-    no_reference  = 22
-    systemerror = -1
+class Errors:
+    failed_to_generate = 201
+    no_reference       = 22
+    systemerror        = 255
 
 from datetime import datetime
 from os import makedirs
@@ -55,7 +55,7 @@ class StreamHandler:
         return readData,oldMoments,incarData
 
 from copy import copy
-class standard:
+class Standard:
     values = {'scale'     : 5.0,
               'vector'    : 0.1,
               'background': [253,246,227],
@@ -64,7 +64,7 @@ class standard:
               'color'     : [176,255,176]}
     @staticmethod
     def fix(**kwargs):
-        result = copy(standard.values)
+        result = copy(Standard.values)
         result.update(kwargs)
         return result
 
@@ -80,7 +80,7 @@ isoSurface SURF center {%.5f %.5f %.5f} sphere %.5f
 color $SURF translucent [%d,%d,%d]"""
     @staticmethod
     def create_script(outDirName,**kwargs):
-        kwargs = standard.fix(**kwargs)
+        kwargs = Standard.fix(**kwargs)
         with open(outDirName+"/script.jmol","w+") as stream:
             stream.write(JmolVisualization.scriptText%(
                 kwargs['scale'],
@@ -115,8 +115,8 @@ class TemporaryFiles:
     def write_directions(self,directions):
         name = self.prefix+self.names[2]+self.suffix+self.extension
         with open(name,"w+") as dirFile:
-            for d in directions:
-                dirFile.write("%.8f %.8f %.8f\n"%tuple(d))
+            for direction in directions:
+                dirFile.write("%.8f %.8f %.8f\n"%(*direction,))
 
     def __str__(self):
         return "%s %s %s"%(self.get_files())
@@ -171,8 +171,8 @@ class VariableFixer:
         return [(mul+1)*d for mul,d in zip(copiesInEachDirection, directions)]
 
     @staticmethod
-    def add_to_all(arr,x=1):
-        return [ a+x for a in arr]
+    def add_to_all(arr,add=1):
+        return [ a+add for a in arr]
 
 class Symmetry:
     def __init__(self,cellSymmetry):
@@ -197,16 +197,16 @@ from aux.format import Color, print_vector, print_label
 from aux.format import print_crystal, print_moments
 class Msg:
     @staticmethod
-    def print_equations(eqs,isRedundant=False):
+    def print_equations(equations,isRedundant=False):
         print_label("System of equations:",labelStyle=Color.BF)
-        for eq in eqs:
-            print_vector(eq)
+        for equation in equations:
+            print_vector(equation)
         if isRedundant:
             print_label("Redundant system of equations.",labelStyle=Color.BF)
             print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=Color.BF)
             print_label("It may be better. But it may also mess everything.",labelStyle=Color.BF)
         else:
-            print_label("det SoE = %.1e"%np.linalg.det(eqs),labelStyle=Color.BF)
+            print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.BF)
 
     @staticmethod
     def print_solver_status(configs,tmpFiles):
@@ -231,7 +231,9 @@ class Msg:
         except KeyError:
             print("",end="")
         try:
-            print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),atoms=[kwargs['crystal'][kwargs['reference']]],vectorStyle=Color.DARKCYAN,labelStyle=Color.BF)
+            print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),
+                        atoms=[kwargs['crystal'][kwargs['reference']]],
+                        vectorStyle=Color.DARKCYAN,labelStyle=Color.BF)
         except KeyError:
             print("",end="")
         try:

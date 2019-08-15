@@ -118,8 +118,10 @@ class NaiveHeisenberg:
         mul                    = self.numberOfElements*(self.numberOfElements + 1)//2
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
         self.interactionNames  = [ None ]*len(flipper)*mul
-        self.avgMoments        = [  0.0 ]*len(flipper)*mul
+        self.avgMomentSq       = [  0.0 ]*len(flipper)*mul
         self.occMoments        = [  0   ]*len(flipper)*mul
+        self.avgCorrection     = [  0.0 ]*len(flipper)*mul
+        self.occCorrection     = [  0   ]*len(flipper)*mul
 
         return mul
 
@@ -128,18 +130,27 @@ class NaiveHeisenberg:
         for (row,config),(I,atomI),atomJ in product(enumerate(self.flippings),
                                                     enumerate(self.crystal  ),
                                                               self.crystal8 ):
-            if config[I] == config[atomJ[3]]:
-                continue
             distance,offset = self.check_if_contributes(atomI,atomJ)
             if not distance:
                 continue
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
-            if j.size: # geometric
-                column = mul*j[0][0]+offset
-                moment = np.abs(self.magneticMoments()['moments'][I+1]\
-                          *self.magneticMoments(row+1)['moments'][atomJ[3]+1])
+            if not j.size:
+                continue
+            column = mul*j[0][0]+offset
+            if config[I] == config[atomJ[3]]:
+                correction = (self.magneticMoments(row+1)['moments'][atomJ[3]+1]
+                             -self.magneticMoments(     )['moments'][atomJ[3]+1])\
+                             /self.magneticMoments(row+1)['moments'][atomJ[3]+1]
+                moment = self.magneticMoments()['moments'][I+1]\
+                        *self.magneticMoments(row+1)['moments'][atomJ[3]+1]
+                self.systemOfEquations[row][column] -= correction*moment
+                self.avgCorrection[column]          += correction
+                self.occCorrection[column]          += 1
+            else:
+                moment = self.magneticMoments()['moments'][I+1]\
+                        *self.magneticMoments(row+1)['moments'][atomJ[3]+1]
                 self.systemOfEquations[row][column] += moment
-                self.avgMoments[column]             += moment
+                self.avgMomentSq[column]            += np.abs(moment)
                 self.occMoments[column]             += 1
                 if self.interactionNames [column] is None:
                     self.interactionNames[column] = \
@@ -150,13 +161,23 @@ class NaiveHeisenberg:
     def clean_SoE(self):
         remover = [ i for i,name in enumerate(self.interactionNames) if name is None ]
         self.interactionNames  = [ name for name in self.interactionNames if name is not None ]
-        self.interactionNames  = self.interactionNames[:len(self.flipper)]
+        self.clear(remover)
+        self.avgMomentSq       = np.array(self.avgMomentSq)/np.array(self.occMoments)
+        self.avgCorrection     = np.array(self.avgCorrection)/np.array(self.occCorrection)
+        self.clip()
+
+    def clear(self,remover):
         self.systemOfEquations = np.delete(self.systemOfEquations,remover,axis=1)
+        self.avgMomentSq       = np.delete(np.array(self.avgMomentSq),   remover)
+        self.occMoments        = np.delete(np.array(self.occMoments),    remover)
+        self.avgCorrection     = np.delete(np.array(self.avgCorrection), remover)
+        self.occCorrection     = np.delete(np.array(self.occCorrection), remover)
+
+    def clip(self):
+        self.interactionNames  = self.interactionNames[:len(self.flipper)]
         self.systemOfEquations = self.systemOfEquations[:,0:len(self.flipper)]
-        self.avgMoments        = np.delete(np.array(self.avgMoments),remover)
-        self.occMoments        = np.delete(np.array(self.occMoments),remover)
-        self.avgMoments        = np.array(self.avgMoments)/np.array(self.occMoments)
-        self.avgMoments        = self.avgMoments[:len(self.flipper)]
+        self.avgMomentSq       = self.avgMomentSq[:len(self.flipper)]
+        self.avgCorrection     = self.avgCorrection[:len(self.flipper)]
 
     def offset_from_mask(self,symbol):
         element = self.mask.find(symbol+'$')
@@ -165,7 +186,6 @@ class NaiveHeisenberg:
     def combine_offsets(self,offsetA,offsetB):
         return self.numberOfElements         *(self.numberOfElements         -1)//2 \
             - (self.numberOfElements-offsetA)*(self.numberOfElements-offsetA -1)//2 + offsetB
-
 
     def check_if_contributes(self,atomI,atomJ):
         if (atomI[0] not in self.mask

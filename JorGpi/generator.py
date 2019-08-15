@@ -92,10 +92,9 @@ class CrystalGenerator:
 
         newReference = None
         for i,atom in enumerate(crystal):
-          if np.linalg.norm(atom[1] - self.cell[self.reference][1]) < 1e-2:
-            newReference = i
-            break
-
+            if np.linalg.norm(atom[1] - self.cell[self.reference][1]) < 1e-2:
+                newReference = i
+                break
         return (crystal,newReference)
 
 #
@@ -212,9 +211,9 @@ class NearestNeighborsGenerator:
                 self.newReferenceAtom = atom
 
     @staticmethod
-    def get_cutOffs(directions,nearestNeighbor):
-        minDirection = 0.99*np.min([np.linalg.norm(d) for d in directions])
-        return minDirection*np.sqrt(np.arange(1.0,np.power(nearestNeighbor+1,3),1.0))
+    def get_cutOffs(directions,nearest_neighbor):
+        minDirection = 0.99*np.min([np.linalg.norm(direction) for direction in directions])
+        return minDirection*np.sqrt(np.arange(1.0,np.power(nearest_neighbor+1,3),1.0))
 
     def __call__(self,nearestNeighbor):
         self.nearestNeighbor = nearestNeighbor

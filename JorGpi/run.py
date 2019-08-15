@@ -13,7 +13,7 @@ from JorGpi.equivalent import findFlips
 from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrors_xyz
 
 from JorGpi.iohandlers import StreamHandler,JmolVisualization
-from JorGpi.iohandlers import TemporaryFiles,errors,Msg
+from JorGpi.iohandlers import TemporaryFiles,Errors,Msg
 from JorGpi.iohandlers import VariableFixer,Symmetry,read_flips
 from JorGpi.crun import Crun
 import shutil as su

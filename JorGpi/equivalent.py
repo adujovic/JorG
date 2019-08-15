@@ -7,7 +7,7 @@ from itertools import product
 
 class Identity(dict):
     def __missing__(self, key):
-            return key
+        return key
 
 class findFlips:
     wyckoffDict  = Identity()
@@ -27,10 +27,11 @@ class findFlips:
     def find_all_distances(self,referenceAtom,cutOff):
         self.distances = []
         for i,atom in enumerate(self.crystal):
-            d = np.around(np.linalg.norm(atom[1]-referenceAtom[1]), decimals=self.logAccuracy)
+            distance = np.around(np.linalg.norm(atom[1]-referenceAtom[1]),
+                                 decimals=self.logAccuracy)
             if (self.wyckoffDict[self.symmetry['wyckoffs'][i]] in self.Wyckoffs and
-                d > 0.0 and d <= cutOff and '$'+atom[0]+'$' in self.atomTypeMask):
-                self.distances.append((d,atom[0]))
+                distance > 0.0 and distance <= cutOff and '$'+atom[0]+'$' in self.atomTypeMask):
+                self.distances.append((distance,atom[0]))
 
         self.distances = np.array(self.distances, dtype=[('distance', np.float), ('element', 'U3')])
         self.distances.sort(order='distance')
@@ -86,10 +87,11 @@ def find_all_distances(crystal8, cutOff,
     for i,flipA,j,flipB in product(range(8),
                                    flipper,
                                    repeat=2):
-        d = np.round(np.linalg.norm(crystal8[flipA+size*i][1]
-                                  - crystal8[flipB+size*j][1]),logAccuracy)
-        if d not in distances and d <= cutOff:
-            distances.append(d)
+        distance = np.round(np.linalg.norm(crystal8[flipA+size*i][1]
+                                         - crystal8[flipB+size*j][1]),
+                            logAccuracy)
+        if distance not in distances and distance <= cutOff:
+            distances.append(distance)
     distances = np.array(distances)
     distances.sort()
     return distances

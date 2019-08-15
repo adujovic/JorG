@@ -25,9 +25,9 @@ class EnergyConverter:
                     'mHe':    500.0*np.reciprocal(13.6056980659),
                     'K'  :    11604.51812}
     default = { 'moments'  : Zero(),
-                'units'         : 'meV' }
-    types = [ "       no moment",
-              "geometric moment" ]
+                'units'    : 'meV' }
+    types = [ " whitout moments",
+              "moments included" ]
 
     @staticmethod
     def multiply(arr,*args):
@@ -140,7 +140,7 @@ class SmartPickUp:
             self.get_system_of_equations()
 
         self.Js = np.array(EnergyConverter.convert(*(self.solver.solve()),
-                           moments=self.model.avgMoments, **kwargs))
+                           moments=self.model.avgMomentSq, **kwargs))
         return self.Js
 
     def __str__(self):
@@ -152,8 +152,10 @@ class SmartPickUp:
         try:
             strout += ''.join([ ("  %s:\t"+len(self.Js[0])*"  % 8.3f    "+"\n")\
                                 %(typeName,*self.Js[i],) for i,typeName in enumerate(self.types) ])
-            strout += '  mu1 * mu2:            '
-            strout += ''.join([ "% .3f        "%mu for mu in self.model.avgMoments])
+            strout += '        <|µ|> (µB):       '
+            strout += ''.join([ "% 8.3f      "%np.sqrt(mu) for mu in self.model.avgMomentSq])
+            strout += '\n            <Δµ/µ>:       '
+            strout += ''.join([ "% 8.3f      "%correction for correction in self.model.avgCorrection])
         except AttributeError:
             return 'None'
         return strout
