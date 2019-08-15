@@ -52,10 +52,10 @@ class Voronoi:
         return [project + radius, project - radius]
 
     @staticmethod
-    def supportXYZ(center, radius):
+    def support_xyz(center, radius):
         differences = []
-        for v in np.identity(3):
-            differences.append(Voronoi.support(center,radius,v))
+        for versor in np.identity(3):
+            differences.append(Voronoi.support(center,radius,versor))
         differences = np.array(differences)
         return [np.min(differences),np.max(differences)]
 
@@ -78,7 +78,7 @@ class Voronoi:
             self.add_points(multipliers)
         self.points = np.array(self.points)
 
-    def get_Voronoi_diagram(self, name=None,
+    def get_voronoi_diagram(self, name=None,
                                   save=False):
         self.fill_points()
         self.diagram = scipy.spatial.Voronoi(self.points)
@@ -124,7 +124,7 @@ class Voronoi:
         WSradius = Geometry.radius_from_volume(self.convexHull.volume)
         self.add_convex_hull(vertices,atom,name)
         self.plotter.add_sphere(atom,self.radius,color=self.atomColors[name],alpha=1.0)
-        self.aspect_data.append(Voronoi.supportXYZ(atom,self.radius))
+        self.aspect_data.append(Voronoi.support_xyz(atom,self.radius))
         return (self.radius,WSradius)
 
     def show(self,name=None):

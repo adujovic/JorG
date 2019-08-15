@@ -3,30 +3,30 @@ class Color:
         From:
         https://stackoverflow.com/questions/8924173/how-do-i-print-bold-text-in-python
     """
-    BF    = '\033[1m'
-    IT    = '\033[3m'
-    UN    = '\033[4m'
-    BLINK = '\033[5m'
-    END   = '\033[0m'
-    INV   = '\033[7m'
-    HID   = '\033[8m'
-    DEFAULT       = "\033[39m"
-    BLACK         = "\033[30m"
-    DARKRED       = "\033[31m"
-    DARKGREEN     = "\033[32m"
-    DARKYELLOW    = "\033[33m"
-    DARKBLUE      = "\033[34m"
-    DARKMAGENTA   = "\033[35m"
-    DARKCYAN      = "\033[36m"
-    GRAY          = "\033[37m"
-    DARKGRAY      = "\033[90m"
-    RED           = "\033[91m"
-    GREEN         = "\033[92m"
-    YELLOW        = "\033[93m"
-    BLUE          = "\033[94m"
-    MAGENTA       = "\033[95m"
-    CYAN          = "\033[96m"
-    WHITE         = "\033[97m"
+    bf    = '\033[1m'
+    it    = '\033[3m'
+    un    = '\033[4m'
+    blink = '\033[5m'
+    end   = '\033[0m'
+    inv   = '\033[7m'
+    hid   = '\033[8m'
+    default       = "\033[39m"
+    black         = "\033[30m"
+    darkred       = "\033[31m"
+    darkgreen     = "\033[32m"
+    darkyellow    = "\033[33m"
+    darkblue      = "\033[34m"
+    darkmagenta   = "\033[35m"
+    darkcyan      = "\033[36m"
+    gray          = "\033[37m"
+    darkgray      = "\033[90m"
+    red           = "\033[91m"
+    green         = "\033[92m"
+    yellow        = "\033[93m"
+    blue          = "\033[94m"
+    magenta       = "\033[95m"
+    cyan          = "\033[96m"
+    white         = "\033[97m"
 
 from sys import stdout
 from copy import copy
@@ -47,29 +47,29 @@ def safe_update(primary,secondary):
 
 def print_vector(vector,**kwargs):
     kwargs = standard.fix(**kwargs)
-    kwargs = safe_update(kwargs,{'vectorStyle' : Color.DARKCYAN})
+    kwargs = safe_update(kwargs,{'vectorStyle' : Color.darkcyan})
     txt = ' [ ' + kwargs['vectorStyle']
     try:
         txt += len(vector)*' {:=10.5f}'.format(*vector,)
     except IndexError:
         txt += str(vector)
-    txt += Color.END + ' ] '
+    txt += Color.end + ' ] '
     output  = "|"
-    output += txt.center(kwargs['linewidth']+len(kwargs['vectorStyle']+Color.END))
+    output += txt.center(kwargs['linewidth']+len(kwargs['vectorStyle']+Color.end))
     output += "|"+kwargs['end']
     kwargs['stream'].write(output)
 
 def print_atom(atom,**kwargs):
     kwargs = standard.fix(**kwargs)
-    kwargs = safe_update(kwargs,{'vectorStyle'  : Color.END,
-                                 'elementStyle' : Color.BF+Color.DARKYELLOW,
+    kwargs = safe_update(kwargs,{'vectorStyle'  : Color.end,
+                                 'elementStyle' : Color.bf+Color.darkyellow,
                                  'center'       : False})
-    output  = kwargs['elementStyle'] + str(atom[0]) + Color.END
+    output  = kwargs['elementStyle'] + str(atom[0]) + Color.end
     output += ' [ ' + kwargs['vectorStyle']
     output += '{:= 10.5f} {:= 10.5f} {:= 10.5f}'.format(*atom[1],)
-    output += Color.END + ' ] '
+    output += Color.end + ' ] '
     if kwargs['center']:
-        offset = len(kwargs['elementStyle'] + Color.END + kwargs['vectorStyle']+Color.END)
+        offset = len(kwargs['elementStyle'] + Color.end + kwargs['vectorStyle']+Color.end)
         output = output.center(kwargs['linewidth']+offset)
         output = "|" + output
         output += "|"
@@ -79,16 +79,16 @@ def print_case(atom,**kwargs):
     kwargs = standard.fix(**kwargs)
     kwargs = safe_update(kwargs,{'wyckoffPosition' : " ",
                                  'distance'        : -1.0,
-                                 'caseStyle'       : Color.IT+Color.CYAN,
-                                 'numberStyle'     : Color.IT,
+                                 'caseStyle'       : Color.it+Color.cyan,
+                                 'numberStyle'     : Color.it,
                                  'caseID'          : 1,
                                  'atomID'          : 1,
-                                 'distanceStyle'   : Color.END})
-    output  = "Case " + kwargs['caseStyle']+"{:3d}".format(kwargs['caseID'])+Color.END
-    output += " atom No. " + kwargs['numberStyle']+"{:3d}".format(kwargs['atomID'])+Color.END
+                                 'distanceStyle'   : Color.end})
+    output  = "Case " + kwargs['caseStyle']+"{:3d}".format(kwargs['caseID'])+Color.end
+    output += " atom No. " + kwargs['numberStyle']+"{:3d}".format(kwargs['atomID'])+Color.end
     output += kwargs['distanceStyle']
     output += " @ {:1s} & {:6.2f} Å | ".format(kwargs['wyckoffPosition'],kwargs['distance'])
-    output += Color.END
+    output += Color.end
     kwargs['stream'].write(output)
     print_atom(atom,end=kwargs['end'])
 
@@ -100,10 +100,10 @@ def format_record(record,**kwargs):
     label  = kwargs['delimiter']    \
            + kwargs['elementStyle'] \
            + name                   \
-           + Color.END              \
+           + Color.end              \
            + kwargs['numberStyle']  \
            + num                    \
-           + Color.END
+           + Color.end
     offset = len(label)-len(name)-len(num)-len(kwargs['delimiter'])
     return label,offset
 
@@ -118,7 +118,7 @@ def print_composition(cell,**kwargs):
     kwargs['stream'].write("+"+kwargs['linewidth']*'-'+"+"+'\n')
     kwargs['stream'].write("|"+kwargs['labelStyle']
                               +"Composition:".center(kwargs['linewidth'])
-                              +Color.END+"|"+'\n')
+                              +Color.end+"|"+'\n')
     sumOfAtoms = 0
     for record in report:
         label,offset = format_record(record,number=report[record],**kwargs)
@@ -130,9 +130,9 @@ def print_composition(cell,**kwargs):
     kwargs['stream'].write('|'+label.center(kwargs['linewidth']+offset)+'|'+'\n')
 
 def print_axes(directions,**kwargs):
-    kwargs['stream'].write("|"+Color.BF
+    kwargs['stream'].write("|"+Color.bf
                               +'Crystal axes:'.center(kwargs['linewidth'])
-                              +Color.END+"|"+'\n')
+                              +Color.end+"|"+'\n')
     names = color_names('a⃗','b⃗','c⃗')
     for n,d in zip(names,directions):
         data = "{:s} = [ {:= 10.5f} {:= 10.5f} {:= 10.5f} ]".format(n,*d,)
@@ -141,28 +141,28 @@ def print_axes(directions,**kwargs):
 def print_directions(directions,**kwargs):
     kwargs['stream'].write("|"+kwargs['labelStyle']
                               +'Crystal directions:'.center(kwargs['linewidth'])
-                              +Color.END+"|"+'\n')
+                              +Color.end+"|"+'\n')
     names = color_names('a','b','c')
     for n,d in zip(names,directions):
         data = "{:s} = {:= 8.5f} Å".format(n,np.linalg.norm(d))
         kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(n)-1)+"|"+'\n')
- 
+
 def print_angles(directions,**kwargs):
     kwargs['stream'].write("|"+kwargs['labelStyle']
                               +'Crystal angles:'.center(kwargs['linewidth'])
-                              +Color.END+"|"+'\n')
+                              +Color.end+"|"+'\n')
 
     names = color_names('α','β','γ')
     tmpCycle = cycle(np.flipud(directions))
-    for n in names:
+    for name in names:
         vectorJ = next(tmpCycle)
         vectorI = next(tmpCycle)
         dotProduct  = np.dot(vectorI,vectorJ)
         dotProduct /= np.linalg.norm(vectorI)
         dotProduct /= np.linalg.norm(vectorJ)
         angle = np.arccos(np.clip(dotProduct,-1,1))/np.pi
-        data = "{:s} = {:= 5.3f}π = {:3d}°".format(n,angle,int(np.around(180.0*angle)))
-        kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(n)-1)+"|"+'\n')
+        data = "{:s} = {:= 5.3f}π = {:3d}°".format(name,angle,int(np.around(180.0*angle)))
+        kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(name)-1)+"|"+'\n')
 
 def empty_line(**kwargs):
     kwargs['stream'].write("|"+kwargs['linewidth']*' '+"|"+'\n')
@@ -172,16 +172,16 @@ def line(**kwargs):
 
 from itertools import cycle
 def color_names(*args):
-    colors = cycle([Color.RED,Color.GREEN,Color.BLUE])
-    return [Color.BF+next(colors)+str(arg)+Color.END for arg in args]
+    colors = cycle([Color.red,Color.green,Color.blue])
+    return [Color.bf+next(colors)+str(arg)+Color.end for arg in args]
 
 import numpy as np
 def print_crystal(cell, **kwargs):
     kwargs = standard.fix(**kwargs)
     kwargs = safe_update(kwargs,{'directions'   : np.eye(3),
-                                 'labelStyle'   : Color.BF,
-                                 'elementStyle' : Color.BF+Color.DARKYELLOW,
-                                 'numberStyle'  : Color.IT,
+                                 'labelStyle'   : Color.bf,
+                                 'elementStyle' : Color.bf+Color.darkyellow,
+                                 'numberStyle'  : Color.it,
                                  'delimiter'    : ' | '})
 
     print_composition(cell,**kwargs)
@@ -206,11 +206,11 @@ def check_line(sumOfChars,length,**kwargs):
 
 def print_moments(moments,**kwargs):
     kwargs = standard.fix(**kwargs)
-    kwargs = safe_update(kwargs,{'colors' : cycle([Color.DARKGREEN,
-                                                   Color.DARKBLUE,
-                                                   Color.DARKMAGENTA]),
-                                 'elementStyle' : Color.BF+Color.GRAY,
-                                 'labelStyle'   : Color.DARKGRAY})
+    kwargs = safe_update(kwargs,{'colors' : cycle([Color.darkgreen,
+                                                   Color.darkblue,
+                                                   Color.darkmagenta]),
+                                 'elementStyle' : Color.bf+Color.gray,
+                                 'labelStyle'   : Color.darkgray})
 
     line(**kwargs)
 
@@ -227,11 +227,11 @@ def print_moments(moments,**kwargs):
         length = len(elementStr)+len(numberStr)+len(momentStr)
         sumOfChars = check_line(sumOfChars,length,**kwargs)
         kwargs['stream'].write(kwargs['elementStyle']
-                              +elementStr + Color.END
+                              +elementStr + Color.end
                               +kwargs['labelStyle']
                               +numberStr
                               +next(kwargs['colors'])+momentStr
-                              +Color.END)
+                              +Color.end)
         sumOfChars += length
     kwargs['stream'].write(' '*(kwargs['linewidth']-sumOfChars))
     kwargs['stream'].write('|'+'\n')
@@ -241,15 +241,15 @@ def print_moments(moments,**kwargs):
 
 def print_label(text,**kwargs):
     kwargs = standard.fix(**kwargs)
-    kwargs = safe_update(kwargs,{'elementStyle' : Color.BF+Color.DARKGREEN,
-                                 'labelStyle'   : Color.BF+Color.DARKYELLOW,
+    kwargs = safe_update(kwargs,{'elementStyle' : Color.bf+Color.darkgreen,
+                                 'labelStyle'   : Color.bf+Color.darkyellow,
                                  'atoms'        : None,
-                                 'vectorStyle'  : Color.END})
+                                 'vectorStyle'  : Color.end})
     if len(text) > kwargs['linewidth'] - 2:
         label = text[:kwargs['linewidth']-5]+"..."
     else:
         label = text.center(kwargs['linewidth']-2)
-    label = kwargs['labelStyle']+label+Color.END
+    label = kwargs['labelStyle']+label+Color.end
     line(**kwargs)
     kwargs['stream'].write("| "+label+" |"+'\n')
 

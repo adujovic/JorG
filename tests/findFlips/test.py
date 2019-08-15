@@ -4,7 +4,7 @@
 from sys import path
 path.insert(0,r'../../')
 import numpy as np
-from JorGpi.equivalent import findFlips,find_all_distances
+from JorGpi.equivalent import FindFlips,find_all_distances
 import time
 
 def main():
@@ -42,8 +42,7 @@ if __name__ == '__main__':
 
     tracker  = -(time.time())
 
-    flipSearch = findFlips()
-
+    flipSearch = FindFlips()
     flipSearch.set_structure(symmetryCell)
 
     print("Unique flips:")

@@ -211,7 +211,7 @@ class NearestNeighborsGenerator:
                 self.newReferenceAtom = atom
 
     @staticmethod
-    def get_cutOffs(directions,nearest_neighbor):
+    def get_cutoffs(directions,nearest_neighbor):
         minDirection = 0.99*np.min([np.linalg.norm(direction) for direction in directions])
         return minDirection*np.sqrt(np.arange(1.0,np.power(nearest_neighbor+1,3),1.0))
 
@@ -219,7 +219,7 @@ class NearestNeighborsGenerator:
         self.nearestNeighbor = nearestNeighbor
         self.fix_moments()
         self.crystal = []
-        for self.cutOff in self.get_cutOffs(self.directions,self.nearestNeighbor):
+        for self.cutOff in self.get_cutoffs(self.directions,self.nearestNeighbor):
             self.multipliers =\
                     get_number_of_pictures(self.directions,
                                            self.cutOff,

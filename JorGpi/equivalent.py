@@ -9,7 +9,7 @@ class Identity(dict):
     def __missing__(self, key):
         return key
 
-class findFlips:
+class FindFlips:
     wyckoffDict  = Identity()
     logAccuracy  = 2
     crystal      = None

@@ -113,18 +113,14 @@ class HeisenbergKernel:
         self.magneticMoments = magnetic_moments
 
     def add_correction(self,field,indices):
-        correction = (self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
-                     -self.magneticMoments(          )['moments'][indices[1]+1])\
-                     /self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
-        moment     =  self.magneticMoments(          )['moments'][indices[0]+1]\
-                     *self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+        correction = self.moment_quotient(field,indices)
+        moment     = self.moment_product (field,indices)
         self.avgCorrection[ field[1]]  += correction
         self._occCorrection[field[1]]  += 1
         return correction*moment
 
     def add_interaction(self,field,indices):
-        moment = self.magneticMoments(          )['moments'][indices[0]+1]\
-                *self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+        moment = self.moment_product(field,indices)
         self.avgMomentSq[field[1]]  += np.abs(moment)
         self._occMoments[field[1]]  += 1
         return moment
@@ -132,6 +128,15 @@ class HeisenbergKernel:
     def add_name(self,index,name):
         if self.interactionNames [index] is None:
             self.interactionNames[index] = name
+
+    def moment_product(self,field,indices):
+        return  self.magneticMoments(          )['moments'][indices[0]+1]\
+               *self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+
+    def moment_quotient(self,field,indices):
+        return (self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+               -self.magneticMoments(          )['moments'][indices[1]+1])\
+               /self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
 
     @staticmethod
     def name_interaction(first,second,distance):
@@ -195,7 +200,6 @@ class NaiveHeisenberg:
                 continue
             column = mul*j[0][0]+offset
             if config[I] == config[atomJ[3]]:
-                print("aaaaaaaaa")
                 self.systemOfEquations[row][column] -= self.kernel.add_correction((row,column),(atomJ[3],I))
             else:
                 self.systemOfEquations[row][column] += self.kernel.add_interaction((row,column),(atomJ[3],I))

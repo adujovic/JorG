@@ -77,7 +77,7 @@ class POSCARloader:
     def parse_atom_name(text):
         found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([a-zA-Z]+).*",text)
         if found:
-            return found.group(1) 
+            return found.group(1)
         return None
 
     @staticmethod

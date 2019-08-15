@@ -17,7 +17,7 @@ if __name__ == '__main__':
     loader.parse()
     for i in range(len(loader)):
         voronoi = Voronoi(data=loader(i))
-        voronoi.get_Voronoi_diagram(save=True,name="WSradia%03d.dat"%i)
+        voronoi.get_voronoi_diagram(save=True,name="WSradia%03d.dat"%i)
         voronoi.show("output%03d.png"%i)
         voronoi.show()
     tracker += time.time()

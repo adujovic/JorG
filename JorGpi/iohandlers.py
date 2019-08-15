@@ -46,11 +46,12 @@ class StreamHandler:
         return self.streams[idx]
 
     @staticmethod
-    def load_VASP(POSCARfile,incarFile):
-        load_POSCAR          = POSCARloader(POSCARfile)
+    def load_vasp(poscarfile,incarfile):
+        load_POSCAR          = POSCARloader(poscarfile)
         load_POSCAR.parse()
         readData             = load_POSCAR(0)
-        load_INCAR           = loadsave.INCARloader(readData['cell'],fileName=incarFile,atomNames=readData['atomNames'])
+        load_INCAR           = loadsave.INCARloader(readData['cell'],fileName=incarfile,
+                                                    atomNames=readData['atomNames'])
         oldMoments,incarData = load_INCAR()
         return readData,oldMoments,incarData
 
@@ -144,7 +145,7 @@ class VariableFixer:
             return cell[reference],reference
         for i,atom in enumerate(cell):
             if "$"+atom[0]+"$" in mask:
-              return atom,i
+                return atom,i
         print("Error:\n%s\nare not in input file!"%re.sub('\$',' ',mask))
         exit(errors.no_reference)
 
@@ -198,22 +199,22 @@ from aux.format import print_crystal, print_moments
 class Msg:
     @staticmethod
     def print_equations(equations,isRedundant=False):
-        print_label("System of equations:",labelStyle=Color.BF)
+        print_label("System of equations:",labelStyle=Color.bf)
         for equation in equations:
             print_vector(equation)
         if isRedundant:
-            print_label("Redundant system of equations.",labelStyle=Color.BF)
-            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=Color.BF)
-            print_label("It may be better. But it may also mess everything.",labelStyle=Color.BF)
+            print_label("Redundant system of equations.",labelStyle=Color.bf)
+            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=Color.bf)
+            print_label("It may be better. But it may also mess everything.",labelStyle=Color.bf)
         else:
-            print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.BF)
+            print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.bf)
 
     @staticmethod
     def print_solver_status(configs,tmpFiles):
         print_label("Checking total number of configurations: %d"%configs,
-                        labelStyle=Color.BF+Color.DARKRED)
+                        labelStyle=Color.bf+Color.darkred)
         print_label("Preparing solver...",
-                      labelStyle=Color.BF+Color.BLUE)
+                      labelStyle=Color.bf+Color.blue)
         print_label('Running: ./asa/solver/start %s'%str(tmpFiles))
 
     @staticmethod
@@ -223,9 +224,9 @@ class Msg:
         except KeyError:
             print("placeholder",end="")
         try:
-            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=Color.BF)
+            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=Color.bf)
         except KeyError:
-            print_label("Size: ?x?x?",labelStyle=Color.BF)
+            print_label("Size: ?x?x?",labelStyle=Color.bf)
         try:
             print_crystal(kwargs['crystal'],directions=kwargs['directions'])
         except KeyError:
@@ -233,7 +234,7 @@ class Msg:
         try:
             print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),
                         atoms=[kwargs['crystal'][kwargs['reference']]],
-                        vectorStyle=Color.DARKCYAN,labelStyle=Color.BF)
+                        vectorStyle=Color.darkcyan,labelStyle=Color.bf)
         except KeyError:
             print("",end="")
         try:

@@ -4,24 +4,24 @@ from aux.format import standard,line
 def show_symmetry(symmetry):
     for i in range(symmetry['rotations'].shape[0]):
         print("  --------------- %4d ---------------" % (i + 1))
-        rot = symmetry['rotations'][i]
-        trans = symmetry['translations'][i]
+        rotation    = symmetry['rotations'][i]
+        translation = symmetry['translations'][i]
         print("  rotation:")
-        for x in rot:
-            print("     [%2d %2d %2d]" % (x[0], x[1], x[2]))
+        for row in rotation:
+            print("     [%2d %2d %2d]" % (*rot,))
         print("  translation:")
-        print("     (%8.5f %8.5f %8.5f)" % (trans[0], trans[1], trans[2]))
+        print("     (%8.5f %8.5f %8.5f)" % (*translation,))
 
 def show_lattice(lattice):
     print("Basis vectors:")
-    for vec, axis in zip(lattice, ("a", "b", "c")):
-        print("%s %10.5f %10.5f %10.5f" % (tuple(axis,) + tuple(vec)))
+    for vector, axis in zip(lattice, ("a", "b", "c")):
+        print("%s %10.5f %10.5f %10.5f" % (tuple(axis,) + tuple(vector)))
 
 def show_cell(lattice, positions, numbers):
     show_lattice(lattice)
     print("Atomic points:")
-    for p, s in zip(positions, numbers):
-        print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
+    for position, number in zip(positions, numbers):
+        print("%2d %10.5f %10.5f %10.5f" % ((number,) + tuple(position)))
 
 from aux.PeriodicTable import periodicTableElement
 def print_line(line,**kwargs):

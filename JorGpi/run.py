@@ -4,23 +4,23 @@ path.insert(0,r'../../')
 import numpy as np
 
 import JorGpi.symmetry as symmetry
-from argv import options
+import argv
 from aux.format import print_case
 import JorGpi.loadsave as loadsave
 import JorGpi.generator as generator
-from JorGpi.equivalent import findFlips
+from JorGpi.equivalent import FindFlips
 
 from heisenberg import EquationSolver,NaiveHeisenberg,apply_mirrors_xyz
 
 from JorGpi.iohandlers import StreamHandler,JmolVisualization
-from JorGpi.iohandlers import TemporaryFiles,Errors,Msg
+from JorGpi.iohandlers import TemporaryFiles,Msg
 from JorGpi.iohandlers import VariableFixer,Symmetry,read_flips
 from JorGpi.crun import Crun
 import shutil as su
 
 class JorGpi:
     def __init__(self,*args):
-        self.currentOptions  = options(*args)
+        self.currentOptions  = argv.Options(*args)
         self.cutOff          = self.currentOptions('cutOff')
         self.nearestNeighbor = self.currentOptions('neighbor')
         self.reference       = self.currentOptions('reference')
@@ -32,7 +32,7 @@ class JorGpi:
 
     #   Reading POSCAR and INCAR files
         self.readData,self.oldMoments,self.incarData =\
-                self.handler.load_VASP(self.currentOptions('input'),
+                self.handler.load_vasp(self.currentOptions('input'),
                                        self.currentOptions('incar'))
         self.cell          = self.readData['cell']
         self.atomNames     = self.readData['atomNames']
@@ -72,13 +72,13 @@ class JorGpi:
         self.nearestNeighbor,\
                 self.cutOff = VariableFixer.fix_neighbor(self.nearestNeighbor,self.cutOff)
         if self.cutOff is None:
-            self.prepare_cell_from_NN()
+            self.prepare_cell_from_nn()
         else:
-            self.prepare_cell_from_RR()
+            self.prepare_cell_from_rr()
         self.search_for_flipps()
         self.write_output_raport()
 
-    def prepare_cell_from_NN(self):
+    def prepare_cell_from_nn(self):
         generatorNN = generator.NearestNeighborsGenerator(self.cell,self.referenceAtom,self.directions)
         generatorNN.wyckoffs         = self.currentOptions('Wyckoffs')
         generatorNN.atomTypeMask     = self.currentOptions('mask')
@@ -118,7 +118,7 @@ class JorGpi:
 
     def search_for_flipps(self):
 #        Searching for unique atoms for calculations
-        flipSearch              = findFlips()
+        flipSearch              = FindFlips()
         flipSearch.symmetry     = self.symmetryFull
         flipSearch.crystal      = self.crystal
         flipSearch.atomTypeMask = self.currentOptions('mask')
@@ -139,8 +139,8 @@ class JorGpi:
                                  comments=["Analysis of symmetry in the generated cell"],
                                  stream=raport)
         self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,self.crystal[self.newReference])
-        loadsave.save_POSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
-                             crystal=self.crystal, multiplyers=self.copiesInEachDirection)
+        loadsave.SavePOSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
+                            crystal=self.crystal, multiplyers=self.copiesInEachDirection)
         self.selected = [self.newReference]
         for caseID,(i,atom,distance,wyck) in enumerate(self.flipper):
             print_case(atom,atomID=i+1,caseID=caseID+1,wyckoffPosition=wyck,distance=distance)
@@ -216,7 +216,7 @@ class JorGpi:
         Msg.print_equations(self.systemOfEquations,self.currentOptions('redundant'))
         np.savetxt(self.outDirName+'/systemOfEquations.txt',np.array(self.systemOfEquations))
 
-    def generate_possible_configurations(self):
+    def possible_configurations(self):
         try:
             su.copy('best.flips.rerun','best.flips')
         except (OSError,FileNotFoundError):

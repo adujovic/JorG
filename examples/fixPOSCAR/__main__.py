@@ -5,7 +5,7 @@ from POSCARloader import POSCARloader
 import numpy as np
 
 
-def save_vanilla_POSCAR(filename,data):
+def save_vanilla_poscar(filename,data):
     with open(filename,"w+") as vaspFile:
         vaspFile.write(data['comment'])
         vaspFile.write("\n1.0\n")
@@ -30,4 +30,4 @@ if __name__ == '__main__':
     for arg in argv[1:]:
         loader = POSCARloader(arg)
         loader.parse()
-        save_vanilla_POSCAR('%s.fxd'%arg,loader())
+        save_vanilla_poscar('%s.fxd'%arg,loader())

@@ -24,6 +24,6 @@ if __name__ == '__main__':
     print(atoms,volume,mass,RHO)
     for i in range(len(loader)):
         voronoi = Voronoi(data=loader(i))
-        voronoi.get_Voronoi_diagram(save=True,name="%s_WS.txt"%argv[1+i])
+        voronoi.get_voronoi_diagram(save=True,name="%s_WS.txt"%argv[1+i])
         voronoi.show("%s.png"%argv[1+i])
         voronoi.show()

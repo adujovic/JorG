@@ -4,10 +4,10 @@ import numpy as np
 import re
 import aux.Masks as periodic
 
-class error:
+class Error:
     access = 123
 
-class options:
+class Options:
     keys = ["cutOff", "neighbor", "Wyckoffs", "reference",
             "input", "incar", "output", "mask", "symmetry",
             "refined", "redundant", "extra-dimentions", "spin-orbit"]
@@ -107,4 +107,4 @@ class options:
         except KeyError:
             print("No key \"%s\" defined, please try: "%key)
             print("%s"%(str(self.keys)))
-            exit(error.access)
+            exit(Error.access)

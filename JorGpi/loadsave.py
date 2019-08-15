@@ -92,7 +92,7 @@ class SaveXYZ:
 #
 #
 #
-class save_POSCAR:
+class SavePOSCAR:
     settings = {'fileName'    : 'POSCAR',
                 'multiplyers' : [1, 1, 1],
                 'crystal'     : None}

@@ -66,7 +66,7 @@ class VaspRunXML:
             if field.tag == 'set' and 'spin' in field.attrib['comment']:
                 self.spin = int(re.search('\d',field.attrib['comment']).group(0))
         except KeyError:
-           return
+            return
         try:
             if field.tag == 'r':
                 self.partialDOS[self.index][self.spin].append(np.fromstring(field.text,sep=' '))
@@ -89,9 +89,9 @@ class VaspRunXML:
             self.calculate_moment(ion,partial)
 
     @staticmethod
-    def DOS_below_ef(dos,ef):
+    def DOS_below_ef(dos,fermi_energy):
         return np.delete(np.array(dos),
-                np.argwhere(np.array(dos)[:,0] >= ef).flatten(),axis=0)
+                np.argwhere(np.array(dos)[:,0] >= fermi_energy).flatten(),axis=0)
 
     def integrate(self,function,argument):
         if self.trapez:

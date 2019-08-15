@@ -6,7 +6,7 @@ path.insert(0,r'../../')
 import time
 from datetime import datetime
 import re
-from argv import options
+from argv import Options
 
 def main():
     pass
@@ -14,7 +14,7 @@ def main():
 if __name__ == '__main__':
     tracker  = -(time.time())
 
-    currentOptions = options(*argv)
+    currentOptions = Options(*argv)
 
     print('Reading: cutOff', end='\t')
     print(currentOptions('cutOff'))
