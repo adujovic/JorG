@@ -3,6 +3,7 @@
 from sys import path
 path.insert(0,r'../../')
 import numpy as np
+np.seterr(all='raise')
 from itertools import product
 
 class EquationSolver:
@@ -99,17 +100,78 @@ class DefaultMoments:
     def __call__(self,idx=0):
         return {'energy': 0.0, 'moments': self.moments}
 
-class NaiveHeisenberg:
-    def __init__(self,flippings,
-                 crystal,crystal8):
-        self.magneticMoments   = DefaultMoments(crystal)
-        self.flippings = flippings
-        self.crystal   = crystal
-        self.crystal8  = crystal8
+class HeisenbergKernel:
+    def __init__(self, number_of_variables, magnetic_moments):
+        self.interactionNames   = [ None ]*number_of_variables
+        self.avgMomentSq        = [  0.0 ]*number_of_variables
+        self._occMoments        = [  0   ]*number_of_variables
+        self.avgCorrection      = [  0.0 ]*number_of_variables
+        self._occCorrection     = [  0   ]*number_of_variables
+        self.magneticMoments    = magnetic_moments
+
+    def set_moments(self, magnetic_moments):
+        self.magneticMoments = magnetic_moments
+
+    def add_correction(self,field,indices):
+        correction = (self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+                     -self.magneticMoments(          )['moments'][indices[1]+1])\
+                     /self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+        moment     =  self.magneticMoments(          )['moments'][indices[0]+1]\
+                     *self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+        self.avgCorrection[ field[1]]  += correction
+        self._occCorrection[field[1]]  += 1
+        return correction*moment
+
+    def add_interaction(self,field,indices):
+        moment = self.magneticMoments(          )['moments'][indices[0]+1]\
+                *self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+        self.avgMomentSq[field[1]]  += np.abs(moment)
+        self._occMoments[field[1]]  += 1
+        return moment
+
+    def add_name(self,index,name):
+        if self.interactionNames [index] is None:
+            self.interactionNames[index] = name
 
     @staticmethod
     def name_interaction(first,second,distance):
         return "%s-%s @%.2f"%(first,second,distance)
+
+    def clean(self,max_size):
+        remover =               [ i for  i,name in enumerate(self.interactionNames) if name is None ]
+        self.interactionNames = [ name for name in self.interactionNames        if name is not None ]
+        self.clear(remover)
+        self.avgMomentSq      = np.array(self.avgMomentSq)  /np.array(self._occMoments)
+        try:
+            self.avgCorrection= np.array(self.avgCorrection)/np.array(self._occCorrection)
+        except FloatingPointError:
+            self.avgCorrection= np.array(self.avgCorrection)
+        self.clip(max_size)
+        return remover
+
+    def clear(self,remover):
+        self.avgMomentSq       = np.delete(np.array(self.avgMomentSq),   remover)
+        self._occMoments       = np.delete(np.array(self._occMoments),   remover)
+        self.avgCorrection     = np.delete(np.array(self.avgCorrection), remover)
+        self._occCorrection    = np.delete(np.array(self._occCorrection),remover)
+
+    def clip(self,max_size):
+        self.interactionNames  = self.interactionNames[:max_size]
+        self.avgMomentSq       = self.avgMomentSq     [:max_size]
+        self.avgCorrection     = self.avgCorrection   [:max_size]
+
+class MetaData:
+    def __init__(self,heisenberg_kernel):
+        self.names       = heisenberg_kernel.interactionNames
+        self.moments     = np.sqrt(heisenberg_kernel.avgMomentSq)
+        self.corrections = heisenberg_kernel.avgCorrection
+
+class NaiveHeisenberg:
+    def __init__(self,flippings,
+                 crystal,crystal8):
+        self.flippings       = flippings
+        self.crystal         = crystal
+        self.crystal8        = crystal8
 
     def initialize(self,mask,flipper):
         self.flipper           = np.array(flipper)
@@ -117,12 +179,7 @@ class NaiveHeisenberg:
         self.numberOfElements  = self.mask.count('$')
         mul                    = self.numberOfElements*(self.numberOfElements + 1)//2
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
-        self.interactionNames  = [ None ]*len(flipper)*mul
-        self.avgMomentSq       = [  0.0 ]*len(flipper)*mul
-        self.occMoments        = [  0   ]*len(flipper)*mul
-        self.avgCorrection     = [  0.0 ]*len(flipper)*mul
-        self.occCorrection     = [  0   ]*len(flipper)*mul
-
+        self.kernel            = HeisenbergKernel(len(flipper)*mul,DefaultMoments(self.crystal))
         return mul
 
     def generate(self,mask,flipper):
@@ -138,46 +195,27 @@ class NaiveHeisenberg:
                 continue
             column = mul*j[0][0]+offset
             if config[I] == config[atomJ[3]]:
-                correction = (self.magneticMoments(row+1)['moments'][atomJ[3]+1]
-                             -self.magneticMoments(     )['moments'][atomJ[3]+1])\
-                             /self.magneticMoments(row+1)['moments'][atomJ[3]+1]
-                moment = self.magneticMoments()['moments'][I+1]\
-                        *self.magneticMoments(row+1)['moments'][atomJ[3]+1]
-                self.systemOfEquations[row][column] -= correction*moment
-                self.avgCorrection[column]          += correction
-                self.occCorrection[column]          += 1
+                print("aaaaaaaaa")
+                self.systemOfEquations[row][column] -= self.kernel.add_correction((row,column),(atomJ[3],I))
             else:
-                moment = self.magneticMoments()['moments'][I+1]\
-                        *self.magneticMoments(row+1)['moments'][atomJ[3]+1]
-                self.systemOfEquations[row][column] += moment
-                self.avgMomentSq[column]            += np.abs(moment)
-                self.occMoments[column]             += 1
-                if self.interactionNames [column] is None:
-                    self.interactionNames[column] = \
-                        NaiveHeisenberg.name_interaction(atomI[0],atomJ[0],distance)
+                self.systemOfEquations[row][column] += self.kernel.add_interaction((row,column),(atomJ[3],I))
+                self.kernel.add_name(column,HeisenbergKernel.name_interaction(atomI[0],atomJ[0],distance))
         self.clean_SoE()
         return self.systemOfEquations
 
+    def set_moments(self,magnetic_moments):
+        self.kernel.set_moments(magnetic_moments)
+
+    def get_moments(self,idx=0):
+        return self.kernel.magneticMoments(idx)
+
+    def get_average_moments(self):
+        return self.kernel.avgMomentSq
+
     def clean_SoE(self):
-        remover = [ i for i,name in enumerate(self.interactionNames) if name is None ]
-        self.interactionNames  = [ name for name in self.interactionNames if name is not None ]
-        self.clear(remover)
-        self.avgMomentSq       = np.array(self.avgMomentSq)/np.array(self.occMoments)
-        self.avgCorrection     = np.array(self.avgCorrection)/np.array(self.occCorrection)
-        self.clip()
-
-    def clear(self,remover):
+        remover = self.kernel.clean(len(self.flipper))
         self.systemOfEquations = np.delete(self.systemOfEquations,remover,axis=1)
-        self.avgMomentSq       = np.delete(np.array(self.avgMomentSq),   remover)
-        self.occMoments        = np.delete(np.array(self.occMoments),    remover)
-        self.avgCorrection     = np.delete(np.array(self.avgCorrection), remover)
-        self.occCorrection     = np.delete(np.array(self.occCorrection), remover)
-
-    def clip(self):
-        self.interactionNames  = self.interactionNames[:len(self.flipper)]
         self.systemOfEquations = self.systemOfEquations[:,0:len(self.flipper)]
-        self.avgMomentSq       = self.avgMomentSq[:len(self.flipper)]
-        self.avgCorrection     = self.avgCorrection[:len(self.flipper)]
 
     def offset_from_mask(self,symbol):
         element = self.mask.find(symbol+'$')
@@ -199,13 +237,16 @@ class NaiveHeisenberg:
             offset = self.combine_offsets(offsetJ,offsetI)
         return np.round(np.linalg.norm(atomI[1]-atomJ[1]),2),offset
 
+    def get_metadata(self):
+        return MetaData(self.kernel)
+
     def __str__(self):
         output = ""
-        for I,i in product(range(len(self.magneticMoments()['moments'])),
-                           range(len(self.magneticMoments))):
+        for I,i in product(range(len(self.get_moments()['moments'])),
+                           range(len(self.get_moments))):
             if i == 0:
                 output+="\n"
-            output+="% .2f  "%self.magneticMoments(i)['moments'][I+1]
+            output+="% .2f  "%self.get_moments(i)['moments'][I+1]
         output+="\n"
         return output
 

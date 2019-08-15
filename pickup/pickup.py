@@ -140,24 +140,28 @@ class SmartPickUp:
             self.get_system_of_equations()
 
         self.Js = np.array(EnergyConverter.convert(*(self.solver.solve()),
-                           moments=self.model.avgMomentSq, **kwargs))
+                           moments=self.model.get_average_moments(), **kwargs))
         return self.Js
 
     def __str__(self):
+        metaData = self.model.get_metadata()
         try:
             strout  = '                       '
-            strout += ''.join([ "%s | "%name for name in self.model.interactionNames ]) + '\n'
+            strout += ''.join([ "%s | "%name for name in metaData.names ]) + '\n'
         except AttributeError:
-            return 'None'
+            return "Error"
         try:
             strout += ''.join([ ("  %s:\t"+len(self.Js[0])*"  % 8.3f    "+"\n")\
                                 %(typeName,*self.Js[i],) for i,typeName in enumerate(self.types) ])
             strout += '        <|µ|> (µB):       '
-            strout += ''.join([ "% 8.3f      "%np.sqrt(mu) for mu in self.model.avgMomentSq])
-            strout += '\n            <Δµ/µ>:       '
-            strout += ''.join([ "% 8.3f      "%correction for correction in self.model.avgCorrection])
+            strout += ''.join([ "% 8.3f      "%mu   for mu in metaData.moments]) + '\n'
         except AttributeError:
-            return 'None'
+            return strout
+        try:
+            strout += '            <Δµ/µ>:       '
+            strout += ''.join([ "% 8.3f      "%corr for corr in metaData.corrections])
+        except AttributeError:
+            return strout
         return strout
 
 class Reference:
