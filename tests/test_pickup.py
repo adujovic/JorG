@@ -1,4 +1,6 @@
 import unittest
+from sys import path
+path.insert(0,r'../')
 from pickup.pickup import SmartPickUp,Reference,CommandLineOptions
 
 class TestPickupIron(unittest.TestCase):

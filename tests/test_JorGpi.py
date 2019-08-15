@@ -1,5 +1,7 @@
 import unittest
 import JorGpi.run
+from sys import path
+path.insert(0,r'../')
 
 class TestArgv(unittest.TestCase):
     def test_input_001(self):

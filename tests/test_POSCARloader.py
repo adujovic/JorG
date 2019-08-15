@@ -25,7 +25,7 @@ class TestPOSCARloader(unittest.TestCase):
     atoms      = [56, 56, 29, 29, 29, 8, 8, 8, 8, 8, 8, 39]
 
     def setUp(self):
-        self.loader   = POSCARloader('tests/POSCARloader/POSCAR_exp1','tests/POSCARloader/POSCAR_exp2','tests/POSCARloader/POSCAR_exp3')
+        self.loader   = POSCARloader('testData/POSCAR_exp1','testData/POSCAR_exp2','testData/POSCAR_exp3')
 
     def tearDown(self):
         del self.loader

@@ -5,7 +5,7 @@ from itertools import product
 class TestVaspRunXml(unittest.TestCase):
     names = {'m_s' : 0,'m_p' : 1,'m_d' : 2,'m_f' : 3,'m_total': 4}
     def load(self,name):
-        self.parser = VaspRunXML("tests/XML/%s/vasprun.xml"%name)
+        self.parser = VaspRunXML("testData/%s/vasprun.xml"%name)
         self.parser(partial=True)
 
     def test_cr(self):
