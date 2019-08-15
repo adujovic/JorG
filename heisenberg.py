@@ -22,7 +22,6 @@ class EquationSolver:
         if len(self.equations) == 1:
             self.solution = self.vector[0]/self.equations[0]
         elif self.equations.shape[0] == self.equations.shape[1]:
-            print("detB = ",np.linalg.det(self.equations))
             self.solution = np.linalg.solve(self.equations,self.vector,**kwargs)
         else:
             try:
@@ -121,7 +120,7 @@ class HeisenbergKernel:
 
     def add_interaction(self,field,indices):
         moment = self.moment_product(field,indices)
-        self.avgMomentSq[field[1]]  += np.abs(moment)
+        self.avgMomentSq[field[1]]  += moment
         self._occMoments[field[1]]  += 1
         return moment
 
@@ -130,13 +129,12 @@ class HeisenbergKernel:
             self.interactionNames[index] = name
 
     def moment_product(self,field,indices):
-        return  self.magneticMoments(          )['moments'][indices[0]+1]\
-               *self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+        return  np.abs(self.magneticMoments(          )['moments'][indices[0]+1]\
+                      *self.magneticMoments(field[0]+1)['moments'][indices[1]+1])
 
     def moment_quotient(self,field,indices):
-        return (self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
-               -self.magneticMoments(          )['moments'][indices[1]+1])\
-               /self.magneticMoments(field[0]+1)['moments'][indices[1]+1]
+        return 1.0 - np.abs(self.magneticMoments(          )['moments'][indices[1]+1]
+                           /self.magneticMoments(field[0]+1)['moments'][indices[1]+1])
 
     @staticmethod
     def name_interaction(first,second,distance):
@@ -178,45 +176,51 @@ class NaiveHeisenberg:
         self.crystal         = crystal
         self.crystal8        = crystal8
 
-    def initialize(self,mask,flipper):
+    def initialize(self,mask,flipper,magnetic_moments=None):
         self.flipper           = np.array(flipper)
         self.mask              = mask
         self.numberOfElements  = self.mask.count('$')
         mul                    = self.numberOfElements*(self.numberOfElements + 1)//2
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
-        self.kernel            = HeisenbergKernel(len(flipper)*mul,DefaultMoments(self.crystal))
+        if magnetic_moments is None:
+            self.kernel        = HeisenbergKernel(len(flipper)*mul,DefaultMoments(self.crystal))
+        else:
+            self.kernel        = HeisenbergKernel(len(flipper)*mul,magnetic_moments)
         return mul
 
-    def generate(self,mask,flipper):
-        mul = self.initialize(mask,flipper)
-        for (row,config),(I,atomI),atomJ in product(enumerate(self.flippings),
-                                                    enumerate(self.crystal  ),
-                                                              self.crystal8 ):
-            distance,offset = self.check_if_contributes(atomI,atomJ)
-            if not distance:
+    def generate(self,mask,flipper,magnetic_moments=None):
+        mul = self.initialize(mask,flipper,magnetic_moments)
+        print(self)
+        for (row,config),(idx_one,atom_one),atom_two\
+                in product(enumerate(self.flippings),enumerate(self.crystal),self.crystal8):
+            distance,offset = self.check_if_contributes(atom_one,atom_two)
+            if not distance or distance < 1e-2:
                 continue
             j = np.argwhere(np.abs(self.flipper - distance)<1e-2)
             if not j.size:
                 continue
             column = mul*j[0][0]+offset
-            if config[I] == config[atomJ[3]]:
-                self.systemOfEquations[row][column] -= self.kernel.add_correction((row,column),(atomJ[3],I))
+            if config[idx_one] == config[atom_two[3]]:
+                self.systemOfEquations[row][column] -=\
+                        self.kernel.add_correction( (row,column),(idx_one,atom_two[3]))
             else:
-                self.systemOfEquations[row][column] += self.kernel.add_interaction((row,column),(atomJ[3],I))
-                self.kernel.add_name(column,HeisenbergKernel.name_interaction(atomI[0],atomJ[0],distance))
-        self.clean_SoE()
+                self.systemOfEquations[row][column] +=\
+                        self.kernel.add_interaction((row,column),(idx_one,atom_two[3]))
+                self.kernel.add_name(column,
+                        HeisenbergKernel.name_interaction(atom_one[0],atom_two[0],distance))
+        self.remove_empty_columns()
         return self.systemOfEquations
 
-    def set_moments(self,magnetic_moments):
-        self.kernel.set_moments(magnetic_moments)
-
     def get_moments(self,idx=0):
-        return self.kernel.magneticMoments(idx)
+        return self.kernel.magneticMoments
+
+    def get_moment(self,idx=0):
+        return self.kernel.magneticMoments(idx)['moments']
 
     def get_average_moments(self):
         return self.kernel.avgMomentSq
 
-    def clean_SoE(self):
+    def remove_empty_columns(self):
         remover = self.kernel.clean(len(self.flipper))
         self.systemOfEquations = np.delete(self.systemOfEquations,remover,axis=1)
         self.systemOfEquations = self.systemOfEquations[:,0:len(self.flipper)]
@@ -246,11 +250,11 @@ class NaiveHeisenberg:
 
     def __str__(self):
         output = ""
-        for I,i in product(range(len(self.get_moments()['moments'])),
-                           range(len(self.get_moments))):
-            if i == 0:
+        for moment_id,set_id in product(
+            range(len(self.get_moment())),range(len(self.get_moments()))):
+            if set_id == 0:
                 output+="\n"
-            output+="% .2f  "%self.get_moments(i)['moments'][I+1]
+            output+="% .2f  "%self.get_moment(set_id)[moment_id+1]
         output+="\n"
         return output
 

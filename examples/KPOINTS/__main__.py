@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
 from sys import path,argv
 path.insert(0,r'../../')
 import numpy as np
@@ -54,11 +51,9 @@ def check(points,display):
     print_all(points(np.sqrt(0.5)),display)
     print("Just don't:".center(display))
     print_all(points(np.sqrt(1.0)),display)
+
 if __name__ == '__main__':
     display = 42
-#    points  = KPOINTS()
-#    print("POSCAR")
-#    check(points,display)
     for arg in argv[1:]:
         points = KPOINTS(arg)
         print(arg)

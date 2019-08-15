@@ -8,7 +8,7 @@ from sys import path
 path.insert(0,'../../')
 
 
-class showCell:
+class ShowCell:
     figure  = None # matplotlib figure
     subplot = None # subplot
 

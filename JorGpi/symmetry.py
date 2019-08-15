@@ -1,5 +1,5 @@
 from aux.format import print_label
-from aux.format import standard,line
+from aux.format import Standard,line
 
 def show_symmetry(symmetry):
     for i in range(symmetry['rotations'].shape[0]):
@@ -8,7 +8,7 @@ def show_symmetry(symmetry):
         translation = symmetry['translations'][i]
         print("  rotation:")
         for row in rotation:
-            print("     [%2d %2d %2d]" % (*rot,))
+            print("     [%2d %2d %2d]" % (*row,))
         print("  translation:")
         print("     (%8.5f %8.5f %8.5f)" % (*translation,))
 
@@ -25,7 +25,7 @@ def show_cell(lattice, positions, numbers):
 
 from aux.PeriodicTable import periodicTableElement
 def print_line(line,**kwargs):
-    kwargs = standard.fix(**kwargs)
+    kwargs = Standard.fix(**kwargs)
     kwargs['stream'].write("|"+(line).center(kwargs['linewidth'])+"|"+"\n")
 
 def get_equivalent_line(i,j,atom,wyck):
@@ -42,7 +42,7 @@ class WriteReport:
             self.comments = kwargs['comments']
         else:
             self.comments=["" for record in data]
-        self.kwargs = standard.fix(**kwargs)
+        self.kwargs = Standard.fix(**kwargs)
         self.data   = data
         self.write()
 

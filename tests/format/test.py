@@ -6,7 +6,7 @@ path.insert(0,r'../../')
 import time
 import numpy as np
 
-from aux.format import standard, Color
+from aux.format import Standard, Color
 from aux.format import print_vector
 from aux.format import print_atom
 from aux.format import print_case
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     print("Test of kwargs fixing:")
     testkwargs = {'linewidth' : 99, 'nonexistent' : 'yetIexist'}
     print(testkwargs)
-    testkwargs = standard.fix(**testkwargs)
+    testkwargs = Standard.fix(**testkwargs)
     print(testkwargs)
     line()
 
@@ -33,8 +33,8 @@ if __name__ == '__main__':
     print(vector,end=")\n")
     print("\tplain:")
     print_vector(vector)
-    print("\twith vectorStyle=Color.bf:")
-    print_vector(vector,vectorStyle=Color.bf)
+    print("\twith vectorStyle=Color.bold:")
+    print_vector(vector,vectorStyle=Color.bold)
     print("\twith linewidth=23:")
     print_vector(vector,linewidth=23)
     print("\twith end=\'\\nSTOP\\n\':")
@@ -46,8 +46,8 @@ if __name__ == '__main__':
     print(atom,end=")\n")
     print("\tplain:")
     print_atom(atom)
-    print("\twith vectorStyle=Color.bf:")
-    print_atom(atom,vectorStyle=Color.bf)
+    print("\twith vectorStyle=Color.bold:")
+    print_atom(atom,vectorStyle=Color.bold)
     print("\twith elementStyle=Color.darkred")
     print_atom(atom,elementStyle=Color.darkred)
     print("\twith end=\'\\nSTOP\\n\':")
@@ -60,12 +60,12 @@ if __name__ == '__main__':
     print(case,', **',settings,end=")\n",sep="")
     print("\tplain:")
     print_case(case,**settings)
-    print("\twith caseStyle=Color.bf:")
-    print_case(case,**settings,caseStyle=Color.bf)
-    print("\twith numberStyle=Color.bf:")
-    print_case(case,**settings,numberStyle=Color.bf)
-    print("\twith distanceStyle=Color.bf:")
-    print_case(case,**settings,distanceStyle=Color.bf)
+    print("\twith caseStyle=Color.bold:")
+    print_case(case,**settings,caseStyle=Color.bold)
+    print("\twith numberStyle=Color.bold:")
+    print_case(case,**settings,numberStyle=Color.bold)
+    print("\twith distanceStyle=Color.bold:")
+    print_case(case,**settings,distanceStyle=Color.bold)
     print("\twith wyckoffPosition=\'a\':")
     print_case(case,**settings,wyckoffPosition='a')
     print("\twith distance=1.23")

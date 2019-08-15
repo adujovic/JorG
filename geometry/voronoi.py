@@ -6,7 +6,7 @@ from sys import path
 path.insert(0,'../../')
 from matplotlib import colors as mplColors
 from itertools import product
-from geometry.showcell import showCell
+from geometry.showcell import ShowCell
 
 class Geometry:
     @staticmethod
@@ -24,7 +24,7 @@ class Voronoi:
     multipliers = [-1,0,1]
     def __init__(self,data=None):
         self.data = data
-        self.plotter = showCell(resolution=37)
+        self.plotter = ShowCell(resolution=37)
 
         self.fill_if_read()
 

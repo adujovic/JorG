@@ -5,7 +5,7 @@ from sys import path
 path.insert(0,r'../../../')
 import time
 import numpy as np
-from geometry.showcell import showCell
+from geometry.showcell import ShowCell
 
 def main():
     pass
@@ -18,13 +18,13 @@ if __name__ == '__main__':
                      [-1,-1, 1],
                      [-1,-1,-1]])
 
-    plotter = showCell()
+    plotter = ShowCell()
     plotter.add_sphere()
     plotter.add_polygon(points)
     plotter.show()
 
     for i in range(0,16,3):
-        plotter = showCell(resolution=i)
+        plotter = ShowCell(resolution=i)
         for j in range(-4,5):
             plotter.add_sphere(position=j*np.ones(3))
         plotter.show("plot_res%03d.png"%i)

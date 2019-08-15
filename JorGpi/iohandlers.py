@@ -199,22 +199,22 @@ from aux.format import print_crystal, print_moments
 class Msg:
     @staticmethod
     def print_equations(equations,isRedundant=False):
-        print_label("System of equations:",labelStyle=Color.bf)
+        print_label("System of equations:",labelStyle=Color.bold)
         for equation in equations:
             print_vector(equation)
         if isRedundant:
-            print_label("Redundant system of equations.",labelStyle=Color.bf)
-            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=Color.bf)
-            print_label("It may be better. But it may also mess everything.",labelStyle=Color.bf)
+            print_label("Redundant system of equations.",labelStyle=Color.bold)
+            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=Color.bold)
+            print_label("It may be better. But it may also mess everything.",labelStyle=Color.bold)
         else:
-            print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.bf)
+            print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.bold)
 
     @staticmethod
     def print_solver_status(configs,tmpFiles):
         print_label("Checking total number of configurations: %d"%configs,
-                        labelStyle=Color.bf+Color.darkred)
+                        labelStyle=Color.bold+Color.darkred)
         print_label("Preparing solver...",
-                      labelStyle=Color.bf+Color.blue)
+                      labelStyle=Color.bold+Color.blue)
         print_label('Running: ./asa/solver/start %s'%str(tmpFiles))
 
     @staticmethod
@@ -224,9 +224,9 @@ class Msg:
         except KeyError:
             print("placeholder",end="")
         try:
-            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=Color.bf)
+            print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=Color.bold)
         except KeyError:
-            print_label("Size: ?x?x?",labelStyle=Color.bf)
+            print_label("Size: ?x?x?",labelStyle=Color.bold)
         try:
             print_crystal(kwargs['crystal'],directions=kwargs['directions'])
         except KeyError:
@@ -234,7 +234,7 @@ class Msg:
         try:
             print_label("Reference atom in the system is No. %d:"%(kwargs['reference']+1),
                         atoms=[kwargs['crystal'][kwargs['reference']]],
-                        vectorStyle=Color.darkcyan,labelStyle=Color.bf)
+                        vectorStyle=Color.darkcyan,labelStyle=Color.bold)
         except KeyError:
             print("",end="")
         try:

@@ -9,9 +9,6 @@ import numpy as np
 import argparse as ap
 import re
 
-class error:
-    unexcepted = 12
-
 class Zero(dict):
     def __missing__(self,key):
         return 0.0
@@ -26,7 +23,7 @@ class EnergyConverter:
                     'K'  :    11604.51812}
     default = { 'moments'  : Zero(),
                 'units'    : 'meV' }
-    types = [ " whitout moments",
+    types = [ " without moments",
               "moments included" ]
 
     @staticmethod
@@ -61,13 +58,13 @@ class SmartPickUp:
         self.poscars = POSCARloader(*poscars)
         self.poscars.parse()
 
-    def read_MAGMOMs(self,*args):
+    def read_magmoms(self,*args):
         vaspruns = [ "%s/vasprun.xml"%arg for arg in args ]
-        self.MAGMOMs = MAGMOMloaderXML(*vaspruns,trapez=True)
-        self.MAGMOMs.parse()
+        self.magmoms = MAGMOMloaderXML(*vaspruns,trapez=True)
+        self.magmoms.parse()
 
     def read(self,*args,**kwargs):
-        self.read_MAGMOMs(*args)
+        self.read_magmoms(*args)
         self.read_poscars(*args)
         if 'reference' in kwargs:
             self.reference = self.poscars(0)['cell'][kwargs['reference']][1]
@@ -80,9 +77,9 @@ class SmartPickUp:
     def make_crystal(self,idx=0):
         self.crystal  = self.poscars(idx)['cell']
         try:
-            self.crystal  = [ [atom[0],atom[1],self.MAGMOMs.get_moments()[i+1]] for i,atom in enumerate(self.crystal) ]
+            self.crystal  = [ [atom[0],atom[1],self.magmoms.get_moments()[i+1]] for i,atom in enumerate(self.crystal) ]
         except KeyError as err:
-            print(self.MAGMOMs.get_moments())
+            print(self.magmoms.get_moments())
             print(err)
             exit(-1)
         self.crystal8 = apply_mirrors_xyz(self.poscars(0)['directions'],self.crystal)
@@ -102,17 +99,17 @@ class SmartPickUp:
         self.systemOfEquations      = []
         deltaEnergy                 = []
         self.flippingConfigurations = []
-        for i in range(1,len(self.MAGMOMs)):
+        for i in range(1,len(self.magmoms)):
             try:
-                deltaEnergy.append(self.MAGMOMs(i)['energy']-self.MAGMOMs(0)['energy'])
+                deltaEnergy.append(self.magmoms(i)['energy']-self.magmoms(0)['energy'])
             except TypeError:
-                print("VASP hasn't finished this run (%d/%d)"%(i,len(self.MAGMOMs)-1))
+                print("VASP hasn't finished this run (%d/%d)"%(i,len(self.magmoms)-1))
                 continue
             self.set_flipps(i)
         self.model             = NaiveHeisenberg(self.flippingConfigurations,self.crystal,self.crystal8)
-        self.model.MAGMOMs     = self.MAGMOMs
         self.flipped           = np.unique(np.where(self.flippingConfigurations)[1])
-        self.systemOfEquations = self.model.generate(self.namesOfInteractingAtoms,self.distances)
+        self.systemOfEquations = self.model.generate(self.namesOfInteractingAtoms,
+                                                     self.distances, self.magmoms)
         self.solver            = EquationSolver(self.systemOfEquations,deltaEnergy)
         self.solver.remove_tautologies()
 
@@ -125,8 +122,8 @@ class SmartPickUp:
         if atom[0] not in self.namesOfInteractingAtoms:
             self.flippingConfigurations[-1].append(False)
             return
-        momentA = self.MAGMOMs(0)['moments'][idx+1]
-        momentB = self.MAGMOMs(i)['moments'][idx+1]
+        momentA = self.magmoms(0)['moments'][idx+1]
+        momentB = self.magmoms(i)['moments'][idx+1]
         scalar = momentA * momentB
         if (abs(scalar) > 1e-5 and scalar < 0.0):
             self.flippingConfigurations[-1].append(True)

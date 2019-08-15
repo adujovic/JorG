@@ -166,7 +166,7 @@ class INCARsaver:
                 exit(Error.systemerror)
 
     @staticmethod
-    def copy_POSCAR(filename,flipname):
+    def copy_poscar(filename,flipname):
         try:
             shutil.copy2("%s/POSCAR"%filename , "%s/%s/POSCAR"%(filename,flipname))
         except OSError:
@@ -187,10 +187,10 @@ class INCARsaver:
     def save(self,fileName,flips):
         self.fileName = fileName
         INCARsaver.mkdir(fileName,"noFlip")
-        INCARsaver.copy_POSCAR(fileName,"noFlip")
+        INCARsaver.copy_poscar(fileName,"noFlip")
         self.write_incar("noFlip",np.zeros(len(self.crystal)))
         for i,flip in enumerate(flips):
             self.fileName = fileName
             INCARsaver.mkdir(fileName,"flip%05d"%i)
-            INCARsaver.copy_POSCAR(fileName,"flip%05d"%i)
+            INCARsaver.copy_poscar(fileName,"flip%05d"%i)
             self.write_incar("flip%05d"%i,flip)
