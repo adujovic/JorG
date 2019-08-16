@@ -3,12 +3,11 @@ from sys import argv
 import numpy as np
 
 def print_set(string,data):
-    DISPLAY = 42
-    print(string.center(DISPLAY))
-    KPOINTS.print_all(data,DISPLAY)
+    display = 42
+    print(string.center(display))
+    KPOINTS.print_all(data,display)
 
 if __name__ == '__main__':
-    display = 42
     for arg in argv[1:]:
         points = KPOINTS(arg)
         print("KPOINT multiplier proposition for %s:"%arg.center(display))
