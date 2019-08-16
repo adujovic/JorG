@@ -17,7 +17,7 @@ if __name__ == '__main__':
     pickerUpper.read(options('reference'),*options('directories'),reference=ref())
 
     print("Exchange interaction magnitude(s) in %s:"%options('units'))
-    Js = pickerUpper.solve(units=options('units'))
+    pickerUpper.solve(units=options('units'))
     print(pickerUpper)
 
     tracker += time.time()

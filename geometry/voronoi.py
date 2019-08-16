@@ -121,11 +121,11 @@ class Voronoi:
         vertices = np.array([self.diagram.vertices[indx] for indx in region])
         self.radius = self.cutOff*2
         self.convexHull = scipy.spatial.ConvexHull(vertices)
-        WSradius = Geometry.radius_from_volume(self.convexHull.volume)
+        wsRadius = Geometry.radius_from_volume(self.convexHull.volume)
         self.add_convex_hull(vertices,atom,name)
         self.plotter.add_sphere(atom,self.radius,color=self.atomColors[name],alpha=1.0)
         self.aspect_data.append(Voronoi.support_xyz(atom,self.radius))
-        return (self.radius,WSradius)
+        return (self.radius,wsRadius)
 
     def show(self,name=None):
         self.plotter.show(name)

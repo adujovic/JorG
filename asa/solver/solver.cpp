@@ -14,7 +14,9 @@ constexpr size_t SITESNUMBER = _SITESNUMBER;
     aux::read_supercell(system.supercell,_supercell);
     aux::read_flippables(system.flippable,_flippable);
 
+#ifndef _QUIET
     aux::greetings();
+#endif
 
 // *****************************************************************************************
 // *******************************  INITIALIZE ENGINE    ***********************************
@@ -79,8 +81,10 @@ constexpr size_t SITESNUMBER = _SITESNUMBER;
 	    if(x.count() > upperlimit) continue;
 	    if(x.count() > 0.5*mask.count()) x.flip();
 
+#ifndef _QUIET
         std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
         aux::print_state(x,reference,mask);
+#endif
 	    solutions.insert(x);
         ++iteration;
 	    if(solutions.size() >= unique_flips) break;

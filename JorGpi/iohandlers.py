@@ -210,12 +210,11 @@ class Msg:
             print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.bold)
 
     @staticmethod
-    def print_solver_status(configs,tmpFiles):
+    def print_solver_status(configs,tmpFiles,**kwargs):
         print_label("Checking total number of configurations: %d"%configs,
                         labelStyle=Color.bold+Color.darkred)
-        print_label("Preparing solver...",
+        print_label("Preparing and running ASA-solver...",
                       labelStyle=Color.bold+Color.blue)
-        print_label('Running: ./asa/solver/start %s'%str(tmpFiles))
 
     @staticmethod
     def print_crystal_info(**kwargs):
@@ -226,7 +225,7 @@ class Msg:
         try:
             print_label("Size: %dx%dx%d"%(kwargs['copies']),labelStyle=Color.bold)
         except KeyError:
-            print_label("Size: ?x?x?",labelStyle=Color.bold)
+            print_label("Size: 1x1x1",labelStyle=Color.bold)
         try:
             print_crystal(kwargs['crystal'],directions=kwargs['directions'])
         except KeyError:

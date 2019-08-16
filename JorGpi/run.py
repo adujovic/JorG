@@ -5,7 +5,7 @@ import numpy as np
 
 import JorGpi.symmetry as symmetry
 import argv
-from aux.format import print_case
+from aux.format import print_case,print_label,Color
 import JorGpi.loadsave as loadsave
 import JorGpi.generator as generator
 from JorGpi.equivalent import FindFlips
@@ -159,8 +159,10 @@ class JorGpi:
         options = {'extra_compile_args': ['-std=c++17','-O3','-Wall','-Wextra','-pedantic','-fopenmp'],
                    'extra_link_args'   : ['-std=c++17','-lm','-lgsl','-lgslcblas','-fopenmp']}
 
-        def __init__(self,JorGpiObject):
+        def __init__(self,JorGpiObject,**kwargs):
             self.options['define_macros'] = [('_SITESNUMBER', str(len(JorGpiObject.crystal)))]
+            if 'verbose' in kwargs:
+                self.options['define_macros'].append(('_%s'%kwargs['verbose'].upper(), 0))
             self.builder = Crun('asa/asa.cpp',
                                 'asa/ising.cpp',
                                 'asa/solver/solver.cpp',
@@ -176,7 +178,8 @@ class JorGpi:
             self.builder('solver',*self.tmpFiles.get_files(),jorgpiobject.newReference,2*jorgpiobject.nearestNeighbor+4)
 
         def __del__(self):
-            Msg.print_solver_status(len(np.loadtxt('best.flips',bool)),self.tmpFiles)
+            print_label("Found %d unique configurations"%len(np.loadtxt('best.flips',bool)),
+                         labelStyle=Color.bold+Color.darkgreen)
             del self.tmpFiles
             del self.builder
 
@@ -188,12 +191,14 @@ class JorGpi:
             self.flippingConfigurations=[self.flippingConfigurations]
 
     def build_system_of_equations(self,flippingConfigurations):
-        gen = NaiveHeisenberg(flippingConfigurations,self.crystal,self.crystal8)
+        gen = NaiveHeisenberg(np.append([[ False ]*flippingConfigurations.shape[1]],
+                                                   flippingConfigurations,axis=0),
+                                                   self.crystal,self.crystal8)
 
         systemOfEquations = gen.generate(self.currentOptions('mask'),[flip[2] for flip in self.flipper])
 
         eqs = EquationSolver(systemOfEquations,np.zeros(len(systemOfEquations)))
-        systemOfEquations = eqs.remove_tautologies()
+        systemOfEquations,_ = eqs.remove_tautologies()
         remover = eqs.remove_linears()
         if remover:
             flippingConfigurations = np.delete(flippingConfigurations, tuple(remover), axis=0)
@@ -216,11 +221,11 @@ class JorGpi:
         Msg.print_equations(self.systemOfEquations,self.currentOptions('redundant'))
         np.savetxt(self.outDirName+'/systemOfEquations.txt',np.array(self.systemOfEquations))
 
-    def possible_configurations(self):
+    def possible_configurations(self,**kwargs):
         try:
             su.copy('best.flips.rerun','best.flips')
         except (OSError,FileNotFoundError):
-            solver = self.AdaptiveSimulatedAnnealing(self)
+            solver = self.AdaptiveSimulatedAnnealing(self,**kwargs)
             solver(self)
             del solver
         self.load_from_annealing()

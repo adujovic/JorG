@@ -1,3 +1,5 @@
+from sys import path
+path.insert(0,r'../')
 import unittest
 from argv import Options
 

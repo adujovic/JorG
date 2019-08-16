@@ -4,12 +4,13 @@ path.insert(0,r'../')
 from pickup.pickup import SmartPickUp,Reference,CommandLineOptions
 
 class TestPickupIron(unittest.TestCase):
-    def options(self,*args):
+    @staticmethod
+    def options(*args):
         return CommandLineOptions(*args)
 
     def test_iron_001(self):
-        _input = "test -R _VASP/Fe/noFlip -D _VASP/Fe/flip00000 -E Fe -J1 -U mRy".split(" ") 
-        options = self.options(*_input)
+        _input = "test -R _VASP/Fe/noFlip -D _VASP/Fe/flip00000 -E Fe -J1 -U mRy".split(" ")
+        options = TestPickupIron.options(*_input)
         elements = ''.join(options('elements'))
         self.assertEqual(elements,'Fe$')
 
@@ -21,6 +22,6 @@ class TestPickupIron(unittest.TestCase):
         pickerUpper.read(options('reference'),*options('directories'),reference=ref())
 
         self.assertEqual(options('units'),'mRy')
-        Js = pickerUpper.solve(units=options('units')).flatten()
-        self.assertEqual(Js[0],1.1861042008301703)
-        self.assertEqual(Js[1],4.157645364906014)
+        J_ij = pickerUpper.solve(units=options('units')).flatten()
+        self.assertEqual(J_ij[0],1.1861042008301703)
+        self.assertEqual(J_ij[1],4.157645364906014)

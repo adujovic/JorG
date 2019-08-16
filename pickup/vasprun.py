@@ -89,7 +89,7 @@ class VaspRunXML:
             self.calculate_moment(ion,partial)
 
     @staticmethod
-    def DOS_below_ef(dos,fermi_energy):
+    def dos_below_ef(dos,fermi_energy):
         return np.delete(np.array(dos),
                 np.argwhere(np.array(dos)[:,0] >= fermi_energy).flatten(),axis=0)
 
@@ -105,8 +105,8 @@ class VaspRunXML:
             return np.sum(np.dot(deltaArgument,function))
 
     def calculate_moment(self,ion,partial):
-        ups = VaspRunXML.DOS_below_ef(self.partialDOS[ion][1],self.fermi_energy)
-        dns = VaspRunXML.DOS_below_ef(self.partialDOS[ion][2],self.fermi_energy)
+        ups = VaspRunXML.dos_below_ef(self.partialDOS[ion][1],self.fermi_energy)
+        dns = VaspRunXML.dos_below_ef(self.partialDOS[ion][2],self.fermi_energy)
         if partial:
             self.moments[ion]= ([self.integrate(ups[:,1   ] - dns[:,1   ],ups[:,0]),   #moment @ s
                                  self.integrate(ups[:,2:5 ] - dns[:,2:5 ],ups[:,0]),   #moment @ p

@@ -1,3 +1,5 @@
+from sys import path
+path.insert(0,r'../')
 from POSCARloader import POSCARloader
 import numpy as np
 import unittest

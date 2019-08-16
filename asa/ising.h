@@ -343,7 +343,9 @@ void   isingStep   (const gsl_rng* random __attribute__((unused)), void* state, 
 
 template<size_t N>
 void   isingPrint  (void* state){
+#ifndef _QUIET
     std::cout<<'\t'<<static_cast<LatticeType<N,IsingModel<N>>*>(state)->nodes;
+#endif
 }
 
 template<size_t N, class Model>

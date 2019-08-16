@@ -1,3 +1,5 @@
+from sys import path
+path.insert(0,r'../')
 import unittest
 import numpy as np
 from JorGpi.generator import NearestNeighborsGenerator
@@ -33,7 +35,7 @@ class TestNearestNeighborsGenerator(unittest.TestCase):
         _,crystal,_,_,_,_ = self.generator(self.neighbour)
         self.assertEqual(len(crystal), self.size)
 
-    def test_generator_cutOff(self):
+    def test_generator_cutoff(self):
         cutOff,_,_,_,_,_ = self.generator(self.neighbour)
         self.assertIsInstance(cutOff,np.float)
         self.assertAlmostEqual(cutOff,self.cutOff)

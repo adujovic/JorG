@@ -1,46 +1,53 @@
 #!/bin/bash
 ERR=0
 
-echo "python3 -m unittest tests.POSCARloader._unittest -v"
-python3 -m unittest tests.POSCARloader._unittest -v
+cd tests
+ln -s ../asa
+ln -s ../_INPUT
+ln -s ../_VASP
+echo "testing module POSCARloader"
+python3 -m unittest test_POSCARloader -v
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST
 fi
 
-echo "python3 -m unittest tests.NearestNeighborsGenerator._unittest -v"
-python3 -m unittest tests.NearestNeighborsGenerator._unittest -v
+echo "testing module NearestNeighborsGenerator"
+python3 -m unittest test_generator -v
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST
 fi
 
-echo "python3 -m unittest tests.argv._unittest -v"
-python3 -m unittest tests.argv._unittest -v
+echo "testing module argv"
+python3 -m unittest test_argv -v
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST
 fi
 
-echo "python3 -m unittest tests/XML/_unittest.py -v"
-python3 -m unittest tests/XML/_unittest.py -v
+echo "testing module xml"
+python3 -m unittest test_xml -v
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST
 fi
 
-echo "python3 -m unittest tests/JorGpi.py -v"
-python3 -m unittest tests/JorGpi.py -v
+echo "testing module JorGpi"
+python3 -m unittest test_jorgpi -v
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST
 fi
 
-echo "python3 -m unittest tests/pickup.py -v"
-python3 -m unittest tests/pickup.py -v
+echo "testing module pickup"
+python3 -m unittest test_pickup -v
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST
 fi
 
+rm asa _INPUT _VASP
+rm -r output
+cd ..
 exit $ERR

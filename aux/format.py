@@ -50,8 +50,8 @@ def print_vector(vector,**kwargs):
     kwargs = safe_update(kwargs,{'vectorStyle' : Color.darkcyan})
     txt = ' [ ' + kwargs['vectorStyle']
     try:
-        txt += len(vector)*' {:=10.5f}'.format(*vector,)
-    except IndexError:
+        txt += ''.join([' {:=10.5f}'.format(field) for field in vector])
+    except (IndexError,TypeError):
         txt += str(vector)
     txt += Color.end + ' ] '
     output  = "|"
@@ -134,9 +134,9 @@ def print_axes(directions,**kwargs):
                               +'Crystal axes:'.center(kwargs['linewidth'])
                               +Color.end+"|"+'\n')
     names = color_names('a⃗','b⃗','c⃗')
-    for n,d in zip(names,directions):
-        data = "{:s} = [ {:= 10.5f} {:= 10.5f} {:= 10.5f} ]".format(n,*d,)
-        kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(n)-1)+"|"+'\n')
+    for name,direction in zip(names,directions):
+        data = "{:s} = [ {:= 10.5f} {:= 10.5f} {:= 10.5f} ]".format(name,*direction,)
+        kwargs['stream'].write('|'+data.center(kwargs['linewidth']+len(name)-1)+"|"+'\n')
 
 def print_directions(directions,**kwargs):
     kwargs['stream'].write("|"+kwargs['labelStyle']

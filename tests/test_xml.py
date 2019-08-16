@@ -1,3 +1,5 @@
+from sys import path
+path.insert(0,r'../')
 from pickup.vasprun import VaspRunXML
 import unittest
 from itertools import product

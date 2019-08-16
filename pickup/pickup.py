@@ -88,9 +88,9 @@ class SmartPickUp:
         self.distances = set([])
         self.make_crystal(idx)
         for atom in self.poscars(idx)['cell']:
-            d = np.around(np.linalg.norm(atom[1]-self.reference),decimals=2)
+            distance = np.around(np.linalg.norm(atom[1]-self.reference),decimals=2)
             if atom[0] in self.namesOfInteractingAtoms:
-                self.distances.add(d)
+                self.distances.add(distance)
         self.distances = np.sort(np.array(list(self.distances)))[1:1+self.numberOfNeighbors]
 
     # for sorted!
@@ -136,9 +136,9 @@ class SmartPickUp:
         except AttributeError:
             self.get_system_of_equations()
 
-        self.Js = np.array(EnergyConverter.convert(*(self.solver.solve()),
+        self.J_ij = np.array(EnergyConverter.convert(*(self.solver.solve()),
                            moments=self.model.get_average_moments(), **kwargs))
-        return self.Js
+        return self.J_ij
 
     def __str__(self):
         metaData = self.model.get_metadata()
@@ -148,8 +148,8 @@ class SmartPickUp:
         except AttributeError:
             return "Error"
         try:
-            strout += ''.join([ ("  %s:\t"+len(self.Js[0])*"  % 8.3f    "+"\n")\
-                                %(typeName,*self.Js[i],) for i,typeName in enumerate(self.types) ])
+            strout += ''.join([ ("  %s:\t"+len(self.J_ij[0])*"  % 8.3f    "+"\n")\
+                                %(typeName,*self.J_ij[i],) for i,typeName in enumerate(self.types) ])
             strout += '        <|µ|> (µB):       '
             strout += ''.join([ "% 8.3f      "%mu   for mu in metaData.moments]) + '\n'
         except AttributeError:

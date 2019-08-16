@@ -96,11 +96,10 @@ class DefaultMoments:
     class Identity(dict):
         def __missing__(self,key):
             return 0.0
-
     def __init__(self,crystal,length):
         self.moments = DefaultMoments.Identity()
         for idx,atom in enumerate(crystal):
-            self.moments[idx] = atom[2]
+            self.moments[idx+1] = atom[2]
         self.length  = length
     def __call__(self,idx=0):
         return {'energy': 0.0, 'moments': self.moments}
@@ -201,7 +200,6 @@ class NaiveHeisenberg:
 
     def generate(self,mask,flipper,magnetic_moments=None):
         mul = self.initialize(mask,flipper,magnetic_moments)
-        print(self)
         for (row,config),(idx_one,atom_one),atom_two\
                 in product(enumerate(self.flippings),enumerate(self.crystal),self.crystal8):
             distance,offset = self.check_if_contributes(atom_one,atom_two)
