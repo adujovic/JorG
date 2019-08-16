@@ -47,6 +47,13 @@ if [ "$TST" -ne "0" ]; then
     ERR=$TST
 fi
 
+echo "testing module KPOINTS"
+python3 -m unittest test_kpoints -v
+TST=$?
+if [ "$TST" -ne "0" ]; then
+    ERR=$TST
+fi
+
 rm asa _INPUT _VASP
 rm -r output
 exit $ERR

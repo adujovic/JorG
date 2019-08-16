@@ -172,7 +172,7 @@ class JorGpi:
             self.tmpFiles.write_input(JorGpiObject.allFlippable,JorGpiObject.crystal)
             self.tmpFiles.write_supercell(JorGpiObject.crystal)
             self.tmpFiles.write_directions(JorGpiObject.extraDirections)
-            Msg.print_solver_status(int(2**len(JorGpiObject.allFlippable)),self.tmpFiles)
+            Msg.print_solver_status(int(2**len(JorGpiObject.allFlippable)))
 
         def __call__(self,jorgpiobject):
             self.builder('solver',*self.tmpFiles.get_files(),jorgpiobject.newReference,2*jorgpiobject.nearestNeighbor+4)

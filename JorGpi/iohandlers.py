@@ -210,7 +210,7 @@ class Msg:
             print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.bold)
 
     @staticmethod
-    def print_solver_status(configs,tmpFiles):
+    def print_solver_status(configs):
         print_label("Checking total number of configurations: %d"%configs,
                         labelStyle=Color.bold+Color.darkred)
         print_label("Preparing and running ASA-solver...",

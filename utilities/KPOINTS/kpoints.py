@@ -1,11 +1,11 @@
-from sys import path,argv
+from sys import path
 path.insert(0,r'../../')
 import numpy as np
 from POSCARloader import POSCARloader
 
 class KPOINTS:
     def __init__(self,POSCAR="POSCAR",resolution=0.001):
-        self.multipliers = np.arange(1.0,100,resolution)
+        self.multipliers = np.arange(1.0,89,resolution)
         loader = POSCARloader(POSCAR)
         loader.parse()
         self.directions = loader()['directions']
@@ -35,26 +35,7 @@ class KPOINTS:
                 newlyFound.append([justFound,err])
         return newlyFound
 
-def print_all(records,display):
-    for record,error in records:
-        print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*record,error).center(display))
-
-def check(points,display):
-    print("KPOINT multiplier proposition:".center(display))
-    print("Good:".center(display))
-    print_all(points(np.sqrt(1e-3)),display)
-    print("Decent:".center(display))
-    print_all(points(np.sqrt(1e-2)),display)
-    print("Plausible:".center(display))
-    print_all(points(np.sqrt(1e-1)),display)
-    print("Borderline terrible:".center(display))
-    print_all(points(np.sqrt(0.5)),display)
-    print("Just don't:".center(display))
-    print_all(points(np.sqrt(1.0)),display)
-
-if __name__ == '__main__':
-    display = 42
-    for arg in argv[1:]:
-        points = KPOINTS(arg)
-        print(arg)
-        check(points,display)
+    @staticmethod
+    def print_all(records,display):
+        for record,error in records:
+            print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*record,error).center(display))
