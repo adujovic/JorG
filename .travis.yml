@@ -7,20 +7,18 @@ branches:
 matrix:
   include:
     language:
-      - cpp
-      install:
-        - sudo apt update
-        - sudo apt install gsl
-        - sudo apt install gcc-7*
-    language:
       - python
-      python:
-        - "3.5"
-        - "3.6"
-        - "3.7"
-      install:
-        - pip install -r requirements.txt
-        - pip install -r requirements_tests.txt	
-      script:
-        - ./run_all_tests.sh
-        - ./coverage.sh
+      - cpp
+    python:
+      - "3.5"
+      - "3.6"
+      - "3.7"
+    install:
+      - sudo apt update
+      - sudo apt install gsl
+      - sudo apt install gcc-7*
+      - pip install -r requirements.txt
+      - pip install -r requirements_tests.txt	
+    script:
+      - ./run_all_tests.sh
+      - ./coverage.sh

@@ -13,4 +13,3 @@ rm tests/coverage.xml
 cd tests
 rm asa _INPUT _VASP
 rm -r output
-cd ..

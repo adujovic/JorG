@@ -49,5 +49,4 @@ fi
 
 rm asa _INPUT _VASP
 rm -r output
-cd ..
 exit $ERR
