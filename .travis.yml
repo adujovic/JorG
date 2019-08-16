@@ -1,18 +1,26 @@
-language:
-  - python
+env:
+  global:
+    - CODACY_PROJECT_TOKEN="020e3d76de3d4467b4997e5d5f20b88a"
 branches:
   only:
     - experimental
-python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.7"
-install:
-  - pip install -r requirements.txt
-  - pip install -r requirements_tests.txt	
-script:
-  - ./run_all_tests.sh
-  - ./coverage.sh 
-codecov:
-  token: 51ab1716-48d4-456b-9f4a-1b3a0c47eecf
+matrix:
+  include:
+    language:
+      - cpp
+      install:
+        - sudo apt update
+        - sudo apt install gsl
+        - sudo apt install gcc-7*
+    language:
+      - python
+      python:
+        - "3.5"
+        - "3.6"
+        - "3.7"
+      install:
+        - pip install -r requirements.txt
+        - pip install -r requirements_tests.txt	
+      script:
+        - ./run_all_tests.sh
+        - ./coverage.sh 
