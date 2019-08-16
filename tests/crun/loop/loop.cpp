@@ -1,7 +1,11 @@
 #include "loop.h"
 
-void loop(int N){
-    for(int i=0; i<N; ++i)
+int loop(int N){
+    int sum = 0;
+    for(int i=0; i<N; ++i){
+        sum += i;
         std::cout<<i<<" ";
+    }
     std::cout<<std::endl;
+    return sum;
 }

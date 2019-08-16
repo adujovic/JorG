@@ -124,3 +124,8 @@ best.flips
 .*.swp
 
 fix.sh
+
+#CMake
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake

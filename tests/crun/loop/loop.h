@@ -3,5 +3,5 @@
 #include <iostream>
 
 extern "C"
-void loop(int);
+int loop(int);
 #endif
