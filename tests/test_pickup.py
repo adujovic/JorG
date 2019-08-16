@@ -22,6 +22,6 @@ class TestPickupIron(unittest.TestCase):
         pickerUpper.read(options('reference'),*options('directories'),reference=ref())
 
         self.assertEqual(options('units'),'mRy')
-        J_ij = pickerUpper.solve(units=options('units')).flatten()
-        self.assertEqual(J_ij[0],1.1861042008301703)
-        self.assertEqual(J_ij[1],4.157645364906014)
+        _J_ij = pickerUpper.solve(units=options('units')).flatten()
+        self.assertEqual(_J_ij[0],1.1861042008301703)
+        self.assertEqual(_J_ij[1],4.157645364906014)

@@ -6,7 +6,7 @@ ln -s ../asa ./
 ln -s ../_INPUT ./
 ln -s ../_VASP ./
 echo "testing module POSCARloader"
-python3 -m unittest test_POSCARloader -v
+python3 -m unittest test_poscar_loader -v
 TST=$?
 if [ "$TST" -ne "0" ]; then
     ERR=$TST

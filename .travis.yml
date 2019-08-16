@@ -23,4 +23,4 @@ matrix:
         - pip install -r requirements_tests.txt	
       script:
         - ./run_all_tests.sh
-        - ./coverage.sh 
+        - ./coverage.sh

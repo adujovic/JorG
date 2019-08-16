@@ -136,9 +136,9 @@ class SmartPickUp:
         except AttributeError:
             self.get_system_of_equations()
 
-        self.J_ij = np.array(EnergyConverter.convert(*(self.solver.solve()),
+        self._J_ij = np.array(EnergyConverter.convert(*(self.solver.solve()),
                            moments=self.model.get_average_moments(), **kwargs))
-        return self.J_ij
+        return self._J_ij
 
     def __str__(self):
         metaData = self.model.get_metadata()
@@ -148,8 +148,8 @@ class SmartPickUp:
         except AttributeError:
             return "Error"
         try:
-            strout += ''.join([ ("  %s:\t"+len(self.J_ij[0])*"  % 8.3f    "+"\n")\
-                                %(typeName,*self.J_ij[i],) for i,typeName in enumerate(self.types) ])
+            strout += ''.join([ ("  %s:\t"+len(self._J_ij[0])*"  % 8.3f    "+"\n")\
+                                %(typeName,*self._J_ij[i],) for i,typeName in enumerate(self.types) ])
             strout += '        <|µ|> (µB):       '
             strout += ''.join([ "% 8.3f      "%mu   for mu in metaData.moments]) + '\n'
         except AttributeError:
