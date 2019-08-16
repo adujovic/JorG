@@ -2,9 +2,9 @@
 ERR=0
 
 cd tests
-ln -s ../asa
-ln -s ../_INPUT
-ln -s ../_VASP
+ln -s ../asa ./
+ln -s ../_INPUT ./
+ln -s ../_VASP ./
 echo "testing module POSCARloader"
 python3 -m unittest test_POSCARloader -v
 TST=$?
