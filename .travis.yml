@@ -14,9 +14,9 @@ matrix:
       - "3.6"
       - "3.7"
     install:
-      - sudo ./.install.gsl.sh
       - pip install -r requirements.txt
       - pip install -r requirements_tests.txt	
     script:
+      - sudo ./.install.gsl.sh
       - ./run_all_tests.sh
       - ./coverage.sh
