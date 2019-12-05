@@ -10,7 +10,7 @@ def get_number_of_pictures(directions,cutOff,referenceAtom):
     """
         Finding the amount of copies
         of the original SuperCell
-    
+
               .---------------------------.
              / \                           \
             /   \                           \

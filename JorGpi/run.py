@@ -53,7 +53,9 @@ class JorGpi:
             self.cell,self.directions = VariableFixer.from_refined(refinedCell)
 
     def symmetry_run(self):
-#   Checking the symmetry of the input
+        """
+            Checking the symmetry of the input
+                                                """
         symmetryStandard,symmetryRefined = self.symmetry.get_standarized()
         symmetry.WriteReport([self.symmetry.symmetry,symmetryStandard,symmetryRefined],
             comments=["(1) the crude input cell",

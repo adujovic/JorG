@@ -28,6 +28,3 @@ if __name__ == '__main__':
     nanosec  = int(1e9*(tracker-int(tracker)))
     print("Runntime of %02d:%02d:%02d.%09d"%(  hours, minutes,
                                              seconds, nanosec))
-                                             
-                                             
-                                             
