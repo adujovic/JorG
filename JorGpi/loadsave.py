@@ -19,9 +19,9 @@ class INCARloader:
     settings = {'fileName'  : "INCAR"}
 
     def __init__(self,cell,**kwargs):
-#    """
-#        Loading INCAR
-#                                        """
+        """
+            Loading INCAR
+        """
         self.settings.update(kwargs)
         self.incarFile = open(self.settings['fileName'],"r")
         self.oldMoments = []
@@ -59,9 +59,9 @@ class SaveXYZ:
                 'selectedAtoms': None}
 
     def __init__(self,crystal,**kwargs):
-#    """
-#        Saving data to xyz-style file
-#                                        """
+        """
+            Saving data to xyz-style file
+                                            """
         self.settings.update(kwargs)
 
         self.xyzFile = open(self.settings['fileName'],"w+")
@@ -73,7 +73,7 @@ class SaveXYZ:
 
     def write_line(self,i,atom):
         self.xyzFile.write("%s"%atom[0])
-        self.xyzFile.write(" %.10f %.10f %.10f"%(*atom[1],))
+        self.xyzFile.write(" %.10f %.10f %.10f"%tuple(atom[1]))
         vector = 2*np.random.ranf(3)-1.0
         vector = 0.2*vector/np.linalg.norm(vector)
         try:
@@ -98,9 +98,9 @@ class SavePOSCAR:
                 'crystal'     : None}
 
     def __init__(self,data,**kwargs):
-#    """
-#        Saving data to POSCAR file
-#                                    """
+        """
+            Saving data to POSCAR file
+        """
         self.settings.update(kwargs)
         if self.settings['crystal'] is None:
             self.settings['crystal'] = data['cell']

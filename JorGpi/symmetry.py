@@ -8,7 +8,7 @@ def show_symmetry(symmetry):
         translation = symmetry['translations'][i]
         print("  rotation:")
         for row in rotation:
-            print("     [%2d %2d %2d]" % (*row,))
+            print("     [%2d %2d %2d]" %tuple(row))
         print("  translation:")
         print("     (%8.5f %8.5f %8.5f)" % (*translation,))
 
@@ -57,7 +57,9 @@ class WriteReport:
         wyckoffCount   = dict.fromkeys(set(self.data[index]['wyckoffs']),0)
         print_line(self.comments[index],**self.kwargs)
         line(**self.kwargs)
-        print_line("Spacegroup: %s (%d) "%(self.data[index]['international'],self.data[index]['number']),**self.kwargs)
+        print_line("Spacegroup: %s (%d) "%(self.data[index]['international'],
+                                           self.data[index]['number']),
+                                           **self.kwargs)
         print_line("Mapping to equivalent atoms with the Wyckoff positions:",**self.kwargs)
 
         for i,(j,atom,wyck) in enumerate(zip(self.data[index]['equivalent_atoms'],

@@ -151,8 +151,8 @@ class HeisenbergKernel:
         return "%s-%s @%.2f"%(first,second,distance)
 
     def clean(self,max_size):
-        remover =               [ i for  i,name in enumerate(self.interactionNames) if name is None ]
-        self.interactionNames = [ name for name in self.interactionNames        if name is not None ]
+        remover =               [ i for i,name in enumerate(self.interactionNames) if name is None]
+        self.interactionNames = [ name for name in self.interactionNames if name is not None ]
         self.clear(remover)
         self.avgMomentSq      = np.array(self.avgMomentSq)  /np.array(self._occMoments)
         try:
@@ -193,7 +193,9 @@ class NaiveHeisenberg:
         mul                    = self.numberOfElements*(self.numberOfElements + 1)//2
         self.systemOfEquations = np.zeros((len(self.flippings),len(flipper)*mul))
         if magnetic_moments is None:
-            self.kernel        = HeisenbergKernel(len(flipper)*mul,DefaultMoments(self.crystal,len(self.flippings)))
+            self.kernel        = HeisenbergKernel(len(flipper)*mul,
+                                                  DefaultMoments(self.crystal,
+                                                  len(self.flippings)))
         else:
             self.kernel        = HeisenbergKernel(len(flipper)*mul,magnetic_moments)
         return mul

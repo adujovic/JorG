@@ -66,7 +66,7 @@ def print_atom(atom,**kwargs):
                                  'center'       : False})
     output  = kwargs['elementStyle'] + str(atom[0]) + Color.end
     output += ' [ ' + kwargs['vectorStyle']
-    output += '{:= 10.5f} {:= 10.5f} {:= 10.5f}'.format(*atom[1],)
+    output += '% 10.5f % 10.5f % 10.5f'%tuple(atom[1])
     output += Color.end + ' ] '
     if kwargs['center']:
         offset = len(kwargs['elementStyle'] + Color.end + kwargs['vectorStyle']+Color.end)

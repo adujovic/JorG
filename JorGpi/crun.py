@@ -21,7 +21,7 @@ class Crun:
 
         if 'name' in kwargs:
             self.name = kwargs['name']
-            del compilerOptions['name']
+            del self.compilerOptions['name']
         else:
             self.name = re.sub('^.*/','',args[0])
             self.name = re.sub('\..*$','',self.name)
@@ -38,7 +38,8 @@ class Crun:
         self.search_for_library()
 
     def search_for_library(self):
-        match = [re.match('^%s.*\.so'%self.name,entry.name) for entry in scandir('%s-lib'%(self.name))]
+        match = [re.match('^%s.*\.so'%self.name,entry.name)\
+                 for entry in scandir('%s-lib'%(self.name))]
         try:
             while None in match:
                 match.remove(None)

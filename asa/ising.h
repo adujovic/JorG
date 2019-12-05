@@ -198,11 +198,6 @@ public:
     }
 
     template<class T>
-    auto add_interaction(T interaction) -> decltype((TwoSiteInteraction&&)(tester<T>)(interaction),void()){
-        hamiltonian.push_back(interaction);
-    }
-
-    template<class T>
     auto add_interaction(T interaction) -> decltype((TwoSiteInteraction&)(tester<T>)(interaction),void()){
         hamiltonian.push_back(interaction);
     }

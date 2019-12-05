@@ -24,7 +24,7 @@ class POSCARloader:
                     #remove double white characters
                     clearTxt = [re.sub("\s+"," ",line) for line in clearTxt]
                     self.rawTxt.append(clearTxt)
-            except FileNotFoundError:
+            except OSError:
                 print("File \"%s\" not found!"%inputName)
             except Exception:
                 print("Unexcepted error!")
@@ -75,7 +75,8 @@ class POSCARloader:
 
     @staticmethod
     def parse_atom_name(text):
-        found = re.search("[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([a-zA-Z]+).*",text)
+        found = re.search(
+"[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([a-zA-Z]+).*",text)
         if found:
             return found.group(1)
         return None
@@ -83,7 +84,7 @@ class POSCARloader:
     @staticmethod
     def parse_constrains(text):
         found = re.search(
-         "[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([tTfF]).*\s([tTfF]).*\s([tTfF]).*",text)
+"[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s[\-\+]?\d+\.?\d*\s([tTfF]).*\s([tTfF]).*\s([tTfF]).*",text)
         if not found:
             return None
         constrains = [False, False, False]

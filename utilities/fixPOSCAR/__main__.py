@@ -11,7 +11,7 @@ def save_vanilla_poscar(filename,data):
         vaspFile.write("\n1.0\n")
         invDirections = np.linalg.inv(data['directions'])
         for direction in data['directions']:
-            vaspFile.write(3*"  %.10f"%(*direction,)+"\n")
+            vaspFile.write(3*"  %.10f"%tuple(direction)+"\n")
         for atomName in data['atomNames']:
             vaspFile.write("%s "%atomName)
         vaspFile.write("\n")

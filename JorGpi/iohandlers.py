@@ -86,10 +86,10 @@ color $SURF translucent [%d,%d,%d]"""
             stream.write(JmolVisualization.scriptText%(
                 kwargs['scale'],
                 kwargs['vector'],
-               *kwargs['background'],
-               *kwargs['center'],
+                *kwargs['background'],
+                *kwargs['center'],
                 kwargs['radius'],
-               *kwargs['color'],))
+                *kwargs['color'],))
 
 from os import remove
 class TemporaryFiles:
@@ -147,7 +147,7 @@ class VariableFixer:
             if "$"+atom[0]+"$" in mask:
                 return atom,i
         print("Error:\n%s\nare not in input file!"%re.sub('\$',' ',mask))
-        exit(errors.no_reference)
+        exit(Errors.no_reference)
 
     @staticmethod
     def from_refined(refinedCell):
@@ -203,11 +203,15 @@ class Msg:
         for equation in equations:
             print_vector(equation)
         if isRedundant:
-            print_label("Redundant system of equations.",labelStyle=Color.bold)
-            print_label("Least square method is to be used to obtain Heisenberg model.",labelStyle=Color.bold)
-            print_label("It may be better. But it may also mess everything.",labelStyle=Color.bold)
+            print_label("Redundant system of equations.",
+                        labelStyle=Color.bold)
+            print_label("Least square method is to be used to obtain Heisenberg model.",
+                        labelStyle=Color.bold)
+            print_label("It may be better. But it may also mess everything.",
+                        labelStyle=Color.bold)
         else:
-            print_label("det SoE = %.1e"%np.linalg.det(equations),labelStyle=Color.bold)
+            print_label("det SoE = %.1e"%np.linalg.det(equations),
+                        labelStyle=Color.bold)
 
     @staticmethod
     def print_solver_status(configs):
