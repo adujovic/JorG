@@ -16,7 +16,14 @@ matrix:
     install:
       - pip install -r requirements.txt
       - pip install -r requirements_tests.txt	
+      - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.6.tar.gz
+      - tar -zxvf gsl-2.6.tar.gz
+      - cd gsl-2.6
+      - mkdir ${HOME}/gsl
+      - ./configure --prefix=${HOME}/gsl
+      - make -j2
+      - make check
+      - make install
     script:
-      - ./.install.gsl.sh
       - ./run_all_tests.sh
       - ./coverage.sh
