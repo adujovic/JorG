@@ -14,7 +14,6 @@ matrix:
       - "3.6"
       - "3.7"
     install:
-      - find ./ -name coverage.sh
       - pip install -r requirements.txt
       - pip install -r requirements_tests.txt	
       - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.6.tar.gz
@@ -22,9 +21,9 @@ matrix:
       - cd gsl-2.6
       - mkdir ${HOME}/gsl
       - ./configure --prefix=${HOME}/gsl
-      - make -j2
-      - make check
+      - make -j8
       - make install
+      - cd ../
     script:
       - ./run_all_tests.sh
       - ./coverage.sh
