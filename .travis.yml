@@ -1,3 +1,4 @@
+dist: bionic 
 env:
   global:
     - CODACY_PROJECT_TOKEN="020e3d76de3d4467b4997e5d5f20b88a"
@@ -10,15 +11,19 @@ matrix:
       - python
       - cpp
     python:
-      - "3.5"
       - "3.6"
       - "3.7"
     install:
-      - sudo apt update
-      - sudo apt install gsl
-      - sudo apt install gcc-7*
       - pip install -r requirements.txt
       - pip install -r requirements_tests.txt	
+      - sudo apt install gcc-8
+      - wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.6.tar.gz
+      - tar -zxf gsl-2.6.tar.gz
+      - cd gsl-2.6
+      - ./configure
+      - make -j2 --silent
+      - sudo make install
+      - cd ../
     script:
       - ./run_all_tests.sh
       - ./coverage.sh

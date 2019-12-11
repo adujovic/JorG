@@ -7,31 +7,32 @@ class Errors:
     left_handed_basis = 3
 
 def get_number_of_pictures(directions,cutOff,referenceAtom):
-#    """
-#        Finding the amount of copies
-#        of the original SuperCell
-#                                        """
-    multipliers = [] # returned
+    """
+        Finding the amount of copies
+        of the original SuperCell
+
+              .---------------------------.
+             / \                           \
+            /   \                           \
+           /     \                           \
+          /       ^---------------------------.
+         /       /                           /
+        /       /     reference point       /
+       /       / C   .                     /
+      ^       /                           /
+     B \     /                           /
+        \   /                           /
+         \ /                           /
+          0--------------------------->
+                       A
+     A,B,C -> Vectors
+     normalA = (BxC)/|BxC|
+     normalB = (CxA)/|CxA|
+     normalC = (AxB)/|AxB|
+    Returns multipliers!
+                                        """
+    multipliers = []
     dDirs = np.tile(directions,(2,1))
-    #
-    #          .---------------------------.
-    #         / \                           \
-    #        /   \                           \
-    #       /     \                           \
-    #      /       ^---------------------------.
-    #     /       /                           /
-    #    /       /     reference point       /
-    #   /       / C   .                     /
-    #  ^       /                           /
-    # B \     /                           /
-    #    \   /                           /
-    #     \ /                           /
-    #      0--------------------------->
-    #                   A
-    # A,B,C -> Vectors
-    # normalA = (BxC)/|BxC|
-    # normalB = (CxA)/|CxA|
-    # normalC = (AxB)/|AxB|
 
     for i in range(3):
         normal = np.cross(dDirs[i+1],dDirs[i+2])
@@ -48,17 +49,11 @@ def get_number_of_pictures(directions,cutOff,referenceAtom):
 
     return np.array(multipliers)
 
-#
-#
-#
-#
-#
-
 from aux.PeriodicTable import elementMagneticMoment
 from itertools import product
 
 class CrystalGenerator:
-#    multipliers
+    #multipliers
     def __init__(self, cell, directions,
                  atomNames, reference=0):
         self.cell       = cell
@@ -74,10 +69,9 @@ class CrystalGenerator:
             self.moments = [elementMagneticMoment[atom[0]] for atom in self.cell]
 
     def __call__(self,multipliers):
-    #    """
-    #        Generator of minimal required SuperCell
-    #                                                """
-
+        """
+            Generator of minimal required SuperCell
+                                                    """
         self.fix_moments()
         crystal = []
         for (name,mul,(atom,moment)) in product(self.atomNames,
@@ -105,14 +99,14 @@ class CrystalGenerator:
 
 import spglib
 def wyckoffs_dict(originalCell, neotericCell):
-#   """
-#      originalCell= (originalDirections,
-#                     originalCell,
-#                     originalAtoms)
-#      neotericCell= (neotericDirections,
-#                     neotericCell,
-#                     neotericAtoms)
-#                                                   """
+    """
+        originalCell= (originalDirections,
+                       originalCell,
+                       originalAtoms)
+        neotericCell= (neotericDirections,
+                       neotericCell,
+                       neotericAtoms)
+                                          """
     originalSymmetry = spglib.get_symmetry_dataset(originalCell)
     neotericSymmetry = spglib.get_symmetry_dataset(neotericCell)
     wyckoffPositionDict = {}
@@ -173,9 +167,9 @@ class NearestNeighborsGenerator:
         self.distances = []
         for atom,wyck in zip(self.crystal,symmetry['wyckoffs']):
             distance = np.around(np.linalg.norm(atom[1]-self.newReferenceAtom[1]),2)
-            if (distance                   not in self.distances  and
-                self.wyckoffPositionDict[wyck] in self.Wyckoffs   and
-                "$%s$"%atom[0]                 in self.atomTypeMask ):
+            if   distance                   not in self.distances\
+             and self.wyckoffPositionDict[wyck] in self.Wyckoffs\
+             and "$%s$"%atom[0]                 in self.atomTypeMask:
                 self.distances.append(distance)
         self.distances.sort()
         if np.ma.masked_greater(self.distances,self.cutOff).count() <= self.nearestNeighbor:

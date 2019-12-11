@@ -77,7 +77,9 @@ class SmartPickUp:
     def make_crystal(self,idx=0):
         self.crystal  = self.poscars(idx)['cell']
         try:
-            self.crystal  = [ [atom[0],atom[1],self.magmoms.get_moments()[i+1]] for i,atom in enumerate(self.crystal) ]
+            self.crystal  = [[atom[0],atom[1],
+                             self.magmoms.get_moments()[i+1]]\
+                           for i,atom in enumerate(self.crystal) ]
         except KeyError as err:
             print(self.magmoms.get_moments())
             print(err)
@@ -106,7 +108,9 @@ class SmartPickUp:
                 print("VASP hasn't finished this run (%d/%d)"%(i,len(self.magmoms)-1))
                 continue
             self.set_flipps(i)
-        self.model             = NaiveHeisenberg(self.flippingConfigurations,self.crystal,self.crystal8)
+        self.model             = NaiveHeisenberg(self.flippingConfigurations,
+                                                 self.crystal,
+                                                 self.crystal8)
         self.flipped           = np.unique(np.where(self.flippingConfigurations)[1])
         self.systemOfEquations = self.model.generate(self.namesOfInteractingAtoms,
                                                      self.distances, self.magmoms)
@@ -149,7 +153,9 @@ class SmartPickUp:
             return "Error"
         try:
             strout += ''.join([ ("  %s:\t"+len(self._J_ij[0])*"  % 8.3f    "+"\n")\
-                                %(typeName,*self._J_ij[i],) for i,typeName in enumerate(self.types) ])
+                                %(typeName,
+                                  *self._J_ij[i],)\
+                        for i,typeName in enumerate(self.types) ])
             strout += '        <|µ|> (µB):       '
             strout += ''.join([ "% 8.3f      "%mu   for mu in metaData.moments]) + '\n'
         except AttributeError:
@@ -187,8 +193,9 @@ class Reference:
 class CommandLineOptions:
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Finding Js')
-        self.parser.add_argument('--number-of-interactions', '-J', type=int, default=1, metavar="#J",
-                help='number of exchange-interaction magnitudes to-be-included in calculations')
+        self.parser.add_argument('--number-of-interactions', '-J',
+                   type=int, default=1, metavar="#J",
+                   help='number of exchange-interaction magnitudes to-be-included in calculations')
         self.parser.add_argument('--reference', '--noFlip', '-R', metavar='dir', required=True,
                     help='reference directory (usually noFlip/)')
         self.parser.add_argument('--units', '-U', default='meV',

@@ -2,8 +2,7 @@ from utilities.KPOINTS.kpoints import KPOINTS
 from sys import argv
 import numpy as np
 
-def print_set(string,data):
-    display = 42
+def print_set(string,data,display=42):
     print(string.center(display))
     KPOINTS.print_all(data,display)
 

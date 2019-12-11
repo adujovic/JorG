@@ -53,10 +53,14 @@ class JorGpi:
             self.cell,self.directions = VariableFixer.from_refined(refinedCell)
 
     def symmetry_run(self):
-#   Checking the symmetry of the input
+        """
+            Checking the symmetry of the input
+                                                """
         symmetryStandard,symmetryRefined = self.symmetry.get_standarized()
         symmetry.WriteReport([self.symmetry.symmetry,symmetryStandard,symmetryRefined],
-            comments=["(1) the crude input cell", "(2) the standarized cell", "(3) the refined cell"])
+            comments=["(1) the crude input cell",
+                      "(2) the standarized cell",
+                      "(3) the refined cell"])
         exit()
 
     def write_input_raport(self):
@@ -79,7 +83,9 @@ class JorGpi:
         self.write_output_raport()
 
     def prepare_cell_from_nn(self):
-        generatorNN = generator.NearestNeighborsGenerator(self.cell,self.referenceAtom,self.directions)
+        generatorNN = generator.NearestNeighborsGenerator(self.cell,
+                                                          self.referenceAtom,
+                                                          self.directions)
         generatorNN.wyckoffs         = self.currentOptions('Wyckoffs')
         generatorNN.atomTypeMask     = self.currentOptions('mask')
         generatorNN.moments          = self.oldMoments
@@ -117,7 +123,9 @@ class JorGpi:
                                                                     self.extraDirections))
 
     def search_for_flipps(self):
-#        Searching for unique atoms for calculations
+        """
+            Searching for unique atoms for calculations
+                                                        """
         flipSearch              = FindFlips()
         flipSearch.symmetry     = self.symmetryFull
         flipSearch.crystal      = self.crystal
@@ -129,16 +137,19 @@ class JorGpi:
         self.allFlippable       = flipSearch.all(self.crystal[self.newReference],self.cutOff)
 
         Msg.print_crystal_info(title="OUTPUT",crystal=self.crystal,directions=self.extraDirections,
-                               copies=(*VariableFixer.add_to_all(self.copiesInEachDirection),),
+                               copies=tuple(VariableFixer.add_to_all(self.copiesInEachDirection)),
                                reference=self.newReference)
 
     def write_output_raport(self):
-    #   Checking the symmetry of the output
+        """
+            Checking the symmetry of the output
+        """
         with open(self.outDirName+"/output.txt",'w+') as raport:
             symmetry.WriteReport([self.symmetryFull],
                                  comments=["Analysis of symmetry in the generated cell"],
                                  stream=raport)
-        self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,self.crystal[self.newReference])
+        self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,
+                                                     self.crystal[self.newReference])
         loadsave.SavePOSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
                             crystal=self.crystal, multiplyers=self.copiesInEachDirection)
         self.selected = [self.newReference]
@@ -156,8 +167,12 @@ class JorGpi:
     class AdaptiveSimulatedAnnealing:
         solverDirectory = './asa/solver'
         myDirectory     = '../../'
-        options = {'extra_compile_args': ['-std=c++17','-O3','-Wall','-Wextra','-pedantic','-fopenmp'],
-                   'extra_link_args'   : ['-std=c++17','-lm','-lgsl','-lgslcblas','-fopenmp']}
+        options = {'extra_compile_args': ['-std=c++17','-O3',
+                                          '-Wall','-Wextra',
+                                          '-pedantic','-fopenmp'],
+                   'extra_link_args'   : ['-std=c++17','-lm',
+                                          '-lgsl','-lgslcblas',
+                                          '-fopenmp']}
 
         def __init__(self,JorGpiObject,**kwargs):
             self.options['define_macros'] = [('_SITESNUMBER', str(len(JorGpiObject.crystal)))]
@@ -175,7 +190,9 @@ class JorGpi:
             Msg.print_solver_status(int(2**len(JorGpiObject.allFlippable)))
 
         def __call__(self,jorgpiobject):
-            self.builder('solver',*self.tmpFiles.get_files(),jorgpiobject.newReference,2*jorgpiobject.nearestNeighbor+4)
+            self.builder('solver',*self.tmpFiles.get_files(),
+                         jorgpiobject.newReference,
+                         2*jorgpiobject.nearestNeighbor+4)
 
         def __del__(self):
             print_label("Found %d unique configurations"%len(np.loadtxt('best.flips',bool)),
@@ -195,7 +212,8 @@ class JorGpi:
                                                    flippingConfigurations,axis=0),
                                                    self.crystal,self.crystal8)
 
-        systemOfEquations = gen.generate(self.currentOptions('mask'),[flip[2] for flip in self.flipper])
+        systemOfEquations = gen.generate(self.currentOptions('mask'),
+                                         [flip[2] for flip in self.flipper])
 
         eqs = EquationSolver(systemOfEquations,np.zeros(len(systemOfEquations)))
         systemOfEquations,_ = eqs.remove_tautologies()
@@ -211,8 +229,9 @@ class JorGpi:
             if systemOfEquations.size == 0:
                 print("ERROR! Not enough equations! Please rerun.")
                 exit(-3)
-        if not self.currentOptions('redundant'): # If the System of Equations is required to be consistent
-            systemOfEquations,flippingConfigurations = eqs.remove_linear_combinations(flippingConfigurations)
+        if not self.currentOptions('redundant'):
+            systemOfEquations,flippingConfigurations = \
+                    eqs.remove_linear_combinations(flippingConfigurations)
         return systemOfEquations,flippingConfigurations
 
     def save_result(self):

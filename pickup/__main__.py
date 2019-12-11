@@ -12,7 +12,8 @@ if __name__ == '__main__':
     elements = ''.join(options('elements'))
     ref = Reference(options('reference')+"/POSCAR")
 
-    print("Running for NN=%d, \'%s\' from atom No %d:"%(options('number_of_interactions'),elements,ref()))
+    print("Running for NN=%d, \'%s\' from atom No %d:"%(options('number_of_interactions'),
+                                                        elements,ref()))
     pickerUpper = SmartPickUp(options('number_of_interactions'),elements)
     pickerUpper.read(options('reference'),*options('directories'),reference=ref())
 
@@ -21,4 +22,9 @@ if __name__ == '__main__':
     print(pickerUpper)
 
     tracker += time.time()
-    print("Runntime of %02d:%02d:%02d.%09d"%(int(tracker/3600),int(tracker/60),int(tracker),int(1e9*tracker)))
+    hours    = int(tracker/3600)
+    minutes  = int(tracker/60) - hours*60
+    seconds  = int(tracker) - (minutes + hours*60)*60,
+    nanosec  = int(1e9*(tracker-int(tracker)))
+    print("Runntime of %02d:%02d:%02d.%09d"%(  hours, minutes,
+                                             seconds, nanosec))

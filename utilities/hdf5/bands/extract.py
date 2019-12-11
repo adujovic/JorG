@@ -18,9 +18,9 @@ File = h5py.File(argv[1],'r')
 
 for path,bands in zip(File['path'],File['frequency']):
     for momentum,frequencies in zip(path,bands):
-#        for k in momentum:
-#            print(k,end=" ")
-#        print("",end="\t")
+        #for k in momentum:
+        #    print(k,end=" ")
+        #print("",end="\t")
         for omega in frequencies:
             print(omega, end=" ")
         print("")
