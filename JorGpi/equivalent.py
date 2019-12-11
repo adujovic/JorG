@@ -35,6 +35,7 @@ class FindFlips:
 
         self.distances = np.array(self.distances, dtype=[('distance', np.float), ('element', 'U3')])
         self.distances.sort(order='distance')
+        print(self.distances)
 
     def search_for_equivalent(self,distance,index,referenceAtom):
         for i in np.argwhere(self.symmetry['equivalent_atoms']
@@ -69,8 +70,11 @@ class FindFlips:
 
     def all(self,referenceAtom,cutoff):
         flipper = []
-        for i,atom in enumerate(self.crystal):
-            distance = np.linalg.norm(atom[1]-referenceAtom[1])
+        for (i,atom),(j,refAtom) in product(enumerate(self.crystal),enumerate(self.crystal)):
+            if i >= j:
+                continue
+            distance = np.around(np.linalg.norm(atom[1]-refAtom[1]),
+                                     decimals=self.logAccuracy)
             if "$"+atom[0]+"$" in self.atomTypeMask                         \
                 and self.wyckoffDict[self.symmetry['wyckoffs'][i]] in self.Wyckoffs   \
                 and distance > 1e-3 \

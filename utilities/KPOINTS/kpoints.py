@@ -38,4 +38,4 @@ class KPOINTS:
     @staticmethod
     def print_all(records,display):
         for record,error in records:
-            print("{:3d} {:3d} {:3d} +/- {:4.3f}".format(*record,error).center(display))
+            print("{:3d} {:3d} {:3d} +/- {:4.3f}  {:7d}".format(*record,error,np.prod(record)).center(display))
