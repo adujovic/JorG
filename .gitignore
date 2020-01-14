@@ -129,3 +129,6 @@ fix.sh
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
+
+#GSL
+gsl*

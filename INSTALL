@@ -1,0 +1,12 @@
+You need python3 and pip3 for this
+
+To install run:
+python3 setup.py install
+
+With optional flags:
+--prefix DIRECTORY      :  Local install in DIRECTORY
+--coptionsi "OPTIONS"   :  Options for ./configure e.g. CC=clang (only if gsl is to be installed)
+--install_reqs          :  Installing requirements
+--tests                 :  Installing testsuite with pip3
+--pipoptions  "OPTIONS" :  Extra options for pip3
+--verbose               :  Verbose installation

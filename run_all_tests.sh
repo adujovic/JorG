@@ -1,7 +1,7 @@
 #!/bin/bash
 ERR=0
 
-cd tests
+cd JorGpi/tests
 ln -s ../asa ./
 ln -s ../_INPUT ./
 ln -s ../_VASP ./
