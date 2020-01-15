@@ -2,6 +2,7 @@ import re
 from setuptools import setup, Extension
 from os import makedirs,environ
 from subprocess import call
+import shlex
 from sys import argv,path
 
 packages_jorgpi = ['JorGpi',
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     options=re.sub('~',environ['HOME'],options)
     if '--install_reqs' in argv:
         print('Installing requirements')
-        call('./install-requirements.sh'+options,shell=True)
+        call(shlex.split('./install-requirements.sh'+options),shell=False)
         argv.remove('--install_reqs')
 
     try:
@@ -78,5 +79,5 @@ if __name__ == '__main__':
           test_suite='nose.collector',
           tests_require=['nose'])
 
-    call('./install-gsl.sh'+options,shell=True)
-    call('./install-asa.sh'+options,shell=True)
+    call(shlex.split('./install-gsl.sh'+options),shell=False)
+    call(shlex.split('./install-asa.sh'+options),shell=False)

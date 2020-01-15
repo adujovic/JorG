@@ -6,7 +6,14 @@ if [ -n "$CMD" ]; then
     exit 0
 fi
 
-if [ ! -d gsl-* ]; then
+for g in gsl-*; do
+    if [ ! -d $g ]; then
+        GSL_DIRECTORY=$g
+        break
+    fi
+done
+
+if [ -z "$GSL_DIRECOTRY" ]; then
     wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
     if [ ! -s gsl-latest.tar.gz ]; then
         echo "ERROR DOWNLOADING GSL!"
