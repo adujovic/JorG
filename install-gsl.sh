@@ -10,6 +10,11 @@ DIR=$(ls -d gsl*)
 
 if [ -z "$DIR" ]; then
     wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
+    DIR=$(ls -d gsl*)
+    if [ -s gsl-latest.tar.gz ]; then
+        echo "ERROR DOWNLOADING GSL!"
+        exit 255
+    fi
     tar -xzf gsl-latest.tar.gz
     rm -f gsl-latest.tar.gz
     DIR=$(ls -d gsl*)
