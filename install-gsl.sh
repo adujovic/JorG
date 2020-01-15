@@ -21,7 +21,7 @@ if [ -z "$GSL_DIRECOTRY" ]; then
     fi
     tar -xzf gsl-latest.tar.gz
     rm -f gsl-latest.tar.gz
-    $GSL_DIRECTORY=$(ls -d gsl*)
+    GSL_DIRECTORY=$(ls -d gsl*)
 fi
 
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
