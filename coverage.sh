@@ -1,16 +1,19 @@
 #!/bin/bash
 
 (
-cd JorGpi/tests
+cd JorGpi || exit
+(
+cd tests || exit
 ln -s ../asa ./
 ln -s ../_INPUT ./
 ln -s ../_VASP ./
 )
 
-nosetests-3.4 --with-coverage --cover-xml -w JorGpi/tests
-python-codacy-coverage -r JorGpi/tests/coverage.xml
-rm JorGpi/tests/coverage.xml
+nosetests-3.4 --with-coverage --cover-xml -w tests
+python-codacy-coverage -r tests/coverage.xml
+rm tests/coverage.xml
 
-cd JorGpi/tests
+cd tests
 rm asa _INPUT _VASP
-rm -r output
+rm -fr output
+)

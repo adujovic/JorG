@@ -76,22 +76,23 @@ class TestArgv(unittest.TestCase):
     def test_input_005(self):
         _input="foo --symmetry -i POSCAR_Cs2F6Ni2 "
         self.set_up(_input)
-        self.check_type(self.poscar,self.incar,self.mask,isType=str)
+        self.check_type(self.poscar,self.mask,isType=str)
         self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
         self.assertIsNone(self.neighbor)
         self.assertEqual(self.poscar,'POSCAR_Cs2F6Ni2')
+        self.assertEqual(self.incar,None)
         self.assertEqual(self.currentOptions('symmetry'),True)
 
     def test_input_006(self):
         _input="foo -i POSCAR_tst1 "
         self.set_up(_input)
-        self.check_type(self.poscar,self.incar,self.mask,isType=str)
+        self.check_type(self.poscar,self.mask,isType=str)
         self.check_bools()
         self.check_type(self.currentOptions('reference'),isType=int)
         self.assertIsNone(self.neighbor)
         self.assertEqual(self.poscar,'POSCAR_tst1')
-        self.assertEqual(self.incar,'_INPUT/INCAR')
+        self.assertEqual(self.incar,None)
         self.check_in(self.mask,"Mn")
 
     def test_input_007(self):
