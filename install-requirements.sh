@@ -30,15 +30,15 @@ esac; shift; done
 if [[ "$1" == '--' ]]; then shift; fi
 
 if [ -z "$PREFIX" ]; then
-  sudo pip3 $verbose install -r requirements.txt
+  sudo pip3 $verbose install -r requirements.txt ${PIPOPT}
 else
-  pip3 $verbose install -r requirements.txt --user
+  pip3 $verbose install -r requirements.txt --user ${PIPOPT}
 fi  
 
 if [ -n "$TESTS" ]; then
     if [ -z "$PREFIX" ]; then
-      sudo pip3 $verbose install -r requirements_tests.txt
+      sudo pip3 $verbose install -r requirements_tests.txt ${PIPOPT}
     else
-      pip3 $verbose install -r requirements_tests.txt --user
+      pip3 $verbose install -r requirements_tests.txt --user ${PIPOPT}
     fi  
 fi    

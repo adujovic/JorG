@@ -9,9 +9,6 @@ while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
   --prefix )
     shift; PREFIX=$1
     ;;
-  -v | --verbose )
-    verbose=1
-    ;;
 esac; shift; done
 if [[ "$1" == '--' ]]; then shift; fi
 
