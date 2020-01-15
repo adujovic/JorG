@@ -18,9 +18,15 @@ if [[ "$1" == '--' ]]; then shift; fi
 if [ -n "$PREFIX" ]; then
     mkdir -p ${PREFIX}/src
     cp -r JorGpi/asa ${PREFIX}/src
-    echo "export JORGPI_ASA_SRC=${PREFIX}/src" >> ${HOME}/.bashrc
+    ISINBASHRC=$(grep 'JORGPI_ASA_SRC' ${HOME}/.bashrc)
+    if [ -z "${ISINBASHRC}" ]; then
+      echo "export JORGPI_ASA_SRC=${PREFIX}/src" >> ${HOME}/.bashrc
+    fi
 else
     sudo mkdir -p /usr/src
     sudo cp -r JorGpi/asa /usr/src
-    sudo echo "export JORGPI_ASA_SRC=/usr/src" >> /etc/bash.bashrc
+    ISINBASHRC=$(sudo grep 'JORGPI_ASA_SRC' /etc/bash.bashrc)
+    if [ -z "${ISINBASHRC}" ]; then
+      sudo echo "export JORGPI_ASA_SRC=/usr/src" >> /etc/bash.bashrc
+    fi
 fi
