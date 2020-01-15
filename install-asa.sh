@@ -27,6 +27,6 @@ else
     sudo cp -r JorGpi/asa /usr/src
     ISINBASHRC=$(sudo grep 'JORGPI_ASA_SRC' /etc/bash.bashrc)
     if [ -z "${ISINBASHRC}" ]; then
-      sudo echo "export JORGPI_ASA_SRC=/usr/src" >> /etc/bash.bashrc
+      echo "export JORGPI_ASA_SRC=/usr/src" | sudo tee -a /etc/bash.bashrc > /dev/null
     fi
 fi

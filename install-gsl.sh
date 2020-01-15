@@ -53,7 +53,7 @@ fi
     sudo make install
     ISINBASHRC=$(sudo grep '/usr/local/lib' /etc/bash.bashrc)
     if [ -z "$ISINBASHRC" ]; then
-      sudo echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib" >> /etc/bash.bashrc
+      echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib" | sudo tee -a /etc/bash.bashrc > /dev/null
     fi
   else
     ./configure --prefix=${PREFIX} "${COPTIONS}"
