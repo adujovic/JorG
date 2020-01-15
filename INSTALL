@@ -4,7 +4,9 @@ To install run:
 python3 setup.py install
 
 With optional flags:
---prefix DIRECTORY      :  Local install in DIRECTORY
+--user                  :  Install in PYTHONUSERBASE directory (default $HOME/.local)
+                        :  Recomended to run :
+                        :  $ PYTHONUSERBASE=${MYDESTINATION} python3 setup.py install --user
 --coptionsi "OPTIONS"   :  Options for ./configure e.g. CC=clang (only if gsl is to be installed)
 --install_reqs          :  Installing requirements
 --tests                 :  Installing testsuite with pip3

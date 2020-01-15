@@ -2,16 +2,19 @@
 
 import numpy as np
 import errno
+from os.path import exists
+from datetime import datetime
+from os import makedirs
 
 class Errors:
     failed_to_generate = 201
     no_reference       = 22
     systemerror        = 255
+    erroneous_input    = 44
 
-from datetime import datetime
-from os import makedirs
 import JorGpi.generate.loadsave as loadsave
 from JorGpi.POSCARloader import POSCARloader
+
 class StreamHandler:
     def __init__(self,*args):
         self.streams = []
@@ -45,9 +48,21 @@ class StreamHandler:
 
     @staticmethod
     def load_vasp(poscarfile,incarfile):
+        if not exists(poscarfile):
+            print('POSCAR file %s does not exist!'%poscarfile)
+            exit(Errors.erroneous_input)
+        if incarfile is not None and not exists(incarfile):
+            print('INCAR file %s does not exist!'%incarfile)
+            exit(Errors.erroneous_input)
+
         load_POSCAR          = POSCARloader(poscarfile)
         load_POSCAR.parse()
         readData             = load_POSCAR(0)
+
+        if incarfile is None:
+            oldMoments=[ 1.0 ] * len(readData['cell'])
+            return readData,oldMoments,''
+
         load_INCAR           = loadsave.INCARloader(readData['cell'],fileName=incarfile,
                                                     atomNames=readData['atomNames'])
         oldMoments,incarData = load_INCAR()

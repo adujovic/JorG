@@ -39,9 +39,9 @@ class Options:
              help='number of reference atom in inputFile')
 
     def add_arguments_io(self):
-        self.parser.add_argument('--input', '-i', default='_INPUT/POSCAR',
+        self.parser.add_argument('--input', '-i', default='POSCAR',
              help='input POSCAR file')
-        self.parser.add_argument('--incar', '--INCAR', '-I', default='_INPUT/INCAR',
+        self.parser.add_argument('--incar', '--INCAR', '-I', default=None,
              help='input INCAR file')
         self.parser.add_argument('--output', '-o', default=None,
              help='output directory')
@@ -98,7 +98,7 @@ class Options:
         if self.opt.__dict__['elements'] is not None:
             output += self.generate_separate()
         if output == '':
-            return periodic.maskFull
+            output=periodic.maskFull
         return output
 
     def __call__(self, key):

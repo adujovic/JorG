@@ -1,7 +1,7 @@
 import re
 from setuptools import setup, Extension
-from os import system
-from sys import argv
+from os import system,makedirs,environ
+from sys import argv,path
 
 packages_jorgpi = ['JorGpi',
                    'JorGpi.generate',
@@ -27,11 +27,28 @@ if __name__ == '__main__':
     for arg in argv[2:]:
         options+=" %s"%arg
 
-    system('./install-gsl.sh'+options)
+    options=re.sub('=',' ',options)
+    options=re.sub('~',environ['HOME'],options)
     if '--install_reqs' in argv:
         print('Installing requirements')
         system('./install-requirements.sh'+options)
+        argv.remove('--install_reqs')
 
+    try:
+        locDir = environ['PYTHONUSERBASE']
+        try:
+            makedirs(locDir,exist_ok=False)
+            ISNEWPATH=True
+        except FileExistsError:
+            ISNEWPATH=False
+        if ISNEWPATH:
+            with open(environ['HOME']+'/.bashrc','a+') as bashrc:
+                bashrc.write('\nexport PYTHONPATH=$PYTHONPATH:%s'%locDir)
+    except KeyError:
+        locDir = environ['HOME']+'/.local'
+        print('Installing in %s'%(environ['HOME']))
+
+    options+=' --prefix %s'%locDir
     try:
         with open('requirements.txt','r') as reqs:
             for line in reqs.readlines():
@@ -44,12 +61,20 @@ if __name__ == '__main__':
     setup(name='JorGpi',
           version='0.1',
           description='JorGpi DFT-to-Heisenberg mapping module',
+          long_description="""
+          JorGpi DFT-to-Heisenberg mapping module
+          """,
           author='Andrzej P. Kądzielawa',
           author_email='andrzej.piotr.kadzielawa@vsb.cz',
           url='https://github.com/Mellechowicz/JorG',
           packages=packages_jorgpi,
           install_requires=requirements_jorgpi,
-          provides=['phonopy'],
+          provides=['JorGpi'],
           scripts=executables_jorgpi,
+          platforms=['POSIX'],
+          license='',
           test_suite='nose.collector',
           tests_require=['nose'])
+
+    system('./install-gsl.sh'+options)
+    system('./install-asa.sh'+options)

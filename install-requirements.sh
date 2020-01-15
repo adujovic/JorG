@@ -35,7 +35,7 @@ else
   pip3 $verbose install -r requirements.txt --user
 fi  
 
-if [ "$TESTS" -eq 1 ]; then
+if [ -n "$TESTS" ]; then
     if [ -z "$PREFIX" ]; then
       sudo pip3 $verbose install -r requirements_tests.txt
     else

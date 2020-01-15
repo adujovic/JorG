@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import shutil as su
+from os import environ
 
 from JorGpi import argv
 import JorGpi.generate.symmetry as symmetry
@@ -163,8 +164,6 @@ class JorGpi:
                                         center=self.crystal[self.newReference][1])
 
     class AdaptiveSimulatedAnnealing:
-        solverDirectory = './asa/solver'
-        myDirectory     = '../../'
         options = {'extra_compile_args': ['-std=c++17','-O3',
                                           '-Wall','-Wextra',
                                           '-pedantic','-fopenmp'],
@@ -173,13 +172,14 @@ class JorGpi:
                                           '-fopenmp']}
 
         def __init__(self,JorGpiObject,**kwargs):
+            self.solverDirectory = environ['JORGPI_ASA_SRC']+'/asa/solver'
             self.options['define_macros'] = [('_SITESNUMBER', str(len(JorGpiObject.crystal)))]
             if 'verbose' in kwargs:
                 self.options['define_macros'].append(('_%s'%kwargs['verbose'].upper(), 0))
-            self.builder = Crun('asa/asa.cpp',
-                                'asa/ising.cpp',
-                                'asa/solver/solver.cpp',
-                                'asa/solver/aux.cpp',
+            self.builder = Crun(environ['JORGPI_ASA_SRC']+'/asa/asa.cpp',
+                                environ['JORGPI_ASA_SRC']+'/asa/ising.cpp',
+                                environ['JORGPI_ASA_SRC']+'/asa/solver/solver.cpp',
+                                environ['JORGPI_ASA_SRC']+'/asa/solver/aux.cpp',
                                 **self.options)
             self.tmpFiles = TemporaryFiles()
             self.tmpFiles.write_input(JorGpiObject.allFlippable,JorGpiObject.crystal)
