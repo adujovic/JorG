@@ -21,13 +21,12 @@ if [ -z "$GSL_DIRECOTRY" ]; then
     fi
     tar -xzf gsl-latest.tar.gz
     rm -f gsl-latest.tar.gz
+    $GSL_DIRECTORY=$(ls -d gsl*)
 fi
-
-DIR=$(ls -d gsl*)
 
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
   --version )
-    echo ${DIR:4:4}
+    echo ${GSL_DIRECTORY:4:4}
     exit
     ;;
   --prefix )
@@ -47,7 +46,7 @@ if [ "$verbose" -eq "1" ]; then
     echo "I'm running $NCPUS procs"
 fi
 (
-  cd $DIR
+  cd $GSL_DIRECTORY
   if [ -z $PREFIX ]; then
     ./configure "${COPTIONS}"
     make -j${NCPUS}
