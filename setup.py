@@ -1,6 +1,7 @@
 import re
 from setuptools import setup, Extension
-from os import system,makedirs,environ
+from os import makedirs,environ
+from subprocess import call
 from sys import argv,path
 
 packages_jorgpi = ['JorGpi',
@@ -18,6 +19,7 @@ executables_jorgpi = ['JorGpi/bin/JorGpi-kpoints',
 requirements_jorgpi = []
 
 if __name__ == '__main__':
+    myself=environ['PWD']
     options=""
     try:
         if argv[1] != 'install':
@@ -31,7 +33,7 @@ if __name__ == '__main__':
     options=re.sub('~',environ['HOME'],options)
     if '--install_reqs' in argv:
         print('Installing requirements')
-        system('./install-requirements.sh'+options)
+        call('./install-requirements.sh'+options,shell=True)
         argv.remove('--install_reqs')
 
     try:
@@ -76,5 +78,5 @@ if __name__ == '__main__':
           test_suite='nose.collector',
           tests_require=['nose'])
 
-    system('./install-gsl.sh'+options)
-    system('./install-asa.sh'+options)
+    call('./install-gsl.sh'+options,shell=True)
+    call('./install-asa.sh'+options,shell=True)
