@@ -2,6 +2,7 @@ dist: bionic
 env:
   global:
     - CODACY_PROJECT_TOKEN="020e3d76de3d4467b4997e5d5f20b88a"
+    - PYTHONPATH=$PYTHONPATH:/home/andrzej/python/JorG
 branches:
   only:
     - experimental
