@@ -1,15 +1,16 @@
 import re
-from setuptools import setup, Extension
+from setuptools import setup
 from os import makedirs,environ
 from subprocess import call
 import shlex
-from sys import argv,path
+from sys import argv,path,version_info
 
 packages_jorgpi = ['JorGpi',
                    'JorGpi.generate',
                    'JorGpi.pickup',
                    'JorGpi.utilities',
                    'JorGpi.utilities.KPOINTS',
+                   'JorGpi.utilities.fixPOSCAR',
                    'JorGpi.aux',
                    'JorGpi.geometry']
 executables_jorgpi = ['JorGpi/bin/JorGpi-kpoints',
@@ -18,6 +19,8 @@ executables_jorgpi = ['JorGpi/bin/JorGpi-kpoints',
                       'JorGpi/bin/JorGpi-startup']
 
 requirements_jorgpi = []
+
+VERSION='0.1.1'
 
 if __name__ == '__main__':
     myself=environ['PWD']
@@ -37,21 +40,16 @@ if __name__ == '__main__':
         call(shlex.split('./install-requirements.sh'+options),shell=False)
         argv.remove('--install_reqs')
 
-    try:
-        locDir = environ['PYTHONUSERBASE']
+    if '--user' in argv:
         try:
-            makedirs(locDir,exist_ok=False)
-            ISNEWPATH=True
-        except FileExistsError:
-            ISNEWPATH=False
-        if ISNEWPATH:
+            locDir = environ['PYTHONUSERBASE']
             with open(environ['HOME']+'/.bashrc','a+') as bashrc:
-                bashrc.write('\nexport PYTHONPATH=$PYTHONPATH:%s'%locDir)
-    except KeyError:
-        locDir = environ['HOME']+'/.local'
-        print('Installing in %s'%(environ['HOME']))
-
-    options+=' --prefix %s'%locDir
+                bashrc.write('\nexport PYTHONPATH=%s/lib/python%d.%d/site-packages/JorGpi-%s-py%d.%d.egg:$PYTHONPATH\n'%(locDir,version_info[0],version_info[1],VERSION,version_info[0],version_info[1]))
+            makedirs(locDir,exist_ok=True)
+        except KeyError:
+            locDir = environ['HOME']+'/.local'
+            print('Installing in %s'%(environ['HOME']))
+        options+=' --prefix %s'%locDir
     try:
         with open('requirements.txt','r') as reqs:
             for line in reqs.readlines():
@@ -62,7 +60,7 @@ if __name__ == '__main__':
     except FileNotFoundError:
         requirements_jorgpi = [ 'numpy', 'scipy', 'spglib', 'matplotlib', 'setuptools', 'defusedxml' ]
     setup(name='JorGpi',
-          version='0.1',
+          version=VERSION,
           description='JorGpi DFT-to-Heisenberg mapping module',
           long_description="""
           JorGpi DFT-to-Heisenberg mapping module
