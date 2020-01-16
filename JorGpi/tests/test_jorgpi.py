@@ -1,6 +1,6 @@
 import unittest
 from JorGpi.generate import run
-from sys import environ
+from os import environ
 
 class TestJorGpi(unittest.TestCase):
     def test_clear_run(self):
