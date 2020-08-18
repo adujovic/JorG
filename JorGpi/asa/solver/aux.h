@@ -33,15 +33,48 @@ struct System{
 };
     
 template<typename VectorType>
-std::vector<std::tuple<unsigned,unsigned,double>> get_interactions(System<VectorType>& system, double decayCoeff){
+std::vector<std::tuple<unsigned,unsigned,double>> get_interactions(System<VectorType>& system, double decayCoeff, int interactionModel=0){
+#ifdef _VERBOSE
+	switch(interactionModel){
+	  case 0:
+	    std::cout<<"Model of interactions: "<<"exponential"<<std::endl;
+	    break;
+	  case 1:
+	    std::cout<<"Model of interactions: "<<"rational"<<std::endl;
+	    break;
+	  case 2:
+	    std::cout<<"Model of interactions: "<<"Bessel J0"<<std::endl;
+	    break;
+	  default: exit(-1); break;
+	}
+#endif
     std::vector<std::tuple<unsigned,unsigned,double>> d;
     for (const auto& atom1 : system.flippable) {
         for (const auto& atom2 : system.supercell) {
             if(std::fabs(std::get<2>(atom2)) > 1e-9 && std::get<0>(atom1) != std::get<0>(atom2)) 
-                d.push_back(std::make_tuple(std::get<0>(atom1),
-                                            std::get<0>(atom2),
-                                            -exp(decayCoeff*VectorType::norm(
-                                                std::get<1>(atom1) - std::get<1>(atom2) ))));
+            	switch(interactionModel){
+		  case 0:
+               	    d.push_back(std::make_tuple(std::get<0>(atom1),
+                   	                        std::get<0>(atom2),
+                           	               -exp(decayCoeff*VectorType::norm(
+                                   	            std::get<1>(atom1) - std::get<1>(atom2) ))));
+		    break;
+		  case 1:
+               	    d.push_back(std::make_tuple(std::get<0>(atom1),
+                   	                        std::get<0>(atom2),
+                                               -pow(VectorType::norm(
+                                                std::get<1>(atom1) - std::get<1>(atom2) ),-decayCoeff)));
+		    break;
+		  case 2:
+               	    d.push_back(std::make_tuple(std::get<0>(atom1),
+                   	                        std::get<0>(atom2),
+                                               -sin(decayCoeff*VectorType::norm(
+                                                      std::get<1>(atom1) - std::get<1>(atom2) ))/
+                                                   (decayCoeff*VectorType::norm(
+                                                      std::get<1>(atom1) - std::get<1>(atom2) ))));
+		    break;
+		  default: exit(-1); break;
+		}
         }
     }
     return d;
