@@ -16,3 +16,5 @@
 <a href="https://www.codacy.com/manual/apkadzielawa/JorG?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mellechowicz/JorG&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/7d440aa57dae4f5d9224da4d66fd43f1"/></a>
 <a href="https://www.codacy.com/manual/apkadzielawa/JorG?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mellechowicz/JorG&amp;utm_campaign=Badge_Coverage"><img src="https://api.codacy.com/project/badge/Coverage/7d440aa57dae4f5d9224da4d66fd43f1"/></a>
 <a href="https://doi.org/10.5281/zenodo.3944649"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.3944649.svg" alt="DOI"></a>
+
+<sub><sup>This work was supported by The Ministry of Education, Youth and Sports from the Large Infrastructures for Research, Experimental Development and Innovations project *IT4Innovations National Supercomputing Center – LM2015070*.</sup></sub>
