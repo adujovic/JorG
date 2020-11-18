@@ -92,7 +92,8 @@ class SaveXYZ:
 class SavePOSCAR:
     settings = {'fileName'    : 'POSCAR',
                 'multiplyers' : [1, 1, 1],
-                'crystal'     : None}
+                'crystal'     : None,
+                'coordStyle'  : 'd'}
 
     def __init__(self,data,**kwargs):
         """
@@ -103,6 +104,7 @@ class SavePOSCAR:
             self.settings['crystal'] = data['cell']
 
         self.multiplyers = np.array(self.settings['multiplyers']) + 1
+        self.directions  = np.linalg.inv(data['directions']*self.multiplyers[:, np.newaxis])
         self.vaspFile = open(self.settings['fileName'],"w+")
 
         self.vaspFile.write(data['comment'])
@@ -112,14 +114,19 @@ class SavePOSCAR:
         self.write_elements(data['atomNames'])
         self.write_populations(data['cellAtoms'])
 
-        self.vaspFile.write("Carthesian\n")
+        if   self.settings['coordStyle'] == 'c':
+            self.vaspFile.write("Carthesian\n")
+        elif self.settings['coordStyle'] == 'd':
+            self.vaspFile.write("Direct\n")
+        else:
+            self.vaspFile.write("Direct\n")
 
         self.write_atoms(data['atomNames'])
 
     def write_directions(self,directions):
         self.vaspFile.write("1.0\n")
         for direction in self.multiplyers*directions:
-            self.vaspFile.write("  %.10f  %.10f  %.10f\n"%(*direction,))
+            self.vaspFile.write("  % .10f  % .10f  % .10f\n"%(*direction,))
 
     def write_elements(self,atomNames):
         for atomName in atomNames:
@@ -136,7 +143,12 @@ class SavePOSCAR:
                        self.settings['crystal']):
             if atom[0] != atomName:
                 continue
-            self.vaspFile.write("  %.10f  %.10f  %.10f  %s\n"%(*atom[1],atom[0]))
+            if   self.settings['coordStyle'] == 'c':
+                self.vaspFile.write("  % .10f  % .10f  % .10f   %s\n"%(*atom[1],atom[0]))
+            elif self.settings['coordStyle'] == 'c':
+                self.vaspFile.write("  % .10f  % .10f  % .10f   %s\n"%(*np.dot(atom[1],self.directions),atom[0]))
+            else:
+                self.vaspFile.write("  % .10f  % .10f  % .10f   %s\n"%(*np.dot(atom[1],self.directions),atom[0]))
         self.vaspFile.write("\n")
 
     def __del__(self):
@@ -173,14 +185,14 @@ class INCARsaver:
     def write_incar(self,flipname,flip):
         with open(self.fileName+"/"+flipname+"/INCAR","w+") as vaspFile:
             newINCAR = re.sub('\s*MAGMOM.*\n','\n',self.oldINCAR)
-            newINCAR = re.sub('\s*ICHARG.*\n','\n',newINCAR)
-            newINCAR = re.sub('\s*LORBIT.*\n','\n',newINCAR)
-            newINCAR = re.sub('\s*ISPIN.*\n','\n',newINCAR)
+            newINCAR = re.sub('\s*ICHARG.*\n','\n',     newINCAR)
+            newINCAR = re.sub('\s*LORBIT.*\n','\n',     newINCAR)
+            newINCAR = re.sub('\s*ISPIN.*\n','\n',      newINCAR)
             vaspFile.write(newINCAR)
-            vaspFile.write("ISPIN  = 2\n")
+            vaspFile.write("ISPIN  = 2\n" )
             vaspFile.write("LORBIT = 11\n")
-            vaspFile.write("ICHARG = 2\n")
-            vaspFile.write("MAGMOM = ")
+            vaspFile.write("ICHARG = 2\n" )
+            vaspFile.write("MAGMOM = "    )
             for bit,atom in zip(flip,self.crystal):
                 if bit:
                     vaspFile.write("%f "%-atom[2])
@@ -190,7 +202,7 @@ class INCARsaver:
 
     def save(self,fileName,flips):
         self.fileName = fileName
-        INCARsaver.mkdir(fileName,"noFlip")
+        INCARsaver.mkdir(      fileName,"noFlip")
         INCARsaver.copy_poscar(fileName,"noFlip")
         self.write_incar("noFlip",np.zeros(len(self.crystal)))
         for i,flip in enumerate(flips):
