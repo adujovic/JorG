@@ -133,7 +133,8 @@ class CellReader:
         atomCoordinates = POSCARloader.parse_atom(line)
         if self.isdirect:
             self.cell.append((self.atomNames[self.atomType],
-                         np.dot(self.directions,atomCoordinates)))
+		    #what is the order?                         np.dot(atomCoordinates,self.directions)))
+                         np.dot(atomCoordinates,self.directions)))
             self.center += np.dot(self.directions,atomCoordinates)
             self.cellSymmetry[1].append(tuple(atomCoordinates))
         else:

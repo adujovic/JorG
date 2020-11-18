@@ -268,8 +268,17 @@ class NaiveHeisenberg:
         return output
 
 def apply_mirrors_xyz(dimensions,cell):
+    # Not all cells are diagonal!
+    displacements  = np.array([np.linalg.norm(d) for d in dimensions])
+    displacements /= np.max(displacements)
+    # number of copies in each direction so one can 
+    reflections    = []
+    for d in displacements:
+        maxInt = 1+int(d - 1e-15) # to avoid d=1
+        reflections.append([i for i in range(-maxInt,maxInt+1)])
+
     outputCell = []
-    for proj in product([-1,0,1],repeat=3):
+    for proj in product(*reflections):
         projection = np.array([proj])
         translation = np.dot(projection,dimensions)[0]
         for i,atom in enumerate(cell):
