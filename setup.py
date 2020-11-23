@@ -20,10 +20,13 @@ executables_jorgpi = ['JorGpi/bin/JorGpi-kpoints',
 
 requirements_jorgpi = []
 
-VERSION='0.1.1'
+VERSION='0.1.3'
 
 if __name__ == '__main__':
-    myself=environ['PWD']
+    try:
+        myself=environ["PWD"]
+    except KeyError:
+        print("PWD not set! Try running sudo -E python3 setup.py install instead.")
     options=""
     try:
         if argv[1] != 'install':
