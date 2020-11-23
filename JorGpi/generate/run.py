@@ -24,6 +24,7 @@ class JorGpi:
         self.nearestNeighbor = self.currentOptions('neighbor')
         self.reference       = self.currentOptions('reference')
         self.outDirName      = self.currentOptions('output')
+        self.bufferCases     = self.currentOptions('buffer_cases')
         self.extraMultiplier = np.zeros(3,dtype=int)
 
         self.handler    = StreamHandler(self.outDirName)
@@ -50,6 +51,10 @@ class JorGpi:
         if self.currentOptions('refined'):
             refinedCell               = self.symmetry.standarize()
             self.cell,self.directions = VariableFixer.from_refined(refinedCell)
+        if self.currentOptions('carthesian_output'):
+            self.coordinatesStyle = 'c'
+        else:
+            self.coordinatesStyle = 'd'
 
     def symmetry_run(self):
         """
@@ -150,7 +155,8 @@ class JorGpi:
         self.readData['comment']="NewRef: %d, @ %s"%(self.newReference,
                                                      self.crystal[self.newReference])
         loadsave.SavePOSCAR(self.readData, fileName=self.outDirName+"/POSCAR",
-                            crystal=self.crystal, multiplyers=self.copiesInEachDirection)
+                            crystal=self.crystal, multiplyers=self.copiesInEachDirection,
+                            coordStyle=self.coordinatesStyle)
         self.selected = [self.newReference]
         for caseID,(i,atom,distance,wyck) in enumerate(self.flipper):
             print_case(atom,atomID=i+1,caseID=caseID+1,wyckoffPosition=wyck,distance=distance)
@@ -190,7 +196,7 @@ class JorGpi:
         def __call__(self,jorgpiobject):
             self.builder('solver',*self.tmpFiles.get_files(),
                          jorgpiobject.newReference,
-                         2*jorgpiobject.nearestNeighbor+4)
+                         2*jorgpiobject.nearestNeighbor+jorgpiobject.bufferCases)
 
         def __del__(self):
             print_label("Found %d unique configurations"%len(np.loadtxt('best.flips',bool)),
@@ -227,7 +233,7 @@ class JorGpi:
             if systemOfEquations.size == 0:
                 print("ERROR! Not enough equations! Please rerun.")
                 exit(-3)
-        if not self.currentOptions('redundant'):
+        if self.currentOptions('minimal_set'):
             systemOfEquations,flippingConfigurations = \
                     eqs.remove_linear_combinations(flippingConfigurations)
         return systemOfEquations,flippingConfigurations
@@ -235,7 +241,7 @@ class JorGpi:
     def save_result(self):
         saver = loadsave.INCARsaver(self.incarData,self.crystal)
         saver.save(self.outDirName,self.flippingConfigurations)
-        Msg.print_equations(self.systemOfEquations,self.currentOptions('redundant'))
+        Msg.print_equations(self.systemOfEquations,self.currentOptions('minimal_set'))
         np.savetxt(self.outDirName+'/systemOfEquations.txt',np.array(self.systemOfEquations))
 
     def possible_configurations(self,**kwargs):

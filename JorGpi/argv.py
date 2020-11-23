@@ -10,7 +10,8 @@ class Error:
 class Options:
     keys = ["cutOff", "neighbor", "Wyckoffs", "reference",
             "input", "incar", "output", "mask", "symmetry",
-            "refined", "redundant", "extra-dimentions", "spin-orbit"]
+            "refined", "minimal_set", "extra_dimentions", 
+            "buffer_cases", 'carthesian_output' ]
 
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Find minimal number of unique spin-flips')
@@ -18,6 +19,7 @@ class Options:
         self.add_arguments_io()
         self.add_arguments_geometric()
         self.add_arguments_elements()
+        self.add_arguments_output_style()
         self.add_arguments_optional()
 
         self.opt = self.parser.parse_args(args[1:])
@@ -56,19 +58,26 @@ class Options:
         self.parser.add_argument('--block',choices=periodic.blocks, nargs='+',
              help='block name (eg. P <=> \'%s\')'%periodic.blocks['P'])
 
-    def add_arguments_optional(self):
-        self.parser.add_argument('--symmetry', '-S', action='store_true',
-             help='symmetry run only (default False)')
-        self.parser.add_argument('--redundant', action='store_true',
-             help='creates a redundant system of equations for \
+    def add_arguments_output_style(self):
+        self.parser.add_argument('--minimal-set', action='store_true',
+             help='creates a minimal-set system of equations for \
                      final calculation of the Heisenberg exchange interaction (default False)')
-        self.parser.add_argument('--spin-orbit', '--SOC', action='store_true',
-             help='(work-in-progress) is sping-orbit coupling enabled (default False)')
-        self.parser.add_argument('--refined',  action='store_true',
-             help='should use refined supercell (default False)')
+        self.parser.add_argument('--buffer-cases', '-B', type=int, default=4,
+                help='The number of additional solutions of the Ising model\
+                      (above the twice the number of exchange interacions,\
+                      (i.e., the ASA solver finds 2*J+B excited states (default 4)')
         self.parser.add_argument('--extra-dimentions','-X', default=None,
                                  action='store',dest='extra-dimentions',
              help='string \"X Y Z\" of extra cell copies in each directions (eg. \"0 0 1\")')
+        self.parser.add_argument('--carthesian-output', action='store_true',
+                help='Sets output cells to carthesian coordinates (default False,\
+                      i.e., using direct')
+
+    def add_arguments_optional(self):
+        self.parser.add_argument('--symmetry', '-S', action='store_true',
+             help='symmetry run only (default False)')
+        self.parser.add_argument('--refined',  action='store_true',
+             help='should use refined supercell (default False)')
 
     def generate_separate(self):
         output=''

@@ -16,7 +16,7 @@ class TestArgv(unittest.TestCase):
 
     def check_bools(self):
         self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('redundant'),
+                        self.currentOptions('minimal-set'),
                         self.currentOptions('refined'),isType=bool)
 
     def check_in(self,where,*args):
@@ -145,7 +145,7 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.currentOptions('symmetry'),True)
 
     def test_input_011(self):
-        _input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 6 -E Ni -o output/ASD --redundant"
+        _input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -N 6 -E Ni -o output/ASD --minimal-set"
         self.set_up(_input)
         self.check_type(self.poscar,self.incar,self.output,self.mask,isType=str)
         self.check_bools()
@@ -156,7 +156,7 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.incar,'_INCARs/INCAR_CsNiF')
         self.assertEqual(self.output,'output/ASD')
         self.check_in(self.mask,"Ni")
-        self.assertEqual(self.currentOptions('redundant'),True)
+        self.assertEqual(self.currentOptions('minimal-set'),True)
 
     def test_input_012(self):
         _input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -E Ni -o output/ASD --reference 21 -R 123.0"

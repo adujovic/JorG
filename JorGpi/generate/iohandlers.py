@@ -211,11 +211,11 @@ from JorGpi.aux.format import Color, print_vector, print_label
 from JorGpi.aux.format import print_crystal, print_moments
 class Msg:
     @staticmethod
-    def print_equations(equations,isRedundant=False):
+    def print_equations(equations,isNotRedundant=False):
         print_label("System of equations:",labelStyle=Color.bold)
         for equation in equations:
             print_vector(equation)
-        if isRedundant:
+        if not isNotRedundant:
             print_label("Redundant system of equations.",
                         labelStyle=Color.bold)
             print_label("Least square method is to be used to obtain Heisenberg model.",
@@ -228,8 +228,12 @@ class Msg:
 
     @staticmethod
     def print_solver_status(configs):
-        print_label("Checking total number of configurations: %d"%configs,
-                        labelStyle=Color.bold+Color.darkred)
+        if configs > 1e6:
+            print_label("Checking total number of configurations: %.2e"%float(configs),
+                            labelStyle=Color.bold+Color.darkred)
+        else:
+            print_label("Checking total number of configurations: %d"%configs,
+                            labelStyle=Color.bold+Color.darkred)
         print_label("Preparing and running ASA-solver...",
                       labelStyle=Color.bold+Color.blue)
 
