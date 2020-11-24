@@ -1,3 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env python3
+from runpy import run_module
 
-python3 -m JorGpi.utilities.KPOINTS $@
+run_module('JorGpi.utilities.KPOINTS', run_name='__main__')
+
