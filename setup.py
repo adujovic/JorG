@@ -14,14 +14,14 @@ packages_jorgpi = ['JorGpi',
                    'JorGpi.aux',
                    'JorGpi.geometry']
 executables_jorgpi = ['JorGpi/bin/JorGpi-demagnetize',
-                      'JorGpi/bin/JorGpi-kpoints',
+                      'JorGpi/bin/JorGpi-KPOINTS',
                       'JorGpi/bin/JorGpi-pickup',
                       'JorGpi/bin/JorGpi-POSCAR',
                       'JorGpi/bin/JorGpi-startup']
 
 requirements_jorgpi = []
 
-VERSION='0.1.3'
+VERSION='0.2.0'
 
 if __name__ == '__main__':
     try:

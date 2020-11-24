@@ -28,6 +28,7 @@ class Options:
     def fix_data(self):
         self.opt.__dict__['reference'] -= 1
         self.opt.__dict__['mask'] = self.generate_mask()
+        self.opt.__dict__['extra_dimentions'] = np.fromstring(self.opt.__dict__['extra_dimentions'],sep=' ',dtype=int)
 
     def add_arguments_geometric(self):
         self.typeOfRange.add_argument('--cutOff', '-R', default=None, type=np.float,
@@ -66,8 +67,8 @@ class Options:
                 help='The number of additional solutions of the Ising model\
                       (above the twice the number of exchange interacions,\
                       (i.e., the ASA solver finds 2*J+B excited states (default 4)')
-        self.parser.add_argument('--extra-dimentions','-X', default=None,
-                                 action='store',dest='extra-dimentions',
+        self.parser.add_argument('--extra-dimentions','-X', default="0 0 0",
+                                 action='store',
              help='string \"X Y Z\" of extra cell copies in each directions (eg. \"0 0 1\")')
         self.parser.add_argument('--carthesian-output', action='store_true',
                 help='Sets output cells to carthesian coordinates (default False,\

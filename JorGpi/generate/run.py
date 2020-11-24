@@ -25,7 +25,7 @@ class JorGpi:
         self.reference       = self.currentOptions('reference')
         self.outDirName      = self.currentOptions('output')
         self.bufferCases     = self.currentOptions('buffer_cases')
-        self.extraMultiplier = np.zeros(3,dtype=int)
+        self.extraMultiplier = self.currentOptions('extra_dimentions')
 
         self.handler    = StreamHandler(self.outDirName)
         self.outDirName = self.handler()
@@ -95,7 +95,7 @@ class JorGpi:
         generatorNN.moments          = self.oldMoments
         generatorNN.extraMultiplier  = self.extraMultiplier
 
-        generatorNN(self.nearestNeighbor)
+        generatorNN(2*self.nearestNeighbor-1)
         try:
             (self.cutOff, self.crystal,
              self.symmetryFull, self.newReference,
