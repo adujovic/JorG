@@ -191,7 +191,7 @@ class INCARsaver:
             vaspFile.write(newINCAR)
             vaspFile.write("ISPIN  = 2\n" )
             vaspFile.write("LORBIT = 11\n")
-            vaspFile.write("ICHARG = 2\n" )
+            vaspFile.write("ICHARG = 1\n" )
             vaspFile.write("MAGMOM = "    )
             for bit,atom in zip(flip,self.crystal):
                 if bit:
