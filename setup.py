@@ -13,7 +13,8 @@ packages_jorgpi = ['JorGpi',
                    'JorGpi.utilities.fixPOSCAR',
                    'JorGpi.aux',
                    'JorGpi.geometry']
-executables_jorgpi = ['JorGpi/bin/JorGpi-kpoints',
+executables_jorgpi = ['JorGpi/bin/JorGpi-demagnetize',
+                      'JorGpi/bin/JorGpi-kpoints',
                       'JorGpi/bin/JorGpi-pickup',
                       'JorGpi/bin/JorGpi-POSCAR',
                       'JorGpi/bin/JorGpi-startup']
