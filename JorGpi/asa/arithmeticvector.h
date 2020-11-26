@@ -63,7 +63,7 @@ namespace celerium{
     // OPERATORS
     
     T operator[](size_t n) const{
-		if(n>=N || n<0){
+		if(n >= N){
 		   throw std::domain_error("celerium::ArithmeticVectorN<N,T>::operator[]: there is no field to access!\n");
 		}
      return body[n]; 

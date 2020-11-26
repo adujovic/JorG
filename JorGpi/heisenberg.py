@@ -3,18 +3,29 @@
 import numpy as np
 np.seterr(all='raise')
 from itertools import product
+from scipy.optimize import leastsq
 
 class EquationSolver:
     def __init__(self,equations,vector):
         self.equations = np.array(equations)
         self.vector    = np.array(vector)
         self.solution  = None
+        self.guess     = np.random.normal(loc=0.5, scale=1.0, size=self.equations.shape[1])
+        self.guess[0] = 10.0
 
     def solve(self,**kwargs):
         if self.solution is not None:
             return self.solution
         self.solve_system_of_equations(**kwargs)
         return self.solution
+
+    @staticmethod
+    def linear(x, *args):
+        return np.dot(x,np.transpose(np.array([args])))
+
+    @staticmethod
+    def residual(p,x,y):
+        return y - np.transpose(EquationSolver.linear(x,*p))[0]
 
     def solve_system_of_equations(self, **kwargs):
         if len(self.equations) == 1:
@@ -23,7 +34,7 @@ class EquationSolver:
             self.solution = np.linalg.solve(self.equations,self.vector,**kwargs)
         else:
             try:
-                self.solution = np.linalg.lstsq(self.equations,self.vector,rcond=None,**kwargs)[0]
+                self.solution = leastsq(self.residual,self.guess,args=(self.equations,self.vector))[0]
             except np.linalg.LinAlgError as err:
                 print("%s: see:"%str(err))
                 print(self.equations.shape,self.vector.shape)
@@ -268,8 +279,17 @@ class NaiveHeisenberg:
         return output
 
 def apply_mirrors_xyz(dimensions,cell):
+    # Not all cells are diagonal!
+    displacements  = np.array([np.linalg.norm(d) for d in dimensions])
+    displacements /= np.max(displacements)
+    # number of copies in each direction so one can 
+    reflections    = []
+    for d in displacements:
+        maxInt = 1+int(d - 1e-15) # to avoid d=1
+        reflections.append([i for i in range(-maxInt,maxInt+1)])
+
     outputCell = []
-    for proj in product([-1,0,1],repeat=3):
+    for proj in product(*reflections):
         projection = np.array([proj])
         translation = np.dot(projection,dimensions)[0]
         for i,atom in enumerate(cell):

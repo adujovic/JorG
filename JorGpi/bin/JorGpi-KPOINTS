@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+from runpy import run_module
+
+run_module('JorGpi.utilities.KPOINTS', run_name='__main__')
+

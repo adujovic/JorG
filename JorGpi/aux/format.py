@@ -27,7 +27,7 @@ class Color:
     magenta       = "\033[95m"
     cyan          = "\033[96m"
     white         = "\033[97m"
-
+   
 from sys import stdout
 from copy import copy
 class Standard:

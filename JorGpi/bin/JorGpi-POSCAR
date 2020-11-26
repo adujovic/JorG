@@ -1,3 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
+from runpy import run_module
 
-python3 -m JorGpi.utilities.fixPOSCAR $@
+run_module('JorGpi.utilities.fixPOSCAR', run_name='__main__')

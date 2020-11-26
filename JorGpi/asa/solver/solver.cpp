@@ -42,6 +42,18 @@ constexpr size_t SITESNUMBER = _SITESNUMBER;
     for (const auto& atom : system.flippable) mask.set(std::get<0>(atom));
     mask.reset(reference);
 
+// *****************************************************************************************
+// ********************************   CHECK MODEL   ****************************************
+// *****************************************************************************************
+
+    int interactionModel = 1;
+#ifdef _FCC
+    interactionModel = 2;
+#endif
+#ifdef _WEAK
+    interactionModel = 0;
+#endif
+
 #ifdef _VERBOSE    
             std::cout<<"               ";
             for(int i=1; i<(SITESNUMBER-reference); ++i) std::cout<<" ";
@@ -52,21 +64,22 @@ constexpr size_t SITESNUMBER = _SITESNUMBER;
 #ifdef _LOWERLIMIT
     size_t lowerlimit = _LOWERLIMIT;
 #else
-    size_t lowerlimit = 0.25*mask.count(); // doesn't allow less than 25% flipps
+    size_t lowerlimit = 0.15*mask.count(); // doesn't allow less than 15% flipps
 #endif
 #ifdef _UPPERLIMIT
     size_t upperlimit = _UPPERLIMIT;
 #else
-    size_t upperlimit = 0.75*mask.count(); // doesn't allow more than 75% flipps
+    size_t upperlimit = 0.85*mask.count(); // doesn't allow more than 85% flipps
 #endif
-    upperlimit = upperlimit < 2          ? 2 : upperlimit;
-    lowerlimit = lowerlimit > upperlimit ? 0 : lowerlimit;
+    upperlimit = upperlimit < 2U         ? 2U : upperlimit;
+    lowerlimit = lowerlimit > upperlimit ? 1U : lowerlimit;
+    lowerlimit = lowerlimit < 1U         ? 1U : lowerlimit;
 
     std::unordered_set<std::bitset<SITESNUMBER>> solutions;
     size_t iteration = 0U;
     for(auto n = 4.0; n<1024.0; n*=2){
         model.reset();
-        auto d = aux::get_interactions(system,-n*decayCoeff);
+        auto d = aux::get_interactions(system,-n*decayCoeff,interactionModel);
         model.add_interaction(d);
 
 #ifdef _VERBOSE    
