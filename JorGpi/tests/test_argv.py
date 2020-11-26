@@ -16,7 +16,7 @@ class TestArgv(unittest.TestCase):
 
     def check_bools(self):
         self.check_type(self.currentOptions('symmetry'),
-                        self.currentOptions('minimal-set'),
+                        self.currentOptions('minimal_set'),
                         self.currentOptions('refined'),isType=bool)
 
     def check_in(self,where,*args):
@@ -156,7 +156,7 @@ class TestArgv(unittest.TestCase):
         self.assertEqual(self.incar,'_INCARs/INCAR_CsNiF')
         self.assertEqual(self.output,'output/ASD')
         self.check_in(self.mask,"Ni")
-        self.assertEqual(self.currentOptions('minimal-set'),True)
+        self.assertEqual(self.currentOptions('minimal_set'),True)
 
     def test_input_012(self):
         _input="foo -i _POSCARs/POSCAR_CsNiF -I _INCARs/INCAR_CsNiF -E Ni -o output/ASD --reference 21 -R 123.0"
