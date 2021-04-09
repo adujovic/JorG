@@ -20,10 +20,11 @@ executables_jorgpi = ['JorGpi/bin/JorGpi-kpoints',
 
 requirements_jorgpi = []
 
-VERSION='0.1.1'
+VERSION='0.1.3'
 
 if __name__ == '__main__':
-    myself=environ['PWD']
+    myself = '/home/andrzej/python/JorG'
+#    myself=environ['PWD']
     options=""
     try:
         if argv[1] != 'install':
