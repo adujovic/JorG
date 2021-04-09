@@ -11,7 +11,7 @@ class Options:
     keys = ["cutOff", "neighbor", "Wyckoffs", "reference",
             "input", "incar", "output", "mask", "symmetry",
             "refined", "minimal_set", "extra_dimentions", 
-            "buffer_cases", 'carthesian_output' ]
+            "buffer_cases", "carthesian_output", "interactionAnsatz" ]
 
     def __init__(self, *args):
         self.parser = ap.ArgumentParser(description='Find minimal number of unique spin-flips')
@@ -40,6 +40,11 @@ class Options:
              defined by string (eg. \'abc\')')
         self.parser.add_argument('--reference', '-r', default=-1, type=int,
              help='number of reference atom in inputFile')
+        self.parser.add_argument('--ansatz', '-a', default=1, type=int,
+			help='starting exchange interaction Ansatz: (0) exponential,\
+								    (1) rational (default),\
+								    (2) Bessel J0')
+
 
     def add_arguments_io(self):
         self.parser.add_argument('--input', '-i', default='POSCAR',

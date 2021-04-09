@@ -23,6 +23,6 @@
 #include "aux.h"
 
 extern "C"
-int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, size_t unique_flips);
+int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, size_t unique_flips, size_t ansatz=0U);
 
 #endif

@@ -1,6 +1,6 @@
 #include "solver.h"
 
-int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, size_t unique_flips){
+int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, size_t unique_flips, size_t ansatz){
 #ifndef _SITESNUMBER
 #define _SITESNUMBER 64
 #endif
@@ -46,14 +46,6 @@ constexpr size_t SITESNUMBER = _SITESNUMBER;
 // ********************************   CHECK MODEL   ****************************************
 // *****************************************************************************************
 
-    int interactionModel = 1;
-#ifdef _FCC
-    interactionModel = 2;
-#endif
-#ifdef _WEAK
-    interactionModel = 0;
-#endif
-
 #ifdef _VERBOSE    
             std::cout<<"               ";
             for(int i=1; i<(SITESNUMBER-reference); ++i) std::cout<<" ";
@@ -79,7 +71,7 @@ constexpr size_t SITESNUMBER = _SITESNUMBER;
     size_t iteration = 0U;
     for(auto n = 4.0; n<1024.0; n*=2){
         model.reset();
-        auto d = aux::get_interactions(system,-n*decayCoeff,interactionModel);
+        auto d = aux::get_interactions(system,-n*decayCoeff,ansatz);
         model.add_interaction(d);
 
 #ifdef _VERBOSE    

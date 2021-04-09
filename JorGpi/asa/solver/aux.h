@@ -33,16 +33,16 @@ struct System{
 };
     
 template<typename VectorType>
-std::vector<std::tuple<unsigned,unsigned,double>> get_interactions(System<VectorType>& system, double decayCoeff, int interactionModel=0){
+std::vector<std::tuple<unsigned,unsigned,double>> get_interactions(System<VectorType>& system, double decayCoeff, size_t interactionModel=0U){
 #ifdef _VERBOSE
 	switch(interactionModel){
-	  case 0:
+	  case 0U:
 	    std::cout<<"Model of interactions: "<<"exponential"<<std::endl;
 	    break;
-	  case 1:
+	  case 1U:
 	    std::cout<<"Model of interactions: "<<"rational"<<std::endl;
 	    break;
-	  case 2:
+	  case 2U:
 	    std::cout<<"Model of interactions: "<<"Bessel J0"<<std::endl;
 	    break;
 	  default: exit(-1); break;

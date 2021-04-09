@@ -19,13 +19,14 @@ from JorGpi.generate.crun import Crun
 
 class JorGpi:
     def __init__(self,*args):
-        self.currentOptions  = argv.Options(*args)
-        self.cutOff          = self.currentOptions('cutOff')
-        self.nearestNeighbor = self.currentOptions('neighbor')
-        self.reference       = self.currentOptions('reference')
-        self.outDirName      = self.currentOptions('output')
-        self.bufferCases     = self.currentOptions('buffer_cases')
-        self.extraMultiplier = self.currentOptions('extra_dimentions')
+        self.currentOptions    = argv.Options(*args)
+        self.cutOff            = self.currentOptions('cutOff')
+        self.nearestNeighbor   = self.currentOptions('neighbor')
+        self.reference         = self.currentOptions('reference')
+        self.outDirName        = self.currentOptions('output')
+        self.bufferCases       = self.currentOptions('buffer_cases')
+        self.extraMultiplier   = self.currentOptions('extra_dimentions')
+        self.interactionAnsatz = self.currentOptions('ansatz')
 
         self.handler    = StreamHandler(self.outDirName)
         self.outDirName = self.handler()
@@ -196,7 +197,8 @@ class JorGpi:
         def __call__(self,jorgpiobject):
             self.builder('solver',*self.tmpFiles.get_files(),
                          jorgpiobject.newReference,
-                         2*jorgpiobject.nearestNeighbor+jorgpiobject.bufferCases)
+                         2*jorgpiobject.nearestNeighbor+jorgpiobject.bufferCases,
+			 jorgpiobject.interactionAnsatz)
 
         def __del__(self):
             print_label("Found %d unique configurations"%len(np.loadtxt('best.flips',bool)),
