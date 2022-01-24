@@ -9,15 +9,15 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
     constexpr size_t SITESNUMBER = _SITESNUMBER;
     int rank = -1;
 #ifdef _MPI
-    char solution_str[SITESNUMBER];
+    char solution[SITESNUMBER];
     int nprocs;
     bool solution_found;
+
     MPI_Status status;
     MPI_Init(NULL, NULL);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
-    
+#endif // _MPI   
 // *****************************************************************************************
 // **************************************   READ   *****************************************
 // *****************************************************************************************
@@ -73,7 +73,7 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
     std::ofstream ostrm("best.flips", std::ios::out);
     std::unordered_set<std::bitset<SITESNUMBER>> solutions;
     size_t iteration = 0U;
-    int nsolutions = 0;
+    size_t nsolutions = 0U;
     for(auto n = 4.0; n<1024.0; n*=2){
         model.reset();
         auto d = aux::get_interactions(system,n*decayCoeff,ansatz);
@@ -88,11 +88,11 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
 #ifdef _MPI
             if(x.count() < lowerlimit || x.count() > upperlimit) solution_found = false;
             else solution_found = true;
-            if (rank != 0) MPI_Send(&solution_found, 1, MPI_C_BOOL, 0, 0, MPI_COMM_WORLD);
+            if (rank > 0) MPI_Send(&solution_found, 1, MPI_C_BOOL, 0, 0, MPI_COMM_WORLD);
 #else
             if(x.count() < lowerlimit) continue;
             if(x.count() > upperlimit) continue;
-#endif
+#endif // _MPI
             if(x.count() > 0.5*mask.count()) x.flip();
 
 #ifdef _MPI
@@ -104,27 +104,26 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
                 if (solution_found) {
                     ++nsolutions;
                     
-                    strncpy(solution_str, x.to_string().c_str(), SITESNUMBER);
-                    for(size_t j = 0U; j < SITESNUMBER; ++j) ostrm<<solution_str[j]<<" ";
+                    for(size_t j = 0U; j < SITESNUMBER; ++j) ostrm<<x[j]<<" ";
                     ostrm<<std::endl;
 #ifndef _QUIET
                     std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
-                    aux::print_state(std::bitset<SITESNUMBER>(std::string(solution_str)),reference,mask);
-#endif // _QUIET
-                    
+                    aux::print_state(x,reference,mask);
+#endif
                 }
                 for (int i = 1; i < nprocs; ++i) {
                     if(nsolutions >= unique_flips) break;
                     MPI_Recv(&solution_found, 1, MPI_C_BOOL, i, 0, MPI_COMM_WORLD, &status);
+
                     if (solution_found) {
                         ++nsolutions;
-                        MPI_Recv(solution_str, SITESNUMBER, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
-                        for(size_t j = 0U; j < SITESNUMBER; ++j) ostrm<<solution_str[j]<<" ";
+                        MPI_Recv(solution, SITESNUMBER, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
+                        for(size_t j = 0U; j < SITESNUMBER; ++j) ostrm<<solution[j]<<" ";
                         ostrm<<std::endl;
 #ifndef _QUIET
                         std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
-                        aux::print_state(std::bitset<SITESNUMBER>(std::string(solution_str)),reference,mask);
-#endif // _QUIET
+                        aux::print_state(std::bitset<SITESNUMBER>(std::string(solution)),reference,mask);
+#endif
                     }
                 }
             }
@@ -142,14 +141,16 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
         }
         if(nsolutions >= unique_flips) break;
     }
+
 #ifndef _MPI
     for(const auto& x : solutions){
         for(unsigned b=0U; b<SITESNUMBER; ++b) ostrm<<x[b]<<" ";
         ostrm<<std::endl;
     }
-#endif
+#endif // _MPI
+
 #ifdef _MPI
     MPI_Finalize();
-#endif
+#endif // _MPI
     return 0;
 }
