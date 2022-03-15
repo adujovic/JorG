@@ -76,6 +76,16 @@ optional arguments:
   --symmetry, -S        symmetry run only (default False)
   --refined             should use refined supercell (default False)
 ```
+## New in version 0.3.0
+```
+  --nmpi NUM_MPI_PROC
+                        Enable the Ising model solver to run in parallel using
+                        the given number of MPI processes
+  --mpicompiler MPI_COMPILER
+                        MPI compiler to use if nmpi > 0.  Supported compilers:
+                        mpicxx, mpiCC, mpic++. By default, set to the MPI compiler
+                        saved in the CC or CXX environment variable, or to mpicxx
+```
 
 ## ```JorGpi-pickup```
 ```bash
