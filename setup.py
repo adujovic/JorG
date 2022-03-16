@@ -21,7 +21,7 @@ executables_jorgpi = ['JorGpi/bin/JorGpi-demagnetize',
 
 requirements_jorgpi = []
 
-VERSION='0.2.1'#.heisenberg'
+VERSION='0.3.0'
 
 if __name__ == '__main__':
     try:
@@ -69,7 +69,7 @@ if __name__ == '__main__':
           long_description="""
           JorGpi DFT-to-Heisenberg mapping module
           """,
-          author='Andrzej P. Kądzielawa',
+          author='Andrzej P. Kądzielawa; Aleksandra Dujović',
           author_email='andrzej.piotr.kadzielawa@vsb.cz',
           url='https://github.com/Mellechowicz/JorG',
           packages=packages_jorgpi,
