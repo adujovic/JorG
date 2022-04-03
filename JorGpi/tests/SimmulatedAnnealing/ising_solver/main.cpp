@@ -1,7 +1,7 @@
-#include "../../../asa/solver/solver.h"
+#include "solver.h"
 
-int main(int argc, char** argv){
-    if(argc < 6){
+int main(int argc, char** argv) {
+    if (argc < 6) {
         std::cerr<<"No files given!"<<std::endl;
         std::cerr<<"One should provide:"<<std::endl;
         std::cerr<<"    (  i) basis"<<std::endl;
