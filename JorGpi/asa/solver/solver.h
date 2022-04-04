@@ -16,6 +16,10 @@
 #include <cstring>
 #include <string>
 
+#ifdef _MPI
+#include <mpi.h>
+#endif
+
 #include "../asa.h"
 #include "../ising.h"
 #include "../arithmeticvector.h"
