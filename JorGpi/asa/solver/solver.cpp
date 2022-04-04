@@ -1,7 +1,5 @@
 #include "solver.h"
-#ifdef _MPI
-#include <mpi.h>
-#endif
+
 int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, size_t unique_flips, size_t ansatz){
 #ifndef _SITESNUMBER
 #define _SITESNUMBER 64
