@@ -22,13 +22,19 @@ class INCARloader:
         self.settings.update(kwargs)
         self.incarFile = open(self.settings['fileName'],"r")
         self.oldMoments = []
-        self.incarData = self.incarFile.read()
+        self.incarData = self.load_data()
         self.cell      = cell
 
         self.oldMomentsText = re.search("\s*MAGMOM\s*=\s*(.*)\n",self.incarData)
         self.oldMoments = []
         if self.oldMomentsText is None:
             self.oldMoments = [periodic.elementMagneticMoment[atom[0]] for atom in self.cell]
+            
+    def load_data(self):
+        data = ""
+        for line in self.incarFile.readlines():
+            data += re.sub("#.*$", "", line)
+        return data
 
     def __call__(self):
         if self.oldMoments:
