@@ -15,6 +15,7 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
     MPI_Init(NULL, NULL);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    const size_t unique_flips_per_proc = std::ceil(unique_flips/static_cast<float>(nprocs));
 #endif // _MPI   
 // *****************************************************************************************
 // **************************************   READ   *****************************************
@@ -80,7 +81,11 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
         if (rank < 1)
             std::cout<<"Limits are set to be: ["<<lowerlimit<<","<<upperlimit<<']'<<std::endl;
 #endif
-        for(unsigned m = 0; m<unique_flips; ++m){
+#ifdef _MPI
+        for(size_t m = 0U; m<unique_flips_per_proc; ++m){
+#else
+        for(size_t m = 0U; m<unique_flips; ++m){
+#endif // _MPI
             model.randomize_state();
             auto x = model.run(&mask);
 #ifdef _MPI
