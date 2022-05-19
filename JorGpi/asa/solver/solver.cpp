@@ -112,7 +112,6 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
 #endif
                 }
                 for (int i = 1; i < nprocs; ++i) {
-                    if(nsolutions >= unique_flips) break;
                     MPI_Recv(&solution_found, 1, MPI_C_BOOL, i, 0, MPI_COMM_WORLD, &status);
                     if (solution_found) {
                         MPI_Recv(solution, SITESNUMBER, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
