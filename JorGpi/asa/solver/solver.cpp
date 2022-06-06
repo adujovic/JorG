@@ -10,12 +10,13 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
     char solution[SITESNUMBER];
     int nprocs;
     bool solution_found;
-
     MPI_Status status;
+
     MPI_Init(NULL, NULL);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif // _MPI   
+    const size_t unique_flips_per_proc = std::ceil(unique_flips/static_cast<float>(nprocs));
+#endif // _MPI
 // *****************************************************************************************
 // **************************************   READ   *****************************************
 // *****************************************************************************************
@@ -80,7 +81,11 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
         if (rank < 1)
             std::cout<<"Limits are set to be: ["<<lowerlimit<<","<<upperlimit<<']'<<std::endl;
 #endif
-        for(unsigned m = 0; m<unique_flips; ++m){
+#ifdef _MPI
+        for(size_t m = 0U; m<unique_flips_per_proc; ++m){
+#else
+        for(size_t m = 0U; m<unique_flips; ++m){
+#endif // _MPI
             model.randomize_state();
             auto x = model.run(&mask);
 #ifdef _MPI
@@ -100,39 +105,35 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
                 }
             } else {
                 if (solution_found) {
-                    ++nsolutions;
-                    
-                    for(size_t j = 0U; j < SITESNUMBER; ++j) ostrm<<x[j]<<" ";
-                    ostrm<<std::endl;
+                    solutions.insert(x);
 #ifndef _QUIET
                     std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
                     aux::print_state(x,reference,mask);
 #endif
                 }
                 for (int i = 1; i < nprocs; ++i) {
-                    if(nsolutions >= unique_flips) break;
                     MPI_Recv(&solution_found, 1, MPI_C_BOOL, i, 0, MPI_COMM_WORLD, &status);
-
                     if (solution_found) {
-                        ++nsolutions;
                         MPI_Recv(solution, SITESNUMBER, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
-                        for(size_t j = 0U; j < SITESNUMBER; ++j) ostrm<<solution[j]<<" ";
-                        ostrm<<std::endl;
+                        x = std::bitset<SITESNUMBER>(std::string(solution));
+                        solutions.insert(x);
 #ifndef _QUIET
                         std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
-                        aux::print_state(std::bitset<SITESNUMBER>(std::string(solution)),reference,mask);
+                        aux::print_state(x,reference,mask);
 #endif
                     }
                 }
             }
-            MPI_Bcast(&nsolutions, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #else
+            solutions.insert(x);
 #ifndef _QUIET
             std::cout<<"("<<iteration<<")\t"<<n*decayCoeff<<"\t";
             aux::print_state(x,reference,mask);
 #endif
-            solutions.insert(x);
-            nsolutions = solutions.size();
+#endif // _MPI
+            if (rank < 1) { nsolutions = solutions.size(); }
+#ifdef _MPI
+            MPI_Bcast(&nsolutions, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif // _MPI
             ++iteration;
             if(nsolutions >= unique_flips) break;
@@ -140,12 +141,12 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
         if(nsolutions >= unique_flips) break;
     }
 
-#ifndef _MPI
-    for(const auto& x : solutions){
-        for(unsigned b=0U; b<SITESNUMBER; ++b) ostrm<<x[b]<<" ";
-        ostrm<<std::endl;
+    if (rank < 1) {
+        for(const auto& x : solutions){
+            for(unsigned b=0U; b<SITESNUMBER; ++b) ostrm<<x[b]<<" ";
+            ostrm<<std::endl;
+        }
     }
-#endif // _MPI
 
 #ifdef _MPI
     MPI_Finalize();
