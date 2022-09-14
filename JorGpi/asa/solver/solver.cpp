@@ -6,6 +6,7 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
 #endif
     constexpr size_t SITESNUMBER = _SITESNUMBER;
     int rank = -1;
+    size_t unique_flips_per_iteration;
 #ifdef _MPI
     char solution[SITESNUMBER];
     int nprocs;
@@ -15,8 +16,10 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
     MPI_Init(NULL, NULL);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    const size_t unique_flips_per_proc = std::ceil(unique_flips/static_cast<float>(nprocs));
-#endif // _MPI
+    unique_flips_per_iteration = std::ceil(unique_flips/static_cast<float>(nprocs));
+#else
+    unique_flips_per_iteration = unique_flips;
+#endif //_MPI
 // *****************************************************************************************
 // **************************************   READ   *****************************************
 // *****************************************************************************************
@@ -81,23 +84,20 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
         if (rank < 1)
             std::cout<<"Limits are set to be: ["<<lowerlimit<<","<<upperlimit<<']'<<std::endl;
 #endif
-#ifdef _MPI
-        for(size_t m = 0U; m<unique_flips_per_proc; ++m){
-#else
-        for(size_t m = 0U; m<unique_flips; ++m){
-#endif // _MPI
+        for(size_t m = 0U; m<unique_flips_per_iteration; ++m){
             model.randomize_state();
             auto x = model.run(&mask);
+
+            if(x.count() < lowerlimit || x.count() > upperlimit) {
 #ifdef _MPI
-            if(x.count() < lowerlimit || x.count() > upperlimit) solution_found = false;
-            else solution_found = true;
-            if (rank > 0) MPI_Send(&solution_found, 1, MPI_C_BOOL, 0, 0, MPI_COMM_WORLD);
+                solution_found = false;
+            } else solution_found = true;
+            if(rank > 0) MPI_Send(&solution_found, 1, MPI_C_BOOL, 0, 0, MPI_COMM_WORLD);
 #else
-            if(x.count() < lowerlimit) continue;
-            if(x.count() > upperlimit) continue;
+                continue;
+            }
 #endif // _MPI
             if(x.count() > 0.5*mask.count()) x.flip();
-
 #ifdef _MPI
             if (rank > 0) {
                 if (solution_found) {
@@ -133,7 +133,7 @@ int solver(char _basis[],char _supercell[],char _flippable[], size_t reference, 
 #endif // _MPI
             if (rank < 1) { nsolutions = solutions.size(); }
 #ifdef _MPI
-            MPI_Bcast(&nsolutions, 1, MPI_INT, 0, MPI_COMM_WORLD);
+            MPI_Bcast(&nsolutions, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 #endif // _MPI
             ++iteration;
             if(nsolutions >= unique_flips) break;
