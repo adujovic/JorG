@@ -1,5 +1,5 @@
 from os import environ
-from glob import glob
+from pathlib import Path
 import subprocess as sp
 from JorGpi.generate.crunsetup import CrunSetup
 
@@ -45,9 +45,7 @@ class Mpirun(CrunSetup):
         environ['CC'] = environ['CXX'] = self.compiler
 
     def create_executable(self, **kwargs):
-        path = self.builddir + "/**/*.o"
-        obj_files = glob(path, recursive=True)
-
+        obj_files = [file for file in Path(self.builddir).glob('**/*.o')]
         link_flags = kwargs['extra_link_args'] if 'extra_link_args' in kwargs else []
         cmd = [self.compiler] + obj_files + ['-o', self.name+'-lib/'+self.executable]\
                + link_flags
